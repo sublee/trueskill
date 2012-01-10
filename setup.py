@@ -40,7 +40,7 @@ def run_tests():
 
 
 setup(
-    name='TrueSkill',
+    name='trueskill',
     version='0.1-dev',
     url='https://github.com/sublee/trueskill/',
     license='BSD',
