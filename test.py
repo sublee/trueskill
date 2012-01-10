@@ -17,13 +17,10 @@ class TrueSkillTestCase(unittest.TestCase):
         except AssertionError, e:
             msg = '\ngot:\n'
             for rating in flatten:
-                #msg += ' - mu=%.{0}f sigma=%.{0}f\n'.format(precision) % \
-                msg += ' - mu=%r sigma=%r\n' % \
-                       (rating.mu, rating.sigma)
+                msg += ' - mu=%r sigma=%r\n' % (rating.mu, rating.sigma)
             msg += 'expected:\n'
             for rating in expected:
-                #msg += ' - mu=%.{0}f sigma=%.{0}f\n'.format(precision) % \
-                msg += ' - mu=%r sigma=%r\n' % \
+                msg += ' - mu=%.{0}f sigma=%.{0}f\n'.format(precision) % \
                        (rating.mu, rating.sigma)
             e.message = msg
             e.args = (msg,)
@@ -66,6 +63,17 @@ class TrueSkillTestCase(unittest.TestCase):
     def individual(self, size):
         args = [1] * size
         return self.teams(*args)
+
+
+class FunctionTestCase(TrueSkillTestCase):
+
+    def test_unsorted_groups(self):
+        t1, t2, t3 = self.teams(1, 1, 1)
+        self.assert_ratings(self.parse_ratings('''
+            18.325, 6.656
+            25.000, 6.208
+            31.675, 6.656
+        '''), [t1, t2, t3], [2, 1, 0])
 
 
 class TwoTeamsTestCase(TrueSkillTestCase):
@@ -277,11 +285,11 @@ class UpsetTestCase(TrueSkillTestCase):
             30.879, 2.983
         '''), [t1, t2], [0, 1])
         self.assert_ratings(self.parse_ratings('''
-            32.012, 3.877
-            32.132, 2.949
             21.840, 6.314
             22.474, 5.575
             22.857, 4.757
+            32.012, 3.877
+            32.132, 2.949
         '''), [t1, t2], [1, 0])
 
     def test_individual_8_players_upset(self):
@@ -308,6 +316,7 @@ class UpsetTestCase(TrueSkillTestCase):
 def suite():
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
+    suite.addTests(loader.loadTestsFromTestCase(FunctionTestCase))
     suite.addTests(loader.loadTestsFromTestCase(TwoTeamsTestCase))
     suite.addTests(loader.loadTestsFromTestCase(UnbalancedTeamsTestCase))
     suite.addTests(loader.loadTestsFromTestCase(MultipleTeamsTestCase))
