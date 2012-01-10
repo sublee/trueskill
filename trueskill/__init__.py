@@ -78,8 +78,8 @@ class Rating(Gaussian):
         return iter((self.mu, self.sigma))
 
     def __repr__(self):
-        args = (type(self).__name__, self.mu, self.sigma, self.exposure)
-        return '%s(mu=%.3f, sigma=%.3f, exposure=%.1f)' % args
+        args = (type(self).__name__, self.mu, self.sigma)
+        return '%s(mu=%.3f, sigma=%.3f)' % args
 
 
 class TrueSkill(object):
