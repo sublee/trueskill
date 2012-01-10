@@ -1,0 +1,8 @@
+
+                           // TrueSkill //
+
+                       TrueSkill, now in Python
+    
+TrueSkill is a rating system among game players and it is used on Xbox
+Live to rank and match players. Now you have the awesome rating algorithm
+library in Python.
