@@ -3,13 +3,16 @@ TrueSkill
 ~~~~~~~~~
 
 An implementation of the TrueSkill algorithm for Python. TrueSkill is a rating
-system between several game players and it is used on Xbox Live to rank and
-match players.
+system among game players and it is used on Xbox Live to rank and match
+players.
 
->>> from trueskill import Rating
+>>> from trueskill import Rating, transform_ratings
 >>> p1, p2, p3, p4 = Rating(), Rating(), Rating(), Rating()
 >>> team1, team2, team3 = (p1,), (p2, p3), (p4,)
->>> transform_ratings([team1, team2, team3])
+>>> transform_ratings([team1, team2, team3]) #doctest: +NORMALIZE_WHITESPACE
+[(Rating(mu=35.877, sigma=6.791),),
+ (Rating(mu=17.867, sigma=7.059), Rating(mu=17.867, sigma=7.059)),
+ (Rating(mu=21.255, sigma=7.155),)]
 
 Links
 `````
@@ -43,7 +46,7 @@ setup(
     license='BSD',
     author='Heungsub Lee',
     author_email='h@subl.ee',
-    description='TrueSkill system',
+    description='An implementation of the TrueSkill algorithm for Python',
     log_description=__doc__,
     packages=['trueskill'],
     zip_safe=False,
