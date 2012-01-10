@@ -34,6 +34,26 @@ def W(diff, draw_margin):
         return v * (v + x)
 
 
+def V_draw(diff, draw_margin):
+    abs_diff = abs(diff)
+    a, b = draw_margin - abs_diff, -draw_margin - abs_diff
+    denom = cdf(a) - cdf(b)
+    if denom < FEW:
+        return -diff + draw_margin * (-1 if diff < 0 else 1)
+    numer = pdf(b) - pdf(a)
+    return numer / denom * (-1 if diff < 0 else 1)
+
+
+def W_draw(diff, draw_margin):
+    abs_diff = abs(diff)
+    a, b = draw_margin - abs_diff, -draw_margin - abs_diff
+    denom = cdf(a) - cdf(b)
+    if denom < FEW:
+        return 1.
+    v = V_draw(abs_diff, draw_margin)
+    return (v ** 2) + (a * pdf(a) - b * pdf(b)) / denom
+
+
 def calc_draw_probability(draw_margin, beta, size):
     return 2 * cdf(draw_margin / (math.sqrt(size) * beta)) - 1
 
@@ -62,20 +82,20 @@ class Rating(Gaussian):
 
 
 def transform_ratings(rating_groups, ranks=None):
-    from .factorgraph import Variable, PriorFactor, \
-                                          LikelihoodFactor, SumFactor, \
-                                          TruncateFactor
-    # flatten
+    from .factorgraph import Variable, PriorFactor, LikelihoodFactor, \
+                             SumFactor, TruncateFactor
+    rating_groups = list(rating_groups)
     group_size = len(rating_groups)
+    # sort rating groups by rank
     if ranks is None:
         ranks = range(group_size)
     elif len(ranks) != group_size:
         raise ValueError('wrong ranks')
     def cmp_rank(x, y):
         return cmp(x[0], y[0])
-    sorted_rating_groups = [g for r, g in \
-                            sorted(zip(ranks, rating_groups), cmp_rank)]
-    ratings = sum(rating_groups, ())
+    sorted_groups = [g for r, g in sorted(zip(ranks, rating_groups), cmp_rank)]
+    # flatten
+    ratings = sum(sorted_groups, ())
     size = len(ratings)
     # create variables
     rating_vars = [Variable() for x in xrange(size)]
@@ -84,7 +104,7 @@ def transform_ratings(rating_groups, ranks=None):
     teamdiff_vars = [Variable() for x in xrange(group_size - 1)]
     team_sizes = [0]
     #
-    for group in rating_groups:
+    for group in sorted_groups:
         team_sizes.append(len(group) + team_sizes[-1])
     del team_sizes[0]
     def get_perf_vars_by_team(team):
@@ -112,9 +132,13 @@ def transform_ratings(rating_groups, ranks=None):
                             [+1, -1])
     def build_trunc_layer():
         for x, teamdiff_var in enumerate(teamdiff_vars):
-            size = sum(len(group) for group in rating_groups[x:x + 2])
+            size = sum(len(group) for group in sorted_groups[x:x + 2])
             draw_margin = calc_draw_margin(DRAW_PROBABILITY, BETA, size)
-            yield TruncateFactor(teamdiff_var, V, W, draw_margin)
+            if ranks[x] == ranks[x + 1]:
+                v_func, w_func = V_draw, W_draw
+            else:
+                v_func, w_func = V, W
+            yield TruncateFactor(teamdiff_var, v_func, w_func, draw_margin)
     # build layers
     rating_layer = list(build_rating_layer())
     perf_layer = list(build_perf_layer())
@@ -147,8 +171,11 @@ def transform_ratings(rating_groups, ranks=None):
     # up both ends
     teamdiff_layer[0].up(0)
     teamdiff_layer[teamdiff_len - 1].up(1)
-    # other black arrows
-    for f in teamperf_layer + perf_layer:
+    # up the remainder of the black arrows
+    for f in teamperf_layer:
+        for x in xrange(len(f.vars) - 1):
+            f.up(x)
+    for f in perf_layer:
         f.up()
     # make result
     rv = []
