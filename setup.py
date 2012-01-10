@@ -11,6 +11,22 @@ match players.
 >>> team1, team2, team3 = (p1,), (p2, p3), (p4,)
 >>> transform_ratings([team1, team2, team3])
 
+Links
+`````
+
+* `GitHub repository <http://github.com/sublee/trueskill/>`_
+* `development version
+  <http://github.com/sublee/trueskill/zipball/master#egg=trueskill-dev>`_
+
+See Also
+````````
+
+* `"Computing Your Skill" by Jeff Moser
+  <http://www.moserware.com/2010/03/computing-your-skill.html>`_
+* `"The Math Behind TrueSkill" by Jeff Moser <http://bit.ly/AdHQA6>`_
+* `TrueSkill Calcurator by Microsoft
+  <http://atom.research.microsoft.com/trueskill/rankcalculator.aspx>`_
+
 """
 from setuptools import setup
 
