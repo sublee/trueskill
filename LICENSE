@@ -1,3 +1,14 @@
+The core ideas used in this Moserware.Skills project were described in 
+"TrueSkill (TM): A Bayesian Skill Rating System" available at 
+http://research.microsoft.com/apps/pubs/default.aspx?id=67956
+
+The authors of the above paper have asked for a link to that article as
+attribution in derived works
+
+Some concepts were based on Jeff Moser's code and documents, available at
+http://www.moserware.com/2010/03/computing-your-skill.html
+
+All the Python code in this trueskill project is
 Copyright (c) 2012 by Heungsub Lee. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
