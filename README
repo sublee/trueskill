@@ -1,8 +1,81 @@
 
                            // TrueSkill //
 
-                       TrueSkill, now in Python
+                    A Bayesian Skill Rating System
+
+
+~ What's TrueSkill(TM)?
     
-TrueSkill is a rating system among game players and it is used on Xbox
-Live to rank and match players. Now you have the awesome rating algorithm
-library in Python.
+  TrueSkill(TM) is a rating system among game players and it is used
+  on Xbox Live to rank and match players. TrueSkill system quantizes
+  "TRUE" skill points by a Bayesian inference algorithm.
+
+  More information is available at http://bit.ly/moserware-trueskill
+  and http://research.microsoft.com/en-us/projects/trueskill/
+
+
+~ Tutorial
+
+  Let's suppose that our sample game is 2:1. `Rating` objects mean
+  each game players' skill points:
+
+  >>> from trueskill import Rating, transform_ratings
+  >>> r1, r2, r3 = Rating(), Rating(), Rating()
+  >>> team1 = (r1, r2)
+  >>> team2 = (r3,)
+
+  TrueSkill system uses Gaussian distribution as player's skill point.
+  The initial mu(mean) of rating is 25 and the initial sigma(standard
+  deviation) is 25/3.
+
+  >>> [team1, team2]
+  [(
+    Rating(mu=25.000, sigma=8.333),
+    Rating(mu=25.000, sigma=8.333)
+  ), (
+    Rating(mu=25.000, sigma=8.333)
+  )]
+
+  The first team has won the game. See the below transformation of the
+  ratings:
+
+  >>> transform_ratings([team1, team2])
+  [(
+    Rating(mu=25.604, sigma=8.075),
+    Rating(mu=25.604, sigma=8.075)
+  ), (
+    Rating(mu=24.396, sigma=8.075)
+  )]
+
+  The mu values in the first team transform from 25 to 25.6 and in
+  the second team transform from 25 to 24.4. The ratings were
+  transformed just a little.
+
+  But, how does it work if the second team player has beaten 2 players
+  in the first team, by himself?
+
+  >>> transform_ratings([team1, team2], ranks=[1, 0]) # reversed ranks
+  [(
+    Rating(mu=16.269, sigma=7.317),
+    Rating(mu=16.269, sigma=7.317)
+  ), (
+    Rating(mu=33.731, sigma=7.317)
+  )]
+
+  In the first team, 25 to 16.3 and in the second team 25 to 33.7.
+  Now we have large transformations because it is a surprising result
+  that 1 player beats 2 players.
+
+  It is just a simplest example. TrueSkill can estimate accurate
+  skills in this way. We only need enough game results!
+
+
+~ How to get?
+
+  Install with "pip" command:
+
+  $ pip install trueskill
+
+  or check out development version:
+
+  $ git clone git://github.com/sublee/trueskill.git
