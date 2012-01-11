@@ -1,14 +1,15 @@
 import unittest
 
-from trueskill import TrueSkill, Rating, transform_ratings, setup
+from trueskill import TrueSkill, Rating, transform_ratings, match_quality, \
+                      setup
 
 
 class TrueSkillTestCase(unittest.TestCase):
 
     def assert_ratings(self, expected, rating_groups, ranks=None, precision=3,
                        env=None):
-        transform = env.transform_ratings if env else transform_ratings
-        got = transform(rating_groups, ranks)
+        func = env.transform_ratings if env else transform_ratings
+        got = func(rating_groups, ranks)
         flatten = sum(got, ())
         expected_len, got_len = len(expected), len(flatten)
         assert expected_len == got_len, \
@@ -33,17 +34,28 @@ class TrueSkillTestCase(unittest.TestCase):
         msg = 'got mu=%r sigma=%r, but mu=%r sigma=%r is expected' % \
               (got.mu, got.sigma, expected.mu, expected.sigma)
         for attr in ['mu', 'sigma']:
-            try:
-                e = round(getattr(expected, attr), p)
-                g = round(getattr(got, attr), p)
-                assert e == g
-            except AssertionError:
-                fmt = '%.{0}f'.format(p)
-                def normalize(f):
-                    return int((fmt % f).replace('.', ''))
-                if abs(normalize(e) - normalize(g)) == 1:
-                    # admiss tiny difference
-                    continue
+            self.assert_almost_equals(getattr(expected, attr),
+                                      getattr(got, attr), p)
+
+    def assert_match_quality(self, expected, rating_groups, precision=3,
+                             env=None):
+        func = env.match_quality if env else match_quality
+        got = func(rating_groups)
+        self.assert_almost_equals(expected, got, precision)
+
+    def assert_almost_equals(self, expected, got, precision=3):
+        expected, got = round(expected, precision), round(got, precision)
+        try:
+            fmt = 'got %.{0}f, but %.{0}f is expected'.format(precision)
+            assert expected == got, fmt % (got, expected)
+        except AssertionError:
+            fmt = '%.{0}f'.format(precision)
+            def normalize(f):
+                return int((fmt % f).replace('.', ''))
+            if abs(normalize(expected) - normalize(got)) == 1:
+                # admiss tiny difference
+                pass
+            else:
                 raise
 
     def parse_ratings(self, text, env=None):
@@ -106,6 +118,7 @@ class SimpleTestCase(TrueSkillTestCase):
             29.396, 7.171
             20.604, 7.171
         '''), [t1, t2])
+        self.assert_match_quality(0.447, [t1, t2])
 
     def test_1_vs_1_draw(self):
         t1, t2 = self.teams(1, 1)
@@ -122,6 +135,7 @@ class SimpleTestCase(TrueSkillTestCase):
             21.892, 7.774
             21.892, 7.774
         '''), [t1, t2])
+        self.assert_match_quality(0.447, [t1, t2])
 
     def test_2_vs_2_draw(self):
         t1, t2 = self.teams(2, 2)
@@ -144,6 +158,7 @@ class SimpleTestCase(TrueSkillTestCase):
             22.802, 8.059
             22.802, 8.059
         '''), [t1, t2])
+        self.assert_match_quality(0.447, [t1, t2])
 
 
 class UnbalancedTeamsTestCase(TrueSkillTestCase):
@@ -155,6 +170,7 @@ class UnbalancedTeamsTestCase(TrueSkillTestCase):
             16.270, 7.317
             16.270, 7.317
         '''), [t1, t2])
+        self.assert_match_quality(0.135, [t1, t2])
 
     def test_1_vs_2_draw(self):
         t1, t2 = self.teams(1, 2)
@@ -172,6 +188,7 @@ class UnbalancedTeamsTestCase(TrueSkillTestCase):
             13.663, 7.527
             13.663, 7.527
         '''), [t1, t2])
+        self.assert_match_quality(0.012, [t1, t2])
 
     def test_1_vs_3_draw(self):
         t1, t2 = self.teams(1, 3)
@@ -194,42 +211,51 @@ class UnbalancedTeamsTestCase(TrueSkillTestCase):
             9.418, 7.917
             9.418, 7.917
         '''), [t1, t2])
+        self.assert_match_quality(0.000, [t1, t2])
 
 
 class MultipleTeamsTestCase(TrueSkillTestCase):
 
     def test_individual_3_players(self):
+        groups = self.individual(3)
         self.assert_ratings(self.parse_ratings('''
             31.675, 6.656
             25.000, 6.208
             18.325, 6.656
-        '''), self.individual(3))
+        '''), groups)
+        #self.assert_match_quality(0.200, groups)
 
     def test_individual_3_players_draw(self):
+        groups = self.individual(3)
         self.assert_ratings(self.parse_ratings('''
             25.000, 5.698
             25.000, 5.695
             25.000, 5.698
-        '''), self.individual(3), [0] * 3)
+        '''), groups, [0] * 3)
 
     def test_individual_4_players(self):
+        groups = self.individual(4)
         self.assert_ratings(self.parse_ratings('''
             33.207, 6.348
             27.401, 5.787
             22.599, 5.787
             16.793, 6.348
-        '''), self.individual(4))
+        '''), groups)
+        #self.assert_match_quality(0.089, groups)
 
     def test_individual_5_players(self):
+        groups = self.individual(5)
         self.assert_ratings(self.parse_ratings('''
             34.363, 6.136
             29.058, 5.536
             25.000, 5.420
             20.942, 5.536
             15.637, 6.136
-        '''), self.individual(5))
+        '''), groups)
+        #self.assert_match_quality(0.040, groups)
 
     def test_individual_8_players(self):
+        groups = self.individual(8)
         self.assert_ratings(self.parse_ratings('''
             25.000, 4.592
             25.000, 4.583
@@ -239,9 +265,11 @@ class MultipleTeamsTestCase(TrueSkillTestCase):
             25.000, 4.576
             25.000, 4.583
             25.000, 4.592
-        '''), self.individual(8), [0] * 8)
+        '''), groups, [0] * 8)
+        #self.assert_match_quality(0.004, groups)
 
     def test_individual_16_players(self):
+        groups = self.individual(16)
         self.assert_ratings(self.parse_ratings('''
             40.539, 5.276
             36.810, 4.711
@@ -259,7 +287,7 @@ class MultipleTeamsTestCase(TrueSkillTestCase):
             15.653, 4.524
             13.190, 4.711
             9.461, 5.276
-        '''), self.individual(16))
+        '''), groups)
 
     def test_2_vs_4_vs_2(self):
         t1 = (Rating(40, 4), Rating(45, 3))
@@ -275,6 +303,7 @@ class MultipleTeamsTestCase(TrueSkillTestCase):
             48.830, 4.590
             29.813, 1.976
         '''), [t1, t2, t3], [0, 1, 1])
+        #self.assert_match_quality(0.367, [t1, t2, t3])
 
 
 class UpsetTestCase(TrueSkillTestCase):
@@ -285,6 +314,7 @@ class UpsetTestCase(TrueSkillTestCase):
             31.662, 7.137
             35.010, 7.910
         '''), [t1, t2], [0, 0])
+        self.assert_match_quality(0.110, [t1, t2])
 
     def test_2_vs_2_upset(self):
         t1 = (Rating(20, 8), Rating(25, 6))
@@ -295,6 +325,7 @@ class UpsetTestCase(TrueSkillTestCase):
             27.575, 6.346
             36.211, 4.768
         '''), [t1, t2])
+        self.assert_match_quality(0.084, [t1, t2])
 
     def test_3_vs_2_upset(self):
         t1 = (Rating(28, 7), Rating(27, 6), Rating(26, 5))
@@ -313,6 +344,7 @@ class UpsetTestCase(TrueSkillTestCase):
             32.012, 3.877
             32.132, 2.949
         '''), [t1, t2], [1, 0])
+        self.assert_match_quality(0.254, [t1, t2])
 
     def test_individual_8_players_upset(self):
         t1 = (Rating(10, 8),)
@@ -323,6 +355,7 @@ class UpsetTestCase(TrueSkillTestCase):
         t6 = (Rating(35, 3),)
         t7 = (Rating(40, 2),)
         t8 = (Rating(45, 1),)
+        groups = [t1, t2, t3, t4, t5, t6, t7, t8]
         self.assert_ratings(self.parse_ratings('''
             35.135, 4.506
             32.585, 4.037
@@ -332,7 +365,8 @@ class UpsetTestCase(TrueSkillTestCase):
             34.051, 2.541
             38.263, 1.849
             44.118, 0.983
-        '''), [t1, t2, t3, t4, t5, t6, t7, t8])
+        '''), groups)
+        #self.assert_match_quality(0.000, groups)
 
 
 def suite():

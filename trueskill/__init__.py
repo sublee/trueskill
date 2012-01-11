@@ -2,11 +2,11 @@ from __future__ import absolute_import
 
 import math
 
-from .mathematics import cdf, pdf, ppf, Gaussian
+from .mathematics import cdf, pdf, ppf, Gaussian, Matrix
 
 
-__all__ = 'TrueSkill', 'Rating', 'setup', 'transform_ratings', \
-          'calc_draw_probability', 'calc_draw_margin', \
+__all__ = 'TrueSkill', 'Rating', 'transform_ratings', 'match_quality', \
+          'calc_draw_probability', 'calc_draw_margin', 'setup', \
           'MU', 'SIGMA', 'BETA', 'TAU', 'DRAW_PROBABILITY'
 
 
@@ -221,8 +221,8 @@ class TrueSkill(object):
             f.up()
 
     def transform_ratings(self, rating_groups, ranks=None, min_delta=DELTA):
-        """Calculates transformed ratings from the given ratings by the ranking
-        table.
+        """Calculates transformed ratings from the given rating groups by the
+        ranking table.
 
         :param rating_groups: a list of tuples that contain :class:`Rating`
                               objects
@@ -258,6 +258,35 @@ class TrueSkill(object):
         unsorting = sorted(zip(unsorting_hint, transformed_groups), compare)
         return [g for x, g in unsorting]
 
+    def match_quality(self, rating_groups):
+        """Calculates the match quality of the given rating groups. A result
+        is the draw probability in the association.
+        """
+        rating_groups = list(rating_groups)
+        ratings = sum(rating_groups, ())
+        # a vector of all of the skill means
+        means = [r.mu for r in ratings]
+        # a matrix whose diagonal values are the variances (sigma^2) of each
+        # of the players.
+        variance_matrix = Matrix()
+        for x, r in enumerate(ratings):
+            variance_matrix[x][x] = r.sigma ** 2
+        # the player-team assignment and comparison matrix
+        seq = []
+        for group, next_group in zip(rating_groups[:-1], rating_groups[1:]):
+            seq.append([1] * len(group) + [-1] * len(next_group))
+        a_matrix = Matrix(cols=seq)
+        a_matrix_transpose = Matrix(rows=seq)
+        # match quality further derivation
+        _ata = (self.beta ** 2 * a_matrix_transpose) * a_matrix
+        _atsa = a_matrix_transpose * variance_matrix * a_matrix
+        start = Matrix(rows=[means]) * a_matrix
+        middle = _ata + _atsa
+        end = a_matrix_transpose * Matrix(cols=[means])
+        exp_part = (-0.5 * (start * middle.inverse * end)).determinant
+        sqrt_part = _ata.determinant / middle.determinant
+        return math.exp(exp_part) * math.sqrt(sqrt_part)
+
     def __repr__(self):
         args = (type(self).__name__, self.mu, self.sigma, self.beta, \
                 self.tau, self.draw_probability * 100)
@@ -285,6 +314,10 @@ def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
 def transform_ratings(rating_groups, ranks=None, min_delta=DELTA):
     """`tranform_ratings` of the global TrueSkill environment."""
     return g().transform_ratings(rating_groups, ranks, min_delta)
+
+
+def match_quality(rating_groups):
+    return g().match_quality(rating_groups)
 
 
 setup() # setup the default environment
