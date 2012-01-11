@@ -131,11 +131,6 @@ class SumFactor(Factor):
         return self.update(self.terms[index], vals, msgs, coeffs)
 
     def update(self, var, vals, msgs, coeffs):
-        '''
-        size = len(coeffs)
-        pi = 1. / sum(coeffs[x] ** 2 / (vals[x].pi - msgs[x].pi) for x in xrange(size))
-        tau = pi * sum(coeffs[x] * (vals[x].tau - msgs[x].tau) / (vals[x].pi - msgs[x].pi) for x in xrange(size))
-        '''
         size = len(coeffs)
         divs = [vals[x] / msgs[x] for x in xrange(size)]
         pi = 1. / sum(coeffs[x] ** 2 / divs[x].pi for x in xrange(size))
@@ -160,5 +155,6 @@ class TruncateFactor(Factor):
         v = self.v_func(*args)
         w = self.w_func(*args)
         denom = (1. - w)
-        return self.var.update_value(self, div.pi / denom,
-                                     (div.tau + sqrt_pi * v) / denom)
+        pi, tau = div.pi / denom, (div.tau + sqrt_pi * v) / denom
+        return self.var.update_value(self, pi, tau)
+                                     

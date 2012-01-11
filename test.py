@@ -1,12 +1,14 @@
 import unittest
 
-from trueskill import Rating, transform_ratings
+from trueskill import TrueSkill, Rating, transform_ratings, setup
 
 
 class TrueSkillTestCase(unittest.TestCase):
 
-    def assert_ratings(self, expected, rating_groups, ranks=None, precision=3):
-        got = transform_ratings(rating_groups, ranks)
+    def assert_ratings(self, expected, rating_groups, ranks=None, precision=3,
+                       env=None):
+        transform = env.transform_ratings if env else transform_ratings
+        got = transform(rating_groups, ranks)
         flatten = sum(got, ())
         expected_len, got_len = len(expected), len(flatten)
         assert expected_len == got_len, \
@@ -44,20 +46,22 @@ class TrueSkillTestCase(unittest.TestCase):
                     continue
                 raise
 
-    def parse_ratings(self, text):
+    def parse_ratings(self, text, env=None):
+        R = env.Rating if env else Rating
         rv = []
         for line in map(str.strip, text.split('\n')):
             if not line:
                 continue
             mu, sigma = tuple(map(float, line.split(', ')))
-            rv.append(Rating(mu, sigma))
+            rv.append(R(mu, sigma))
         return rv
 
-    def teams(self, *sizes):
+    def teams(self, *sizes, **kwargs):
+        R = kwargs['env'].Rating if 'env' in kwargs else Rating
         for size in sizes:
             ratings = []
             for x in xrange(size):
-                ratings.append(Rating())
+                ratings.append(R())
             yield tuple(ratings)
 
     def individual(self, size):
@@ -75,8 +79,26 @@ class FunctionTestCase(TrueSkillTestCase):
             31.675, 6.656
         '''), [t1, t2, t3], [2, 1, 0])
 
+    def test_custom_environment(self):
+        env = TrueSkill(draw_probability=.50)
+        t1, t2 = self.teams(1, 1, env=env)
+        self.assert_ratings(self.parse_ratings('''
+            30.267, 7.077
+            19.733, 7.077
+        '''), [t1, t2], env=env)
 
-class TwoTeamsTestCase(TrueSkillTestCase):
+    def test_global_environment_customization(self):
+        setup(draw_probability=.50)
+        t1, t2 = self.teams(1, 1)
+        self.assert_ratings(self.parse_ratings('''
+            30.267, 7.077
+            19.733, 7.077
+        '''), [t1, t2])
+        # rollback
+        setup()
+
+
+class SimpleTestCase(TrueSkillTestCase):
 
     def test_1_vs_1(self):
         t1, t2 = self.teams(1, 1)
@@ -317,7 +339,7 @@ def suite():
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
     suite.addTests(loader.loadTestsFromTestCase(FunctionTestCase))
-    suite.addTests(loader.loadTestsFromTestCase(TwoTeamsTestCase))
+    suite.addTests(loader.loadTestsFromTestCase(SimpleTestCase))
     suite.addTests(loader.loadTestsFromTestCase(UnbalancedTeamsTestCase))
     suite.addTests(loader.loadTestsFromTestCase(MultipleTeamsTestCase))
     suite.addTests(loader.loadTestsFromTestCase(UpsetTestCase))

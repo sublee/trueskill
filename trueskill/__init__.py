@@ -5,11 +5,23 @@ import math
 from .mathematics import cdf, pdf, ppf, Gaussian
 
 
-MU = 25. # initial mean
-SIGMA = MU / 3 # initial standard deviation
-BETA = SIGMA / 2 # guarantee about an 80% chance of winning
-TAU = SIGMA / 100 # dynamic factor
-DRAW_PROBABILITY = .10 # draw probability of the game
+__all__ = 'TrueSkill', 'Rating', 'setup', 'transform_ratings', \
+          'calc_draw_probability', 'calc_draw_margin', \
+          'MU', 'SIGMA', 'BETA', 'TAU', 'DRAW_PROBABILITY'
+
+
+#: initial mean of ratings
+MU = 25.
+#: initial standard deviation of ratings
+SIGMA = MU / 3
+#: guarantee about an 80% chance of winning
+BETA = SIGMA / 2
+#: dynamic factor
+TAU = SIGMA / 100
+#: draw probability of the game
+DRAW_PROBABILITY = .10
+#: a basis to check reliability of the result
+DELTA = 0.0001
 
 
 def V(diff, draw_margin):
@@ -48,14 +60,17 @@ def W_draw(diff, draw_margin):
 
 
 def calc_draw_probability(draw_margin, beta, size):
+    """Calculates a draw-probability from the given ``draw_margin``."""
     return 2 * cdf(draw_margin / (math.sqrt(size) * beta)) - 1
 
 
 def calc_draw_margin(draw_probability, beta, size):
+    """Calculates a draw-margin from the given ``draw_probability``."""
     return ppf((draw_probability + 1) / 2.) * math.sqrt(size) * beta
 
 
 def _team_sizes(rating_groups):
+    """Makes a size map of each teams."""
     team_sizes = [0]
     for group in rating_groups:
         team_sizes.append(len(group) + team_sizes[-1])
@@ -64,10 +79,15 @@ def _team_sizes(rating_groups):
 
 
 class Rating(Gaussian):
+    """A player's skill as Gaussian distrubution."""
 
-    def __init__(self, mu=MU, sigma=SIGMA):
+    def __init__(self, mu=None, sigma=None):
         if isinstance(mu, tuple):
             mu, sigma = mu
+        if mu is None:
+            mu = g().mu
+        if sigma is None:
+            sigma = g().sigma
         super(Rating, self).__init__(mu, sigma)
 
     @property
@@ -83,6 +103,7 @@ class Rating(Gaussian):
 
 
 class TrueSkill(object):
+    """A TrueSkill environment. It could have customized constants."""
 
     def __init__(self, mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
                  draw_probability=DRAW_PROBABILITY):
@@ -92,7 +113,22 @@ class TrueSkill(object):
         self.tau = tau
         self.draw_probability = draw_probability
 
+    def Rating(self, mu=None, sigma=None):
+        """Returns :class:`Rating` object, but default mu and sigma is replaced
+        with this environment's.
+        """
+        if mu is None:
+            mu = self.mu
+        if sigma is None:
+            sigma = self.sigma
+        return Rating(mu, sigma)
+
+    def make_as_global(self):
+        """Registers this environment to global environment."""
+        return setup(env=self)
+
     def build_factor_graph(self, rating_groups, ranks):
+        """Makes nodes for the factor graph."""
         from .factorgraph import Variable, PriorFactor, LikelihoodFactor, \
                                  SumFactor, TruncateFactor
         ratings = sum(rating_groups, ())
@@ -146,29 +182,33 @@ class TrueSkill(object):
 
 
     def run_schedule(self, rating_layer, perf_layer, teamperf_layer,
-                     teamdiff_layer, trunc_layer):
+                     teamdiff_layer, trunc_layer, min_delta=DELTA):
+        """Sends messages within every nodes of the factor graph until the
+        result is reliable.
+        """
         # gray arrows
         for f in rating_layer + perf_layer + teamperf_layer:
             f.down()
         # arrow #1, #2, #3
         teamdiff_len = len(teamdiff_layer)
-        while True:
+        for x in xrange(50):
             if teamdiff_len == 1:
                 # only two teams
                 teamdiff_layer[0].down()
                 delta = trunc_layer[0].up()
             else:
                 # multiple teams
+                delta = 0
                 for x in xrange(teamdiff_len - 1):
                     teamdiff_layer[x].down()
-                    delta = trunc_layer[x].up()
+                    delta = max(delta, trunc_layer[x].up())
                     teamdiff_layer[x].up(1) # up to right variable
                 for x in xrange(teamdiff_len - 1, 0, -1):
                     teamdiff_layer[x].down()
-                    trunc_layer[x].up()
+                    delta = max(delta, trunc_layer[x].up())
                     teamdiff_layer[x].up(0) # up to left variable
             # repeat until to small update
-            if delta <= 0.0001:
+            if delta <= min_delta:
                 break
         # up both ends
         teamdiff_layer[0].up(0)
@@ -180,7 +220,15 @@ class TrueSkill(object):
         for f in perf_layer:
             f.up()
 
-    def transform_ratings(self, rating_groups, ranks=None):
+    def transform_ratings(self, rating_groups, ranks=None, min_delta=DELTA):
+        """Calculates transformed ratings from the given ratings by the ranking
+        table.
+
+        :param rating_groups: a list of tuples that contain :class:`Rating`
+                              objects
+        :param ranks: a ranking table. by default, it is same as the order of
+                      the ``rating_groups``
+        """
         rating_groups = list(rating_groups)
         group_size = len(rating_groups)
         # sort rating groups by rank
@@ -196,7 +244,7 @@ class TrueSkill(object):
         unsorting_hint = [x for x, (r, g) in sorting]
         # build factor graph
         layers = self.build_factor_graph(sorted_groups, sorted_ranks)
-        self.run_schedule(*layers)
+        self.run_schedule(*layers, min_delta=min_delta)
         # make result
         rating_layer, team_sizes = layers[0], _team_sizes(sorted_groups)
         transformed_groups = []
@@ -210,13 +258,33 @@ class TrueSkill(object):
         unsorting = sorted(zip(unsorting_hint, transformed_groups), compare)
         return [g for x, g in unsorting]
 
-    def Rating(self, mu=None, sigma=None):
-        if mu is None:
-            mu = self.mu
-        if sigma is None:
-            sigma = self.sigma
-        return Rating(mu, sigma)
+    def __repr__(self):
+        args = (type(self).__name__, self.mu, self.sigma, self.beta, \
+                self.tau, self.draw_probability * 100)
+        return '<%s mu=%.3f sigma=%.3f beta=%.3f tau=%.3f ' \
+               'draw_probability=%.1f%%>' % args
 
 
-trueskill = TrueSkill()
-transform_ratings = trueskill.transform_ratings
+_global = []
+def g():
+    """Gets the global TrueSkill environment."""
+    return _global[0]
+
+
+def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
+          draw_probability=DRAW_PROBABILITY, env=None):
+    """Setups the global TrueSkill environment."""
+    try:
+        _global.pop()
+    except IndexError:
+        pass
+    _global.append(env or TrueSkill(mu, sigma, beta, tau, draw_probability))
+    return g()
+
+
+def transform_ratings(rating_groups, ranks=None, min_delta=DELTA):
+    """`tranform_ratings` of the global TrueSkill environment."""
+    return g().transform_ratings(rating_groups, ranks, min_delta)
+
+
+setup() # setup the default environment
