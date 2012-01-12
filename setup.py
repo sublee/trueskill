@@ -28,9 +28,8 @@ See Also
 
 * `TrueSkill(TM) Ranking System by Microsoft
   <http://research.microsoft.com/en-us/projects/trueskill/>`_
-* `"Computing Your Skill" by Jeff Moser
-  <http://www.moserware.com/2010/03/computing-your-skill.html>`_
-* `"The Math Behind TrueSkill" by Jeff Moser <http://bit.ly/AdHQA6>`_
+* `"Computing Your Skill" by Jeff Moser <http://bit.ly/moserware-trueskill>`_
+* `"The Math Behind TrueSkill" by Jeff Moser <http://bit.ly/trueskill-math>`_
 * `TrueSkill Calcurator by Microsoft
   <http://atom.research.microsoft.com/trueskill/rankcalculator.aspx>`_
 
