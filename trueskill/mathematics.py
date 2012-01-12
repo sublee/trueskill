@@ -1,7 +1,8 @@
 import math
+from numbers import Number
 
 
-#__all__ = 'cdf', 'pdf', 'ppf', 'Gaussian'
+__all__ = 'cdf', 'pdf', 'ppf', 'Gaussian', 'Matrix'
 
 
 try:
@@ -50,7 +51,7 @@ except ImportError:
 
 
 class Gaussian(object):
-    """A model for normal distribution."""
+    """A model for the normal distribution."""
 
     def __init__(self, mu=None, sigma=None, pi=0, tau=0):
         if mu is not None:
@@ -82,156 +83,150 @@ class Gaussian(object):
         return 'N(mu=%.3f, sigma=%.3f)' % (self.mu, self.sigma)
 
 
-class Matrix(object):
+class Matrix(list):
+    """A model for matrix."""
 
-    def __init__(self, rows=None, cols=None):
-        assert rows is cols is None or not rows is bool(cols)
-        self.rows = []
-        if rows:
-            for x, row in enumerate(rows):
-                for y, col in enumerate(row):
-                    self[x][y] = col
-        elif cols:
-            for y, col in enumerate(cols):
-                for x, row in enumerate(col):
-                    self[x][y] = row
+    def __init__(self, src, width=None, height=None):
+        if callable(src):
+            f, src = src, {}
+            size = [width, height]
+            if not width:
+                def set_width(width):
+                    size[0] = width
+                size[0] = set_width
+            if not height:
+                def set_height(height):
+                    size[1] = height
+                size[1] = set_height
+            for (r, c), val in f(*size):
+                src[r, c] = val
+            width, height = tuple(size)
+        if isinstance(src, list):
+            is_number = lambda x: isinstance(x, Number)
+            unique_col_sizes = set(map(len, src))
+            msg = 'must be a rectangular array of numbers'
+            assert len(unique_col_sizes) == 1, msg
+            assert all(map(is_number, sum(src, []))), msg
+            two_dimensional_array = src
+        elif isinstance(src, dict):
+            if not width or not height:
+                w = h = 0
+                for r, c in src.iterkeys():
+                    if not width:
+                        w = max(w, r + 1)
+                    if not height:
+                        h = max(h, c + 1)
+                if not width:
+                    width = w
+                if not height:
+                    height = h
+            two_dimensional_array = []
+            for r in xrange(height):
+                row = []
+                two_dimensional_array.append(row)
+                for c in xrange(width):
+                    row.append(src.get((r, c), 0))
+        else:
+            raise TypeError('invalid source')
+        super(Matrix, self).__init__(two_dimensional_array)
 
     @property
     def width(self):
-        w = 0
-        for row in self:
-            w = max(w, len(row))
-        return w
+        return len(self[0])
 
     @property
     def height(self):
-        return len(self.rows)
+        return len(self)
 
-    def get_cofactor(self, del_x, del_y):
-        return (-1 if (del_x + del_y) % 2 else 1) * \
-               self.get_minor(del_x, del_y).determinant
+    def transpose(self):
+        width, height = self.width, self.height
+        src = {}
+        for c in xrange(width):
+            for r in xrange(height):
+                src[c, r] = self[r][c]
+        return type(self)(src, width=height, height=width)
 
-    def get_minor(self, del_x, del_y):
-        rv = Matrix()
-        for x in xrange(self.height):
-            for y in xrange(self.width):
-                rv[x][y] = 0 if x == del_x and y == del_y else self[x][y]
-        return rv
+    def cofactor(self, row_n, col_n):
+        return (-1 if (row_n + col_n) % 2 else 1) * \
+               self.minor(row_n, col_n).determinant()
 
-    @property
+    def minor(self, row_n, col_n):
+        width, height = self.width, self.height
+        assert 0 <= row_n < height and 0 <= col_n < width, \
+               'invalid row or column number'
+        two_dimensional_array = []
+        for r in xrange(height):
+            if r == row_n:
+                continue
+            row = []
+            two_dimensional_array.append(row)
+            for c in xrange(width):
+                if c == col_n:
+                    continue
+                row.append(self[r][c])
+        return type(self)(two_dimensional_array)
+
     def determinant(self):
-        assert self.width == self.height
-        if self.height == 1:
+        width, height = self.width, self.height
+        assert width == height, 'must be a square matrix'
+        if height == 1:
             return self[0][0]
-        elif self.height == 2:
+        elif height == 2:
             a, b = self[0][0], self[0][1]
             c, d = self[1][0], self[1][1]
             return a * d - b * c
-        rv = 0
-        for y in xrange(self.width):
-            rv += self[0][y] * self.get_cofactor(0, y)
-        return rv
+        else:
+            return sum(self[0][c] * self.cofactor(0, c) \
+                       for c in xrange(width))
 
-    @property
     def adjugate(self):
-        assert self.width == self.height
-        if self.height == 2:
+        width, height = self.width, self.height
+        assert width == height, 'must be a square matrix'
+        if height == 2:
             a, b = self[0][0], self[0][1]
             c, d = self[1][0], self[1][1]
             return type(self)([[d, -b], [-c, a]])
         else:
-            rv = type(self)()
-            for x in xrange(self.height):
-                for y in xrange(self.width):
-                    rv[y][x] = self.get_cofactor(x, y)
-            return rv
+            src = {}
+            for r in xrange(height):
+                for c in xrange(width):
+                    src[r, c] = self.cofactor(r, c)
+            return type(self)(src, width, height)
 
-    @property
     def inverse(self):
         if self.width == self.height == 1:
             return type(self)([[1. / self[0][0]]])
         else:
-            return (1. / self.determinant) * self.adjugate
-
-    def __iter__(self):
-        return iter(Row(row) for row in self.rows)
-
-    def __getitem__(self, x):
-        if len(self.rows) <= x:
-            for _ in xrange(len(self.rows), x + 1):
-                self.rows.append([])
-        return Row(self.rows[x])
+            return (1. / self.determinant()) * self.adjugate()
 
     def __add__(self, other):
-        assert isinstance(other, type(self))
-        assert self.width == other.width and self.height == other.height
-        rv = type(self)()
-        for x in xrange(self.height):
-            for y in xrange(self.width):
-                rv[x][y] = self[x][y] + other[x][y]
-        return rv
+        width, height = self.width, self.height
+        assert (width, height) == (other.width, other.height), \
+               'must be same size'
+        src = {}
+        for r in xrange(height):
+            for c in xrange(width):
+                src[r, c] = self[r][c] + other[r][c]
+        return type(self)(src, width, height)
 
     def __mul__(self, other):
-        """Matrix multiplication."""
-        assert isinstance(other, type(self))
-        rv = type(self)()
-        height = self.height
-        width = other.width
-        for x in xrange(height):
-            for y in xrange(width):
-                product_value = 0
-                for i in xrange(self.width):
-                    product_value += self[x][i] * other[i][y]
-                rv[x][y] = product_value
-        return rv
+        assert self.width == other.height, 'bad size'
+        width, height = other.width, self.height
+        src = {}
+        for r in xrange(height):
+            for c in xrange(width):
+                src[r, c] = sum(self[r][x] * other[x][c] \
+                                for x in xrange(self.width))
+        return type(self)(src, width, height)
 
     def __rmul__(self, other):
-        """Scalar multiplication."""
-        from numbers import Number
         assert isinstance(other, Number)
-        rv = type(self)()
-        height = self.height
-        width = self.width
-        for x in xrange(height):
-            for y in xrange(width):
-                rv[x][y] = self[x][y] * other
-        return rv
+        width, height = self.width, self.height
+        src = {}
+        for r in xrange(height):
+            for c in xrange(width):
+                src[r, c] = other * self[r][c]
+        return type(self)(src, width, height)
 
     def __repr__(self):
-        col_size = 7
-        line = ('+' + '-' * col_size) * self.width + '+'
-        rv = line + '\n'
-        for row in self.rows:
-            for x in xrange(self.width):
-                rv += '|'
-                try:
-                    if row[x] is None:
-                        raise IndexError
-                    r = repr(row[x]).rjust(col_size)
-                    if len(r) > col_size:
-                        r = r[:col_size]
-                    rv += r
-                except IndexError:
-                    rv += ' ' * (col_size - 1) + '-'
-            rv += '|\n'
-        rv += line
-        return rv
-
-
-class Row(object):
-
-    def __init__(self, ref):
-        self.ref = ref
-
-    def __getitem__(self, y):
-        if len(self.ref) <= y:
-            for _ in xrange(len(self.ref), y + 1):
-                self.ref.append(0)
-        return self.ref[y]
-
-    def __setitem__(self, y, val):
-        self.__getitem__(y)
-        self.ref[y] = val
-
-    def __len__(self):
-        return len(self.ref)
+        return '%s(%s)' % (type(self).__name__, super(Matrix, self).__repr__())

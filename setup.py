@@ -13,6 +13,8 @@ players.
 [(Rating(mu=35.877, sigma=6.791),),
  (Rating(mu=17.867, sigma=7.059), Rating(mu=17.867, sigma=7.059)),
  (Rating(mu=21.255, sigma=7.155),)]
+>>> print '%.1f%%' % match_quality([team1, team2, team3])
+4.7%
 
 Links
 `````

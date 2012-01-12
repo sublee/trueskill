@@ -366,7 +366,7 @@ class UpsetTestCase(TrueSkillTestCase):
             38.263, 1.849
             44.118, 0.983
         '''), groups)
-        #self.assert_match_quality(0.000, groups)
+        self.assert_match_quality(0.000, groups)
 
 
 def suite():

@@ -264,28 +264,40 @@ class TrueSkill(object):
         """
         rating_groups = list(rating_groups)
         ratings = sum(rating_groups, ())
+        length = len(ratings)
         # a vector of all of the skill means
-        means = [r.mu for r in ratings]
+        mean_matrix = Matrix([[r.mu] for r in ratings])
         # a matrix whose diagonal values are the variances (sigma^2) of each
         # of the players.
-        variance_matrix = Matrix()
-        for x, r in enumerate(ratings):
-            variance_matrix[x][x] = r.sigma ** 2
+        def variance_matrix(width, height):
+            for x, variance in enumerate(r.sigma ** 2 for r in ratings):
+                yield (x, x), variance
+        variance_matrix = Matrix(variance_matrix, length, length)
         # the player-team assignment and comparison matrix
-        seq = []
-        for group, next_group in zip(rating_groups[:-1], rating_groups[1:]):
-            seq.append([1] * len(group) + [-1] * len(next_group))
-        a_matrix = Matrix(cols=seq)
-        a_matrix_transpose = Matrix(rows=seq)
+        def rotated_a_matrix(set_width, set_height):
+            t = 0
+            for r, (cur, next) in enumerate(zip(rating_groups[:-1],
+                                                rating_groups[1:])):
+                for x in xrange(t, t + len(cur)):
+                    yield (r, x), 1
+                    t += 1
+                x += 1
+                for x in xrange(x, x + len(next)):
+                    yield (r, x), -1
+            set_width(x + 1)
+            set_height(r + 1)
+        rotated_a_matrix = Matrix(rotated_a_matrix)
+        a_matrix = rotated_a_matrix.transpose()
         # match quality further derivation
-        _ata = (self.beta ** 2 * a_matrix_transpose) * a_matrix
-        _atsa = a_matrix_transpose * variance_matrix * a_matrix
-        start = Matrix(rows=[means]) * a_matrix
+        _ata = (self.beta ** 2) * rotated_a_matrix * a_matrix
+        _atsa = rotated_a_matrix * variance_matrix * a_matrix
+        start = mean_matrix.transpose() * a_matrix
         middle = _ata + _atsa
-        end = a_matrix_transpose * Matrix(cols=[means])
-        exp_part = (-0.5 * (start * middle.inverse * end)).determinant
-        sqrt_part = _ata.determinant / middle.determinant
-        return math.exp(exp_part) * math.sqrt(sqrt_part)
+        end = rotated_a_matrix * mean_matrix
+        # make result
+        e_arg = (-0.5 * start * middle.inverse() * end).determinant()
+        s_arg = _ata.determinant() / middle.determinant()
+        return math.exp(e_arg) * math.sqrt(s_arg)
 
     def __repr__(self):
         args = (type(self).__name__, self.mu, self.sigma, self.beta, \
