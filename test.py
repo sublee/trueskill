@@ -78,7 +78,7 @@ class TrueSkillTestCase(unittest.TestCase):
 
     def individual(self, size):
         args = [1] * size
-        return self.teams(*args)
+        return list(self.teams(*args))
 
 
 class FunctionTestCase(TrueSkillTestCase):
@@ -223,7 +223,7 @@ class MultipleTeamsTestCase(TrueSkillTestCase):
             25.000, 6.208
             18.325, 6.656
         '''), groups)
-        #self.assert_match_quality(0.200, groups)
+        self.assert_match_quality(0.200, groups)
 
     def test_individual_3_players_draw(self):
         groups = self.individual(3)
@@ -241,7 +241,7 @@ class MultipleTeamsTestCase(TrueSkillTestCase):
             22.599, 5.787
             16.793, 6.348
         '''), groups)
-        #self.assert_match_quality(0.089, groups)
+        self.assert_match_quality(0.089, groups)
 
     def test_individual_5_players(self):
         groups = self.individual(5)
@@ -252,7 +252,7 @@ class MultipleTeamsTestCase(TrueSkillTestCase):
             20.942, 5.536
             15.637, 6.136
         '''), groups)
-        #self.assert_match_quality(0.040, groups)
+        self.assert_match_quality(0.040, groups)
 
     def test_individual_8_players(self):
         groups = self.individual(8)
@@ -266,7 +266,7 @@ class MultipleTeamsTestCase(TrueSkillTestCase):
             25.000, 4.583
             25.000, 4.592
         '''), groups, [0] * 8)
-        #self.assert_match_quality(0.004, groups)
+        self.assert_match_quality(0.004, groups)
 
     def test_individual_16_players(self):
         groups = self.individual(16)
@@ -303,7 +303,7 @@ class MultipleTeamsTestCase(TrueSkillTestCase):
             48.830, 4.590
             29.813, 1.976
         '''), [t1, t2, t3], [0, 1, 1])
-        #self.assert_match_quality(0.367, [t1, t2, t3])
+        self.assert_match_quality(0.367, [t1, t2, t3])
 
 
 class UpsetTestCase(TrueSkillTestCase):
