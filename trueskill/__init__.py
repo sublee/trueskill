@@ -134,6 +134,13 @@ class TrueSkill(object):
         """Registers this environment to global environment."""
         return setup(env=self)
 
+    def validate_rating_groups(self, rating_groups):
+        if len(rating_groups) < 2:
+            raise ValueError('need multiple rating groups')
+        elif 0 in map(len, rating_groups):
+            raise ValueError('each group must contain multiple ratings')
+        return list(rating_groups)
+
     def build_factor_graph(self, rating_groups, ranks):
         """Makes nodes for the factor graph."""
         from .factorgraph import Variable, PriorFactor, LikelihoodFactor, \
@@ -238,7 +245,7 @@ class TrueSkill(object):
         :param min_delta: each loop checks a delta of changes, and the loop
                           will stop if the delta is less then this argument
         """
-        rating_groups = list(rating_groups)
+        rating_groups = self.validate_rating_groups(rating_groups)
         group_size = len(rating_groups)
         # sort rating groups by rank
         if ranks is None:
@@ -271,7 +278,7 @@ class TrueSkill(object):
         """Calculates the match quality of the given rating groups. A result
         is the draw probability in the association.
         """
-        rating_groups = list(rating_groups)
+        rating_groups = self.validate_rating_groups(rating_groups)
         ratings = sum(rating_groups, ())
         length = len(ratings)
         # a vector of all of the skill means

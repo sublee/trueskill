@@ -109,6 +109,45 @@ class FunctionTestCase(TrueSkillTestCase):
         # rollback
         setup()
 
+    def test_rating_groups_validation(self):
+        try:
+            def fail(e=None):
+                msg = 'should raise ValueError' + \
+                      (' but %s is raised' % type(e).__name__ if e else '')
+                assert False, msg
+            try:
+                transform_ratings([])
+                fail()
+            except ValueError:
+                pass
+            try:
+                transform_ratings([(Rating(),)])
+                fail()
+            except ValueError:
+                pass
+            try:
+                transform_ratings([(Rating(),), ()])
+                fail()
+            except ValueError:
+                pass
+            try:
+                match_quality([])
+                fail()
+            except ValueError:
+                pass
+            try:
+                match_quality([(Rating(),)])
+                fail()
+            except ValueError:
+                pass
+            try:
+                match_quality([(Rating(),), ()])
+                fail()
+            except ValueError:
+                pass
+        except Exception, e:
+            fail(e)
+
 
 class SimpleTestCase(TrueSkillTestCase):
 
