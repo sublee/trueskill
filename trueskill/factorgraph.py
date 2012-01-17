@@ -157,4 +157,3 @@ class TruncateFactor(Factor):
         denom = (1. - w)
         pi, tau = div.pi / denom, (div.tau + sqrt_pi * v) / denom
         return self.var.update_value(self, pi, tau)
-                                     
