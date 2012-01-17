@@ -10,15 +10,15 @@ __all__ = 'TrueSkill', 'Rating', 'transform_ratings', 'match_quality', \
           'MU', 'SIGMA', 'BETA', 'TAU', 'DRAW_PROBABILITY'
 
 
-#: initial mean of ratings
+#: default initial mean of ratings
 MU = 25.
-#: initial standard deviation of ratings
+#: default initial standard deviation of ratings
 SIGMA = MU / 3
-#: guarantee about an 80% chance of winning
+#: default guarantee about an 80% chance of winning
 BETA = SIGMA / 2
-#: dynamic factor
+#: default dynamic factor
 TAU = SIGMA / 100
-#: draw probability of the game
+#: default draw probability of the game
 DRAW_PROBABILITY = .10
 #: a basis to check reliability of the result
 DELTA = 0.0001
@@ -103,7 +103,14 @@ class Rating(Gaussian):
 
 
 class TrueSkill(object):
-    """A TrueSkill environment. It could have customized constants."""
+    """A TrueSkill environment. It could have customized constants.
+
+    :param mu: initial mean of ratings
+    :param sigma: initial standard deviation of ratings
+    :param beta: guarantee about an 80% chance of winning
+    :param tau: dynamic factor
+    :param draw_probability: draw probability of the game
+    """
 
     def __init__(self, mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
                  draw_probability=DRAW_PROBABILITY):
@@ -228,6 +235,8 @@ class TrueSkill(object):
                               objects
         :param ranks: a ranking table. by default, it is same as the order of
                       the ``rating_groups``
+        :param min_delta: each loop checks a delta of changes, and the loop
+                          will stop if the delta is less then this argument
         """
         rating_groups = list(rating_groups)
         group_size = len(rating_groups)
@@ -329,6 +338,7 @@ def transform_ratings(rating_groups, ranks=None, min_delta=DELTA):
 
 
 def match_quality(rating_groups):
+    """`match_quality` of the global TrueSkill environment."""
     return g().match_quality(rating_groups)
 
 
