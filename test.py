@@ -1,5 +1,7 @@
+import doctest
 import unittest
 
+import trueskill
 from trueskill import TrueSkill, Rating, transform_ratings, match_quality, \
                       setup
 
@@ -416,4 +418,5 @@ def suite():
     suite.addTests(loader.loadTestsFromTestCase(UnbalancedTeamsTestCase))
     suite.addTests(loader.loadTestsFromTestCase(MultipleTeamsTestCase))
     suite.addTests(loader.loadTestsFromTestCase(UpsetTestCase))
+    suite.addTests(doctest.DocTestSuite(trueskill))
     return suite
