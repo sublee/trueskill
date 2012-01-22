@@ -163,14 +163,27 @@ TrueSkill Objects
 .. autoclass:: Rating
    :members: exposure
 
-Proxy Functions of Global Environment
-'''''''''''''''''''''''''''''''''''''
+Proxy Functions of the Global Environment
+'''''''''''''''''''''''''''''''''''''''''
 
 .. autofunction:: transform_ratings
 
 .. autofunction:: match_quality
 
 .. autofunction:: setup
+
+Default TrueSkill Constants
+'''''''''''''''''''''''''''
+
+.. autodata:: MU
+
+.. autodata:: SIGMA
+
+.. autodata:: BETA
+
+.. autodata:: TAU
+
+.. autodata:: DRAW_PROBABILITY
 
 
 etc.
