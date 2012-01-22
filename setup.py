@@ -44,7 +44,7 @@ def run_tests():
 
 setup(
     name='trueskill',
-    version='0.1.1',
+    version='0.1.2',
     url='https://github.com/sublee/trueskill/',
     license='BSD',
     author='Heungsub Lee',
