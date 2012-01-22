@@ -125,14 +125,14 @@ game, a super-fair game.
 
 This feature would help you implement a fair match making system.
 
-Make Players Be Happy
-'''''''''''''''''''''
+Make Players To Be Happy
+''''''''''''''''''''''''
 
-A skill point is a measure of player's real ability. Someday, this value will
-be convergent to the value that's exactly we are finding. But the value can be
-a less than the initial value (mu=25). To prevent players from despairing by
-knowing their own rating directly, we need to deceive our players into growing
-up in general.
+A skill point is a numeric representation of a player's ability. Someday, this
+value will be convergent to the value that's exactly we are finding. But the
+value can be a less than the initial value (mu=25). To prevent players from
+despairing by knowing their own rating directly, we need to deceive our players
+into growing up in general.
 
 Okay, enough for the reason but how? Just use :attr:`Rating.exposure` property:
 
@@ -176,7 +176,7 @@ Proxy Functions of Global Environment
 etc.
 ~~~~
 
-If you wanna more detail of the TrueSkill algorithm, see these also:
+If you want to more details of the TrueSkill algorithm, see also:
 
 - `TrueSkill™ Ranking System
   <http://research.microsoft.com/en-us/projects/trueskill/>`_ by Microsoft
