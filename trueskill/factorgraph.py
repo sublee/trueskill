@@ -1,3 +1,12 @@
+"""
+    trueskill.factorgraph
+    ~~~~~~~~~~~~~~~~~~~~~
+
+    This module contains nodes for the factor graph of TrueSkill algorithm.
+
+    :copyright: (c) 2012 by Heungsub Lee.
+    :license: BSD, see LICENSE for more details.
+"""
 from __future__ import absolute_import
 
 from math import sqrt

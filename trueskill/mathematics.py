@@ -1,3 +1,13 @@
+"""
+    trueskill.mathematics
+    ~~~~~~~~~~~~~~~~~~~~~
+
+    This module contains basic mathematics functions and objects for TrueSkill
+    algorithm. If you have not scipy, this module provides the fallback.
+
+    :copyright: (c) 2012 by Heungsub Lee.
+    :license: BSD, see LICENSE for more details.
+"""
 import math
 from numbers import Number
 

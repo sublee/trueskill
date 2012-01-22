@@ -1,3 +1,12 @@
+"""
+    trueskill
+    ~~~~~~~~~
+
+    This module implements the TrueSkill rating system.
+
+    :copyright: (c) 2012 by Heungsub Lee.
+    :license: BSD, see LICENSE for more details.
+"""
 from __future__ import absolute_import
 
 import math
@@ -79,7 +88,12 @@ def _team_sizes(rating_groups):
 
 
 class Rating(Gaussian):
-    """A player's skill as Gaussian distrubution."""
+    """Represents a player's skill as Gaussian distrubution. The default mu and
+    sigma value follows the global TrueSkill environment's settings.
+
+    :param mu: mean
+    :param sigma: standard deviation
+    """
 
     def __init__(self, mu=None, sigma=None):
         if isinstance(mu, tuple):
@@ -92,6 +106,7 @@ class Rating(Gaussian):
 
     @property
     def exposure(self):
+        """A value that will go up on the whole."""
         return self.mu - 3 * self.sigma
 
     def __iter__(self):
@@ -103,13 +118,21 @@ class Rating(Gaussian):
 
 
 class TrueSkill(object):
-    """A TrueSkill environment. It could have customized constants.
+    """Implements a TrueSkill environment. An environment could have customized
+    constants. Every games have not same design and may need to customize
+    TrueSkill constants. For example, 60% of matches in your game have finished
+    as draw then you should set ``draw_probability`` to 0.60.
+
+    >>> my_env = TrueSkill(draw_probability=0.60)
 
     :param mu: initial mean of ratings
     :param sigma: initial standard deviation of ratings
     :param beta: guarantee about an 80% chance of winning
     :param tau: dynamic factor
     :param draw_probability: draw probability of the game
+
+    For more details of the constants, see `The Math Behind TrueSkill
+    <http://bit.ly/trueskill-math>`_.
     """
 
     def __init__(self, mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
@@ -121,8 +144,12 @@ class TrueSkill(object):
         self.draw_probability = draw_probability
 
     def Rating(self, mu=None, sigma=None):
-        """Returns :class:`Rating` object, but default mu and sigma is replaced
-        with this environment's.
+        """Initializes new :class:`Rating` object, but it fixes default mu and
+        sigma to the environment's.
+
+        >>> env = TrueSkill(mu=0, sigma=1)
+        >>> env.Rating()
+        Rating(mu=0.000, sigma=1.000)
         """
         if mu is None:
             mu = self.mu
@@ -131,10 +158,41 @@ class TrueSkill(object):
         return Rating(mu, sigma)
 
     def make_as_global(self):
-        """Registers this environment to global environment."""
+        """Registers the environment as the global environment.
+
+        >>> env = TrueSkill(mu=50)
+        >>> Rating()
+        Rating(mu=25.000, sigma=8.333)
+        >>> env.make_as_global() #doctest: +ELLIPSIS
+        <TrueSkill mu=50...>
+        >>> Rating()
+        Rating(mu=50.000, sigma=8.333)
+
+        But if you need just one environment, use :func:`setup` instead.
+        """
         return setup(env=self)
 
     def validate_rating_groups(self, rating_groups):
+        """Validates a ``rating_groups`` argument. It should contain more than
+        2 groups and all groups must not be empty.
+
+        >>> env = TrueSkill()
+        >>> env.validate_rating_groups([])
+        Traceback (most recent call last):
+            ...
+        ValueError: need multiple rating groups
+        >>> env.validate_rating_groups([(Rating(),)])
+        Traceback (most recent call last):
+            ...
+        ValueError: need multiple rating groups
+        >>> env.validate_rating_groups([(Rating(),), ()])
+        Traceback (most recent call last):
+            ...
+        ValueError: each group must contain multiple ratings
+        >>> env.validate_rating_groups([(Rating(),), (Rating(),)])
+        ... #doctest: +ELLIPSIS
+        [(Rating(...),), (Rating(...),)]
+        """
         if len(rating_groups) < 2:
             raise ValueError('need multiple rating groups')
         elif 0 in map(len, rating_groups):
@@ -237,6 +295,24 @@ class TrueSkill(object):
     def transform_ratings(self, rating_groups, ranks=None, min_delta=DELTA):
         """Calculates transformed ratings from the given rating groups by the
         ranking table.
+        
+        ``rating_groups`` is a list of rating tuples that correspond each team
+        of the match. ``ranks`` is rakings of the teams that can be omitted if
+        the ranking is same as the order of ``rating_groups``.
+
+        >>> env = TrueSkill()
+        >>> team1 = (env.Rating(20), env.Rating(21)) # winner
+        >>> team2 = (env.Rating(22), env.Rating(23)) # loser
+        >>> env.transform_ratings(rating_groups=[team1, team2])
+        ... #doctest: +NORMALIZE_WHITESPACE
+        [(Rating(mu=23.645, sigma=7.736), Rating(mu=24.645, sigma=7.736)),
+         (Rating(mu=18.355, sigma=7.736), Rating(mu=19.355, sigma=7.736))]
+
+        You can replace the old ratings like:
+
+        >>> (team1, team2) = tuple(env.transform_ratings([team1, team2]))
+        >>> team1[0]
+        Rating(mu=23.645, sigma=7.736)
 
         :param rating_groups: a list of tuples that contain :class:`Rating`
                               objects
@@ -277,6 +353,14 @@ class TrueSkill(object):
     def match_quality(self, rating_groups):
         """Calculates the match quality of the given rating groups. A result
         is the draw probability in the association.
+
+        >>> env = TrueSkill()
+        >>> env.match_quality([(env.Rating(25, 0.001),),
+        ...                    (env.Rating(25, 0.001),)])
+        0.9999999712000012
+
+        :param rating_groups: a list of tuples that contain :class:`Rating`
+                              objects
         """
         rating_groups = self.validate_rating_groups(rating_groups)
         ratings = sum(rating_groups, ())
@@ -322,31 +406,42 @@ class TrueSkill(object):
                'draw_probability=%.1f%%>' % args
 
 
+def transform_ratings(rating_groups, ranks=None, min_delta=DELTA):
+    """A proxy function for :meth:`TrueSkill.transform_ratings` of the global
+    TrueSkill environment.
+    """
+    return g().transform_ratings(rating_groups, ranks, min_delta)
+
+
+def match_quality(rating_groups):
+    """A proxy function for :meth:`TrueSkill.match_quality` of the global
+    TrueSkill environment.
+    """
+    return g().match_quality(rating_groups)
+
+
 _global = []
 def g():
     """Gets the global TrueSkill environment."""
+    if not _global:
+        setup() # setup the default environment
     return _global[0]
 
 
 def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
           draw_probability=DRAW_PROBABILITY, env=None):
-    """Setups the global TrueSkill environment."""
+    """Setups the global TrueSkill environment.
+
+    >>> Rating()
+    Rating(mu=25.000, sigma=8.333)
+    >>> setup(mu=50) #doctest: +ELLIPSIS
+    <TrueSkill mu=50...>
+    >>> Rating()
+    Rating(mu=50.000, sigma=8.333)
+    """
     try:
         _global.pop()
     except IndexError:
         pass
     _global.append(env or TrueSkill(mu, sigma, beta, tau, draw_probability))
     return g()
-
-
-def transform_ratings(rating_groups, ranks=None, min_delta=DELTA):
-    """`tranform_ratings` of the global TrueSkill environment."""
-    return g().transform_ratings(rating_groups, ranks, min_delta)
-
-
-def match_quality(rating_groups):
-    """`match_quality` of the global TrueSkill environment."""
-    return g().match_quality(rating_groups)
-
-
-setup() # setup the default environment
