@@ -98,9 +98,9 @@ html_theme = 'trueskill'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {'index_logo': 'trueskill.png',
-                      'index_logo_alt': project,
-                      'github_fork': 'sublee/trueskill'}
+html_theme_options = {'index_logo_alt': project,
+                      'github_fork': 'sublee/trueskill',
+                      'google_analytics': 'UA-28655602-1'}
 
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = ['_themes']
