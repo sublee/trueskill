@@ -9,7 +9,7 @@ rating system among game players. It has been used on
 `Xbox Live <http://www.xbox.com/live>`_ to rank and match players. TrueSkill
 system quantizes "TRUE" skill points by a Bayesian inference algorithm.
 
-This project is a Python package which implements TrueSkill system.
+This project is a Python package which implements TrueSkill™ rating system.
 
 
 Installation
@@ -39,7 +39,7 @@ Tutorial
 Measure Player's Skill
 ''''''''''''''''''''''
 
-Let's suppose that our sample game is 2:1. :class:`Rating` objects mean each
+Let's suppose that our sample game is 2v1. :class:`Rating` objects mean each
 game players' skill points:
 
 .. sourcecode:: python
@@ -50,8 +50,8 @@ game players' skill points:
    >>> team2 = (r3,)
 
 TrueSkill system uses Gaussian distribution as player's skill point. The
-initial mu (μ; mean) of rating is 25 and the initial sigma (σ; standard
-deviation) is 25/3 ≈ 8.333:
+initial mu (\\(\\mu\\); mean) of rating is 25 and the initial sigma
+(\\(\\sigma\\); standard deviation) is \\(\\frac{ 25 }{ 3 } \\approx 8.333\\):
 
 .. sourcecode:: python
 
@@ -119,9 +119,9 @@ another result of a really fair game:
    0.9999999712000012
 
 A much exact skill point follows very low sigma value such as the above ratings
-(sigma=0.001). Very low sigma value indicates that the rating is much more
-precise. Also, because of the same ratings, TrueSkill assures a draw of this
-game, a super-fair game.
+(\\(\\sigma=0.001\\)). Very low sigma value indicates that the rating is much
+more precise. Also, because of the same ratings, TrueSkill assures a draw of
+this game, a super-fair game.
 
 This feature would help you implement a fair match making system.
 
@@ -130,11 +130,13 @@ Make Players To Be Happy
 
 A skill point is a numeric representation of a player's ability. Someday, this
 value will be convergent to the value that's exactly we are finding. But the
-value can be a less than the initial value (mu=25). To prevent players from
-despairing by knowing their own rating directly, we need to deceive our players
-into growing up in general.
+value can be a less than the initial value (\\(\\mu=25\\)). To prevent players
+from despairing by knowing their own rating directly, we need to deceive our
+players into growing up in general.
 
 Okay, enough for the reason but how? Just use :attr:`Rating.exposure` property:
+
+$$ E = \\mu - 3\\sigma $$
 
 .. sourcecode:: python
 
