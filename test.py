@@ -418,5 +418,6 @@ def suite():
     suite.addTests(loader.loadTestsFromTestCase(UnbalancedTeamsTestCase))
     suite.addTests(loader.loadTestsFromTestCase(MultipleTeamsTestCase))
     suite.addTests(loader.loadTestsFromTestCase(UpsetTestCase))
-    suite.addTests(doctest.DocTestSuite(trueskill))
+    doctest_setup = lambda self: trueskill.setup()
+    suite.addTests(doctest.DocTestSuite(trueskill, setUp=doctest_setup))
     return suite
