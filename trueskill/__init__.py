@@ -355,9 +355,10 @@ class TrueSkill(object):
         is the draw probability in the association.
 
         >>> env = TrueSkill()
-        >>> env.match_quality([(env.Rating(25, 0.001),),
-        ...                    (env.Rating(25, 0.001),)])
-        0.9999999712000012
+        >>> rating_groups = [(env.Rating(25, 0.001),),
+        ...                  (env.Rating(25, 0.001),)]
+        >>> print env.match_quality(rating_groups)
+        0.9999999712
 
         :param rating_groups: a list of tuples that contain :class:`Rating`
                               objects

@@ -181,7 +181,7 @@ class Matrix(list):
             pivot, r = max((abs(tmp[r][c]), r) for r in xrange(c + 1))
             pivot = tmp[r][c]
             if not pivot:
-                return 0
+                return 0.
             tmp[r], tmp[c] = tmp[c], tmp[r]
             if r != c:
                 rv = -rv
