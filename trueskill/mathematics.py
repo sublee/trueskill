@@ -156,10 +156,6 @@ class Matrix(list):
                 src[c, r] = self[r][c]
         return type(self)(src, width=height, height=width)
 
-    def cofactor(self, row_n, col_n):
-        return (-1 if (row_n + col_n) % 2 else 1) * \
-               self.minor(row_n, col_n).determinant()
-
     def minor(self, row_n, col_n):
         width, height = self.width, self.height
         assert 0 <= row_n < height and 0 <= col_n < width, \
@@ -177,17 +173,25 @@ class Matrix(list):
         return type(self)(two_dimensional_array)
 
     def determinant(self):
+        import copy
         width, height = self.width, self.height
         assert width == height, 'must be a square matrix'
-        if height == 1:
-            return self[0][0]
-        elif height == 2:
-            a, b = self[0][0], self[0][1]
-            c, d = self[1][0], self[1][1]
-            return a * d - b * c
-        else:
-            return sum(self[0][c] * self.cofactor(0, c) \
-                       for c in xrange(width))
+        tmp, rv = copy.deepcopy(self), 1.
+        for c in xrange(width - 1, 0, -1):
+            pivot, r = max((abs(tmp[r][c]), r) for r in xrange(c + 1))
+            pivot = tmp[r][c]
+            if not pivot:
+                return 0
+            tmp[r], tmp[c] = tmp[c], tmp[r]
+            if r != c:
+                rv = -rv
+            rv *= pivot
+            fact = -1. / pivot
+            for r in xrange(c):
+                f = fact * tmp[r][c]
+                for x in xrange(c):
+                    tmp[r][x] += f * tmp[c][x]
+        return rv * tmp[0][0]
 
     def adjugate(self):
         width, height = self.width, self.height
@@ -200,7 +204,8 @@ class Matrix(list):
             src = {}
             for r in xrange(height):
                 for c in xrange(width):
-                    src[r, c] = self.cofactor(r, c)
+                    src[r, c] = self.minor(r, c).determinant() * \
+                                (-1 if (r + c) % 2 else 1)
             return type(self)(src, width, height)
 
     def inverse(self):
