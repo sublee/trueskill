@@ -1,3 +1,7 @@
 *.pyc
 .*
 *.egg-info
+docs/_*
+docs/Makefile
+build
+dist
