@@ -252,7 +252,6 @@ class TrueSkill(object):
                list(build_teamdiff_layer()), \
                list(build_trunc_layer())
 
-
     def run_schedule(self, rating_layer, perf_layer, teamperf_layer,
                      teamdiff_layer, trunc_layer, min_delta=DELTA):
         """Sends messages within every nodes of the factor graph until the
