@@ -193,6 +193,8 @@ class TrueSkill(object):
         ... #doctest: +ELLIPSIS
         [(Rating(...),), (Rating(...),)]
         """
+        rating_groups = [(x,) if isinstance(x, Rating) else x \
+                         for x in rating_groups]
         if len(rating_groups) < 2:
             raise ValueError('need multiple rating groups')
         elif 0 in map(len, rating_groups):

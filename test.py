@@ -150,6 +150,10 @@ class FunctionTestCase(TrueSkillTestCase):
         except Exception, e:
             fail(e)
 
+    def test_individual_ratings(self):
+        r1, r2 = Rating(50, 1), Rating(10, 5)
+        assert match_quality([(r1,), (r2,)]) == match_quality([r1, r2])
+
 
 class SimpleTestCase(TrueSkillTestCase):
 
