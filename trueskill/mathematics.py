@@ -47,17 +47,18 @@ except ImportError:
             x += err / (1.12837916709551257 * math.exp(-(x ** 2)) - x * err)
         return x if zero_point else -x
 
-    def cdf(x):
+    def cdf(x, mu=0, sigma=1):
         """Cumulative distribution function"""
-        return 1 - 0.5 * erfcc(x / math.sqrt(2))
+        return 0.5 * erfcc(-(x - mu) / (sigma * math.sqrt(2)))
 
-    def pdf(x):
+    def pdf(x, mu=0, sigma=1):
         """Probability density function"""
-        return (1 / math.sqrt(2 * math.pi)) * math.exp(-(x ** 2 / 2))
+        return (1 / math.sqrt(2 * math.pi) * abs(sigma)) * \
+               math.exp(-(((x - mu) / abs(sigma)) ** 2 / 2))
 
-    def ppf(x):
+    def ppf(x, mu=0, sigma=1):
         """The inverse function of CDF"""
-        return -math.sqrt(2) * ierfcc(2 * x)
+        return mu - sigma * math.sqrt(2) * ierfcc(2 * x)
 
 
 class Gaussian(object):

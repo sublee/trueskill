@@ -9,6 +9,7 @@
 """
 from __future__ import absolute_import
 
+import itertools
 import math
 
 from .mathematics import cdf, pdf, ppf, Gaussian, Matrix
@@ -260,11 +261,11 @@ class TrueSkill(object):
         result is reliable.
         """
         # gray arrows
-        for f in rating_layer + perf_layer + teamperf_layer:
+        for f in itertools.chain(rating_layer, perf_layer, teamperf_layer):
             f.down()
         # arrow #1, #2, #3
         teamdiff_len = len(teamdiff_layer)
-        for x in xrange(50):
+        for x in xrange(10):
             if teamdiff_len == 1:
                 # only two teams
                 teamdiff_layer[0].down()
