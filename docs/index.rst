@@ -188,8 +188,8 @@ Default TrueSkill Constants
 .. autodata:: DRAW_PROBABILITY
 
 
-etc.
-~~~~
+Further Reading
+~~~~~~~~~~~~~~~
 
 If you want to more details of the TrueSkill algorithm, see also:
 
@@ -200,6 +200,10 @@ If you want to more details of the TrueSkill algorithm, see also:
 - `TrueSkill Calcurator
   <http://atom.research.microsoft.com/trueskill/rankcalculator.aspx>`_
   by Microsoft
+
+
+Licensing and Author
+~~~~~~~~~~~~~~~~~~~~
 
 This project licensed with `BSD <http://en.wikipedia.org/wiki/BSD_licenses>`_,
 so feel free to use and manipulate as long as you respect these licenses. See
