@@ -338,8 +338,7 @@ class TrueSkill(object):
         unsorting_hint = [x for x, (r, g) in sorting]
         # build factor graph
         layers = self.build_factor_graph(sorted_groups, sorted_ranks)
-        args = layers + (min_delta,)
-        self.run_schedule(*args)
+        self.run_schedule(*layers, min_delta=min_delta)
         # make result
         rating_layer, team_sizes = layers[0], _team_sizes(sorted_groups)
         transformed_groups = []
