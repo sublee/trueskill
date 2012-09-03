@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     trueskill
     ~~~~~~~~~
@@ -8,7 +9,6 @@
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
-
 import itertools
 import math
 

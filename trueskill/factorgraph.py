@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     trueskill.factorgraph
     ~~~~~~~~~~~~~~~~~~~~~
@@ -8,7 +9,6 @@
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
-
 from math import sqrt
 
 from .mathematics import cdf, pdf, ppf, Gaussian
@@ -130,9 +130,7 @@ class SumFactor(Factor):
 
     def up(self, index=0):
         coeff = self.coeffs[index]
-        #for index, coeff in enumerate(self.coeffs):
-        coeffs = [-c / coeff for x, c in enumerate(self.coeffs) \
-                             if x != index]
+        coeffs = [-c / coeff for x, c in enumerate(self.coeffs) if x != index]
         coeffs.insert(index, 1. / coeff)
         vals = self.terms[:]
         vals[index] = self.sum
