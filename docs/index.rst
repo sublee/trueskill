@@ -125,8 +125,8 @@ this game, a super-fair game.
 
 This feature would help you implement a fair match making system.
 
-Make Players To Be Happy
-''''''''''''''''''''''''
+Make Players Happy
+''''''''''''''''''
 
 A skill point is a numeric representation of a player's ability. Someday, this
 value will be convergent to the value that's exactly we are finding. But the
