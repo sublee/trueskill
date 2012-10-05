@@ -414,6 +414,49 @@ class UpsetTestCase(TrueSkillTestCase):
         self.assert_match_quality(0.000, groups)
 
 
+class RegressionTestCase(TrueSkillTestCase):
+
+    def test_issue3(self):
+        """This input led to ZeroDivisionError. Also another TrueSkill
+        implementations cannot calculate this case.
+        """
+        # @konikos's case 1
+        team1 = (Rating(mu=42.234, sigma=3.728),
+                 Rating(mu=43.290, sigma=3.842))
+        team2 = (Rating(mu=16.667, sigma=0.500),
+                 Rating(mu=16.667, sigma=0.500),
+                 Rating(mu=16.667, sigma=0.500),
+                 Rating(mu=16.667, sigma=0.500),
+                 Rating(mu=16.667, sigma=0.500),
+                 Rating(mu=16.667, sigma=0.500),
+                 Rating(mu=16.667, sigma=0.500),
+                 Rating(mu=16.667, sigma=0.500),
+                 Rating(mu=16.667, sigma=0.500),
+                 Rating(mu=16.667, sigma=0.500),
+                 Rating(mu=16.667, sigma=0.500),
+                 Rating(mu=16.667, sigma=0.500),
+                 Rating(mu=16.667, sigma=0.500),
+                 Rating(mu=16.667, sigma=0.500),
+                 Rating(mu=16.667, sigma=0.500))
+        transform_ratings([team1, team2], ranks=[6, 5])
+        # @konikos's case 2
+        team1 = (Rating(mu=25.000, sigma=0.500),
+                 Rating(mu=25.000, sigma=0.500),
+                 Rating(mu=25.000, sigma=0.500),
+                 Rating(mu=25.000, sigma=0.500),
+                 Rating(mu=33.333, sigma=0.500),
+                 Rating(mu=33.333, sigma=0.500),
+                 Rating(mu=33.333, sigma=0.500),
+                 Rating(mu=33.333, sigma=0.500),
+                 Rating(mu=41.667, sigma=0.500),
+                 Rating(mu=41.667, sigma=0.500),
+                 Rating(mu=41.667, sigma=0.500),
+                 Rating(mu=41.667, sigma=0.500))
+        team2 = (Rating(mu=42.234, sigma=3.728),
+                 Rating(mu=43.291, sigma=3.842))
+        transform_ratings([team1, team2], ranks=[0, 28])
+
+
 def suite():
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
@@ -422,6 +465,7 @@ def suite():
     suite.addTests(loader.loadTestsFromTestCase(UnbalancedTeamsTestCase))
     suite.addTests(loader.loadTestsFromTestCase(MultipleTeamsTestCase))
     suite.addTests(loader.loadTestsFromTestCase(UpsetTestCase))
+    suite.addTests(loader.loadTestsFromTestCase(RegressionTestCase))
     doctest_setup = lambda self: trueskill.setup()
     suite.addTests(doctest.DocTestSuite(trueskill, setUp=doctest_setup))
     return suite

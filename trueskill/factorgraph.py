@@ -140,7 +140,10 @@ class SumFactor(Factor):
     def update(self, var, vals, msgs, coeffs):
         size = len(coeffs)
         divs = [vals[x] / msgs[x] for x in xrange(size)]
-        pi = 1. / sum(coeffs[x] ** 2 / divs[x].pi for x in xrange(size))
+        try:
+            pi = 1. / sum(coeffs[x] ** 2 / divs[x].pi for x in xrange(size))
+        except ZeroDivisionError:
+            pi = 0
         tau = pi * sum(coeffs[x] * divs[x].mu for x in xrange(size))
         return var.update_message(self, pi, tau)
 
