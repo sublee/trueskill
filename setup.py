@@ -34,10 +34,9 @@ See Also
   <http://atom.research.microsoft.com/trueskill/rankcalculator.aspx>`_
 
 """
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup
+
+import trueskill
 
 
 def run_tests():
@@ -46,12 +45,12 @@ def run_tests():
 
 
 setup(
-    name='trueskill',
-    version='0.1.4',
-    url='https://github.com/sublee/trueskill/',
-    license='BSD',
-    author='Heungsub Lee',
-    author_email='h@subl.ee',
+    name=trueskill.__name__,
+    version=trueskill.__version__,
+    license=trueskill.__license__,
+    author=trueskill.__author__,
+    author_email=trueskill.__author_email__,
+    url=trueskill.__url__,
     description='A Bayesian Skill Rating System',
     long_description=__doc__,
     packages=['trueskill'],

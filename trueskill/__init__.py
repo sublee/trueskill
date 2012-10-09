@@ -5,7 +5,7 @@
 
     This module implements the TrueSkill rating system.
 
-    :copyright: (c) 2012 by Heungsub Lee.
+    :copyright: (c) 2012 by Heungsub Lee
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
@@ -16,10 +16,11 @@ from .mathematics import cdf, pdf, ppf, Gaussian, Matrix
 
 
 __copyright__ = 'Copyright 2012 by Heungsub Lee'
-__license__ = 'BSD License'
-__author__ = 'Heungsub Lee'
-__email__ = 'h''@''subl.ee'
 __version__ = '0.1.4'
+__license__ = 'BSD'
+__author__ = 'Heungsub Lee'
+__author_email__ = 'h''@''subl.ee'
+__url__ = 'http://packages.python.org/trueskill'
 __all__ = ['TrueSkill', 'Rating', 'transform_ratings', 'match_quality',
            'calc_draw_probability', 'calc_draw_margin', 'setup',
            'MU', 'SIGMA', 'BETA', 'TAU', 'DRAW_PROBABILITY']
