@@ -15,22 +15,6 @@ system quantizes "TRUE" skill points by a Bayesian inference algorithm.
 
 This project is a Python package which implements TrueSkill™ rating system.
 
-Installing
-~~~~~~~~~~
-
-The package is available in `PyPI <http://pypi.python.org/pypi/trueskill>`_. To
-install it in your system, use `easy_install`:
-
-.. sourcecode:: bash
-
-   $ easy_install trueskill
-
-Or check out developement version:
-
-.. sourcecode:: bash
-
-   $ git clone git://github.com/sublee/trueskill.git
-
 Measure player's skill
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -171,6 +155,22 @@ API
 .. autodata:: TAU
 
 .. autodata:: DRAW_PROBABILITY
+
+Installing
+~~~~~~~~~~
+
+The package is available in `PyPI <http://pypi.python.org/pypi/trueskill>`_. To
+install it in your system, use `easy_install`:
+
+.. sourcecode:: bash
+
+   $ easy_install trueskill
+
+Or check out developement version:
+
+.. sourcecode:: bash
+
+   $ git clone git://github.com/sublee/trueskill.git
 
 Further Reading
 ~~~~~~~~~~~~~~~
