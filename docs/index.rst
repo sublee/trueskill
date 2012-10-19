@@ -1,8 +1,12 @@
-=============================================
- TrueSkill —  A Bayesian Skill Rating System
-=============================================
+TrueSkill
+=========
 
-.. module:: trueskill
+Bayesian skill rating system
+
+.. currentmodule:: trueskill
+
+What's TrueSkiil?
+~~~~~~~~~~~~~~~~~
 
 `TrueSkill™ <http://research.microsoft.com/en-us/projects/trueskill/>`_ is a
 rating system among game players. It has been used on
@@ -11,38 +15,29 @@ system quantizes "TRUE" skill points by a Bayesian inference algorithm.
 
 This project is a Python package which implements TrueSkill™ rating system.
 
+Installing
+~~~~~~~~~~
 
-Installation
-~~~~~~~~~~~~
-
-Install via `PyPI <http://pypi.python.org/pypi/trueskill>`_ with
-``easy_install`` or ``pip`` command:
+The package is available in `PyPI <http://pypi.python.org/pypi/trueskill>`_. To
+install it in your system, use `easy_install`:
 
 .. sourcecode:: bash
 
    $ easy_install trueskill
 
-.. sourcecode:: bash
-
-   $ pip install trueskill
-
-or check out development version:
+Or check out developement version:
 
 .. sourcecode:: bash
 
    $ git clone git://github.com/sublee/trueskill.git
 
-
-Tutorial
-~~~~~~~~
-
-Measure Player's Skill
-''''''''''''''''''''''
+Measure player's skill
+~~~~~~~~~~~~~~~~~~~~~~
 
 Let's suppose that our sample game is 2v1. :class:`Rating` objects mean each
 game players' skill points:
 
-.. sourcecode:: python
+::
 
    >>> from trueskill import Rating
    >>> r1, r2, r3 = Rating(), Rating(), Rating()
@@ -53,7 +48,7 @@ TrueSkill system uses Gaussian distribution as player's skill point. The
 initial mu (\\(\\mu\\); mean) of rating is 25 and the initial sigma
 (\\(\\sigma\\); standard deviation) is \\(\\frac{ 25 }{ 3 } \\approx 8.333\\):
 
-.. sourcecode:: python
+::
 
    >>> [team1, team2]
    [(
@@ -65,7 +60,7 @@ initial mu (\\(\\mu\\); mean) of rating is 25 and the initial sigma
 
 The first team has won the game. See the below transformation of the ratings:
 
-.. sourcecode:: python
+::
 
    >>> from trueskill import transform_ratings
    >>> transform_ratings([team1, team2])
@@ -81,7 +76,7 @@ second team transform from 25.000 to 24.396. The ratings were transformed just
 a little. But, how does it work if the second team player has beaten 2 players
 in the first team, by himself?
 
-.. sourcecode:: python
+::
 
    >>> transform_ratings([team1, team2], ranks=[1, 0]) # reversed ranks
    [(
@@ -98,8 +93,8 @@ player beats 2 players.
 It is just a simplest example. TrueSkill can estimate accurate skills in this
 way. We only need enough game results!
 
-Match Quality
-'''''''''''''
+Match quality
+~~~~~~~~~~~~~
 
 We also can calculate the fairness of any games with :func:`match_quality`
 function:
@@ -125,8 +120,8 @@ this game, a super-fair game.
 
 This feature would help you implement a fair match making system.
 
-Make Players Happy
-''''''''''''''''''
+Making players happy
+~~~~~~~~~~~~~~~~~~~~
 
 A skill point is a numeric representation of a player's ability. Someday, this
 value will be convergent to the value that's exactly we are finding. But the
@@ -152,12 +147,8 @@ $$ E = \\mu - 3\\sigma $$
 An exposure value starts from 0 instead of 25. It can decrease sometimes but
 the growth graph will go up on the whole.
 
-
 API
 ~~~
-
-TrueSkill Objects
-'''''''''''''''''
 
 .. autoclass:: TrueSkill
    :members: Rating, transform_ratings, match_quality, make_as_global
@@ -165,17 +156,11 @@ TrueSkill Objects
 .. autoclass:: Rating
    :members: exposure
 
-Proxy Functions of the Global Environment
-'''''''''''''''''''''''''''''''''''''''''
-
 .. autofunction:: transform_ratings
 
 .. autofunction:: match_quality
 
 .. autofunction:: setup
-
-Default TrueSkill Constants
-'''''''''''''''''''''''''''
 
 .. autodata:: MU
 
@@ -186,7 +171,6 @@ Default TrueSkill Constants
 .. autodata:: TAU
 
 .. autodata:: DRAW_PROBABILITY
-
 
 Further Reading
 ~~~~~~~~~~~~~~~
@@ -201,14 +185,14 @@ If you want to more details of the TrueSkill algorithm, see also:
   <http://atom.research.microsoft.com/trueskill/rankcalculator.aspx>`_
   by Microsoft
 
-
 Licensing and Author
 ~~~~~~~~~~~~~~~~~~~~
 
-This project licensed with `BSD <http://en.wikipedia.org/wiki/BSD_licenses>`_,
-so feel free to use and manipulate as long as you respect these licenses. See
-`LICENSE <https://github.com/sublee/trueskill/blob/master/LICENSE>`_ for the
-details.
+This project is licensed under BSD_. See LICENSE_ for the details.
 
-I'm `Heungsub Lee <http://subl.ee/>`_, a game developer. Any regarding
-questions or patches are welcomed.
+I'm `Heungsub Lee`_, a game developer. Any regarding questions or patches are
+welcomed.
+
+.. _BSD: http://en.wikipedia.org/wiki/BSD_licenses
+.. _LICENSE: https://github.com/sublee/trueskill/blob/master/LICENSE
+.. _Heungsub Lee: http://subl.ee/
