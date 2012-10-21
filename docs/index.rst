@@ -8,9 +8,9 @@ Bayesian skill rating system
 What's TrueSkiil?
 ~~~~~~~~~~~~~~~~~
 
-`TrueSkill`_ is a rating system among game players. It has been used on
-`Xbox Live`_ to rank and match players. TrueSkill system quantizes "TRUE" skill
-points by a Bayesian inference algorithm.
+`TrueSkill™`_ is a rating system among game players. It has been used on
+`Xbox Live`_ to rank and match players. TrueSkill system quantizes **TRUE**
+skill points by a Bayesian inference algorithm.
 
 With TrueSkill, you can measure players' skill; make the best matches by skill
 points; predict who's going to win. And even it works with N:N:N, a multiple
@@ -18,7 +18,7 @@ team game not only 1:1 game.
 
 This project is a Python package which implements TrueSkill™ rating system.
 
-.. _TrueSkill: http://research.microsoft.com/en-us/projects/trueskill
+.. _TrueSkill™: http://research.microsoft.com/en-us/projects/trueskill
 .. _Xbox Live: http://www.xbox.com/live
 
 Tutorial
