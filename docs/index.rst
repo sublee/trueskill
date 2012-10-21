@@ -8,15 +8,24 @@ Bayesian skill rating system
 What's TrueSkiil?
 ~~~~~~~~~~~~~~~~~
 
-`TrueSkill™ <http://research.microsoft.com/en-us/projects/trueskill/>`_ is a
-rating system among game players. It has been used on
-`Xbox Live <http://www.xbox.com/live>`_ to rank and match players. TrueSkill
-system quantizes "TRUE" skill points by a Bayesian inference algorithm.
+`TrueSkill`_ is a rating system among game players. It has been used on
+`Xbox Live`_ to rank and match players. TrueSkill system quantizes "TRUE" skill
+points by a Bayesian inference algorithm.
+
+With TrueSkill, you can measure players' skill; make the best matches by skill
+points; predict who's going to win. And even it works with N:N:N, a multiple
+team game not only 1:1 game.
 
 This project is a Python package which implements TrueSkill™ rating system.
 
+.. _TrueSkill: http://research.microsoft.com/en-us/projects/trueskill
+.. _Xbox Live: http://www.xbox.com/live
+
+Tutorial
+~~~~~~~~
+
 Measure player's skill
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 Let's suppose that our sample game is 2v1. :class:`Rating` objects mean each
 game players' skill points:
@@ -78,7 +87,7 @@ It is just a simplest example. TrueSkill can estimate accurate skills in this
 way. We only need enough game results!
 
 Match quality
-~~~~~~~~~~~~~
+-------------
 
 We also can calculate the fairness of any games with :func:`match_quality`
 function:
@@ -105,7 +114,7 @@ this game, a super-fair game.
 This feature would help you implement a fair match making system.
 
 Make players happy
-~~~~~~~~~~~~~~~~~~
+------------------
 
 A skill point is a numeric representation of a player's ability. Someday, this
 value will be convergent to the value that's exactly we are finding. But the
@@ -134,17 +143,26 @@ the growth graph will go up on the whole.
 API
 ~~~
 
+TrueSkill objects
+-----------------
+
 .. autoclass:: TrueSkill
    :members: Rating, transform_ratings, match_quality, make_as_global
 
 .. autoclass:: Rating
    :members: exposure
 
+Proxy functions of the global environment
+-----------------------------------------
+
 .. autofunction:: transform_ratings
 
 .. autofunction:: match_quality
 
 .. autofunction:: setup
+
+Constants
+---------
 
 .. autodata:: MU
 
