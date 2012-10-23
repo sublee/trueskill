@@ -39,11 +39,6 @@ from setuptools import setup
 import trueskill
 
 
-def run_tests():
-    from test import suite
-    return suite()
-
-
 setup(
     name=trueskill.__name__,
     version=trueskill.__version__,
@@ -56,15 +51,19 @@ setup(
     packages=['trueskill'],
     zip_safe=False,
     platforms='any',
-    classifiers=[
-        'Development Status :: 4 - Beta',
-        'Environment :: Console',
-        'Intended Audience :: Developers',
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: BSD License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Topic :: Games/Entertainment',
-    ],
-    test_suite='__main__.run_tests'
+    classifiers=['Development Status :: 4 - Beta',
+                 'Environment :: Console',
+                 'Intended Audience :: Developers',
+                 'Intended Audience :: Science/Research',
+                 'License :: OSI Approved :: BSD License',
+                 'Operating System :: OS Independent',
+                 'Programming Language :: Python',
+                 'Programming Language :: Python :: 2.6',
+                 'Programming Language :: Python :: 2.7',
+                 'Programming Language :: Python :: Implementation :: CPython',
+                 'Programming Language :: Python :: Implementation :: PyPy',
+                 'Topic :: Games/Entertainment'],
+    test_suite='trueskilltests.suite',
+    test_loader='attest:auto_reporter.test_loader',
+    tests_require=['Attest'],
 )
