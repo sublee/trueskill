@@ -13,6 +13,8 @@ import itertools
 import math
 
 from .mathematics import cdf, pdf, ppf, Gaussian, Matrix
+from .factorgraph import Variable, PriorFactor, LikelihoodFactor, SumFactor, \
+                         TruncateFactor
 
 
 __copyright__ = 'Copyright 2012 by Heungsub Lee'
@@ -203,18 +205,21 @@ class TrueSkill(object):
         ... #doctest: +ELLIPSIS
         [(Rating(...),), (Rating(...),)]
         """
-        rating_groups = [(x,) if isinstance(x, Rating) else x \
-                         for x in rating_groups]
         if len(rating_groups) < 2:
-            raise ValueError('need multiple rating groups')
-        elif 0 in map(len, rating_groups):
-            raise ValueError('each group must contain multiple ratings')
-        return list(rating_groups)
+            raise ValueError('Need multiple rating groups')
+        elif not all(rating_groups):
+            raise ValueError('Each group must contain multiple ratings')
+        elif len(set(map(type, rating_groups))) != 1:
+            raise TypeError('All groups should be same type')
+        if isinstance(rating_groups[0], dict):
+            keys = map(dict.keys, rating_groups)
+            rating_groups = (tuple(g.itervalues()) for g in rating_groups)
+        else:
+            keys = None
+        return list(rating_groups), keys
 
     def build_factor_graph(self, rating_groups, ranks):
         """Makes nodes for the factor graph."""
-        from .factorgraph import Variable, PriorFactor, LikelihoodFactor, \
-                                 SumFactor, TruncateFactor
         ratings = sum(rating_groups, ())
         size = len(ratings)
         group_size = len(rating_groups)
@@ -330,13 +335,13 @@ class TrueSkill(object):
 
         .. versionadded:: 0.2
         """
-        rating_groups = self.validate_rating_groups(rating_groups)
+        rating_groups, keys = self.validate_rating_groups(rating_groups)
         group_size = len(rating_groups)
         # sort rating groups by rank
         if ranks is None:
             ranks = range(group_size)
         elif len(ranks) != group_size:
-            raise ValueError('wrong ranks')
+            raise ValueError('Wrong ranks')
         def compare(x, y):
             return cmp(x[1][0], y[1][0])
         sorting = sorted(enumerate(zip(ranks, rating_groups)), compare)
@@ -357,7 +362,10 @@ class TrueSkill(object):
         def compare(x, y):
             return cmp(x[0], y[0])
         unsorting = sorted(zip(unsorting_hint, transformed_groups), compare)
-        return [g for x, g in unsorting]
+        if keys is None:
+            return [g for x, g in unsorting]
+        # restore the structure with input dictionary keys
+        return [dict(zip(keys[x], g)) for x, g in unsorting]
 
     def quality(self, rating_groups):
         """Calculates the match quality of the given rating groups. A result
@@ -374,7 +382,7 @@ class TrueSkill(object):
 
         .. versionadded:: 0.2
         """
-        rating_groups = self.validate_rating_groups(rating_groups)
+        rating_groups, keys = self.validate_rating_groups(rating_groups)
         ratings = sum(rating_groups, ())
         length = len(ratings)
         # a vector of all of the skill means
@@ -447,6 +455,8 @@ class TrueSkill(object):
         from warnings import warn
         warn(DeprecationWarning('TrueSkill.transform_ratings is now called '
                                 'TrueSkill.rate'), stacklevel=2)
+        rating_groups = [(r,) if isinstance(r, Rating) else r
+                         for r in rating_groups]
         return self.rate(rating_groups, ranks, min_delta)
 
     def match_quality(self, rating_groups):
@@ -459,10 +469,12 @@ class TrueSkill(object):
         from warnings import warn
         warn(DeprecationWarning('TrueSkill.match_quality is now called '
                                 'TrueSkill.quality'), stacklevel=2)
+        rating_groups = [(r,) if isinstance(r, Rating) else r
+                         for r in rating_groups]
         return self.quality(rating_groups)
 
     def __repr__(self):
-        args = (type(self).__name__, self.mu, self.sigma, self.beta, \
+        args = (type(self).__name__, self.mu, self.sigma, self.beta,
                 self.tau, self.draw_probability * 100)
         return '<%s mu=%.3f sigma=%.3f beta=%.3f tau=%.3f ' \
                'draw_probability=%.1f%%>' % args
@@ -483,7 +495,7 @@ def quality(rating_groups):
 
 
 def transform_ratings(rating_groups, ranks=None, min_delta=DELTA):
-    return _g().transform(rating_groups, ranks, min_delta)
+    return _g().transform_ratings(rating_groups, ranks, min_delta)
 
 
 def match_quality(rating_groups):
