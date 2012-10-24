@@ -18,7 +18,7 @@ from .factorgraph import Variable, PriorFactor, LikelihoodFactor, SumFactor, \
 
 
 __copyright__ = 'Copyright 2012 by Heungsub Lee'
-__version__ = '0.2'
+__version__ = '0.2.dev'
 __license__ = 'BSD'
 __author__ = 'Heungsub Lee'
 __author_email__ = 'h''@''subl.ee'
@@ -320,8 +320,14 @@ class TrueSkill(object):
         structure as this argument. So rating dictionary is useful to choose
         specific player's new rating::
 
+            # load players from the database
+            p1 = load_player_from_database('Arpad Emrick Elo')
+            p2 = load_player_from_database('Mark Glickman')
+            p3 = load_player_from_database('Heungsub Lee')
+            # calculate new ratings
             rating_groups = [{p1: p1.rating, p2: p2.rating}, {p3: p3.rating}]
             rated_rating_groups = env.rate(rating_groups, ranks=[0, 1])
+            # save new ratings
             for player in [p1, p2, p3]:
                 player.rating = rated_rating_groups[player.team][player]
 
@@ -375,7 +381,7 @@ class TrueSkill(object):
             if env.quality([team1, team2, team3]) > 0.8:
                 print 'It may be a good match.'
             else:
-                print 'Is there no any other matches?'
+                print 'Is not there another match?'
 
         :param rating_groups: a list of tuples or dictionaries which contain
                               :class:`Rating` objects

@@ -8,17 +8,17 @@ Bayesian skill rating system
 What's TrueSkiil?
 ~~~~~~~~~~~~~~~~~
 
-`TrueSkill™`_ is a rating system among game players. It has been used on
-`Xbox Live`_ to rank and match players. TrueSkill system quantizes **TRUE**
-skill points by a Bayesian inference algorithm.
+`TrueSkill`_ is a rating system among game players. It has been used on `Xbox
+Live`_ to rank and match players. TrueSkill system quantizes **TRUE** skill
+points by a Bayesian inference algorithm.
 
 With TrueSkill, you can measure players' skill; make the best matches by skill
 points; predict who's going to win. And even it works with N:N:N, a multiple
 team game not only 1:1 game.
 
-This project is a Python package which implements TrueSkill™ rating system.
+This project is a Python package which implements TrueSkill rating system.
 
-.. _TrueSkill™: http://research.microsoft.com/en-us/projects/trueskill
+.. _TrueSkill: http://research.microsoft.com/en-us/projects/trueskill
 .. _Xbox Live: http://www.xbox.com/live
 
 Tutorial
@@ -55,8 +55,8 @@ The first team has won the game. See the below transformation of the ratings:
 
 ::
 
-   >>> from trueskill import transform_ratings
-   >>> transform_ratings([team1, team2])
+   >>> import trueskill
+   >>> truskill.rate([team1, team2])
    [(
      Rating(mu=25.604, sigma=8.075),
      Rating(mu=25.604, sigma=8.075)
@@ -71,7 +71,7 @@ in the first team, by himself?
 
 ::
 
-   >>> transform_ratings([team1, team2], ranks=[1, 0]) # reversed ranks
+   >>> trueskill.rate([team1, team2], ranks=[1, 0]) # reversed ranks
    [(
      Rating(mu=16.269, sigma=7.317),
      Rating(mu=16.269, sigma=7.317)
@@ -89,13 +89,12 @@ way. We only need enough game results!
 Match quality
 -------------
 
-We also can calculate the fairness of any games with :func:`match_quality`
-function:
+We also can calculate the fairness of any games with :func:`quality` function:
 
 .. sourcecode:: python
 
-   >>> from trueskill import match_quality
-   >>> match_quality([team1, team2])
+   >>> import trueskill
+   >>> trueskill.quality([team1, team2])
    0.1346981464530322
 
 The result shows that the probability of a draw game is 13.47%. Let's see
@@ -103,7 +102,7 @@ another result of a really fair game:
 
 .. sourcecode:: python
 
-   >>> match_quality([(Rating(25, 0.001),), (Rating(25, 0.001),)])
+   >>> trueskill.quality([(Rating(25, 0.001),), (Rating(25, 0.001),)])
    0.9999999712000012
 
 A much exact skill point follows very low sigma value such as the above ratings
@@ -147,7 +146,7 @@ TrueSkill objects
 -----------------
 
 .. autoclass:: TrueSkill
-   :members: Rating, transform_ratings, match_quality, make_as_global
+   :members: create_rating, rate, quality, make_as_global
 
 .. autoclass:: Rating
    :members: exposure
@@ -155,9 +154,9 @@ TrueSkill objects
 Proxy functions of the global environment
 -----------------------------------------
 
-.. autofunction:: transform_ratings
+.. autofunction:: rate
 
-.. autofunction:: match_quality
+.. autofunction:: quality
 
 .. autofunction:: setup
 
@@ -189,6 +188,11 @@ Or check out developement version:
 .. sourcecode:: bash
 
    $ git clone git://github.com/sublee/trueskill.git
+
+Changelog
+~~~~~~~~~
+
+.. include:: ../CHANGES
 
 Further Reading
 ~~~~~~~~~~~~~~~
