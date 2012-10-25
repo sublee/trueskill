@@ -23,9 +23,10 @@ __license__ = 'BSD'
 __author__ = 'Heungsub Lee'
 __author_email__ = 'h''@''subl.ee'
 __url__ = 'http://packages.python.org/trueskill'
-__all__ = ['TrueSkill', 'Rating', 'rate', 'quality', 'calc_draw_probability',
-           'calc_draw_margin', 'setup', 'MU', 'SIGMA', 'BETA', 'TAU',
-           'DRAW_PROBABILITY', 'transform_ratings', 'match_quality']
+__all__ = ['TrueSkill', 'Rating', 'rate', 'quality', 'rate_1vs1',
+           'quality_1vs1', 'calc_draw_probability', 'calc_draw_margin',
+           'setup', 'MU', 'SIGMA', 'BETA', 'TAU', 'DRAW_PROBABILITY',
+           'transform_ratings', 'match_quality']
 
 
 #: Default initial mean of ratings
@@ -145,7 +146,7 @@ class TrueSkill(object):
     """Implements a TrueSkill environment. An environment could have customized
     constants. Every games have not same design and may need to customize
     TrueSkill constants.
-    
+
     For example, 60% of matches in your game have finished as draw then you
     should set ``draw_probability`` to 0.60::
 
@@ -317,8 +318,8 @@ class TrueSkill(object):
 
         ``rating_groups`` is a list of rating tuples or dictionaries that
         represents each team of the match. You will get a result as same
-        structure as this argument. So rating dictionary is useful to choose
-        specific player's new rating::
+        structure as this argument. Rating dictionaries for this may be useful
+        to choose specific player's new rating::
 
             # load players from the database
             p1 = load_player_from_database('Arpad Emrick Elo')
@@ -425,6 +426,37 @@ class TrueSkill(object):
         s_arg = _ata.determinant() / middle.determinant()
         return math.exp(e_arg) * math.sqrt(s_arg)
 
+    def rate_1vs1(self, rating1, rating2, drawn=False, min_delta=DELTA):
+        """A shortcut to rate just 2 players in individual match::
+
+            new_rating1, new_rating2 = env.rate_1vs1(rating1, rating2)
+
+        :param rating1: the winner's rating if they didn't draw
+        :param rating2: the loser's rating if they didn't draw
+        :param drawn: if the players drew, set this to ``True``. Defaults to
+                      ``False``.
+        :param min_delta: will be passed to :meth:`rate`
+        :return: recalculated 2 ratings
+
+        .. versionadded:: 0.2
+        """
+        ranks = [0, 0 if drawn else 1]
+        teams = self.rate([(rating1,), (rating2,)], ranks, min_delta)
+        return teams[0][0], teams[1][0]
+
+    def quality_1vs1(self, rating1, rating2):
+        """A shortcut to calculate the match quality between just 2 players in
+        individual match::
+
+            if env.quality_1vs1(rating1, rating2) > 0.8:
+                print 'They look have similar skills.'
+            else:
+                print 'This match may be unfair!'
+
+        .. versionadded:: 0.2
+        """
+        return self.quality([(rating1,), (rating2,)])
+
     def make_as_global(self):
         """Registers the environment as the global environment.
 
@@ -498,6 +530,20 @@ def quality(rating_groups):
     environment.
     """
     return _g().quality(rating_groups)
+
+
+def rate_1vs1(rating1, rating2, drawn=False, min_delta=DELTA):
+    """A proxy function for :meth:`TrueSkill.rate_1vs1` of the global TrueSkill
+    environment.
+    """
+    return _g().rate_1vs1(rating1, rating2, drawn, min_delta)
+
+
+def quality_1vs1(rating1, rating2):
+    """A proxy function for :meth:`TrueSkill.quality_1vs1` of the global
+    TrueSkill environment.
+    """
+    return _g().quality_1vs1(rating1, rating2)
 
 
 def transform_ratings(rating_groups, ranks=None, min_delta=DELTA):
