@@ -3,13 +3,17 @@ Version 0.2
 
 Under development.
 
-- Supports that using dictionaries as a ``rating_group`` to choose specific
-  player's rating simply.
-- Changes the interface for the unity with `Elo`_ and `Glicko`_ library:
+- Changes the interface to maximize compatibility with `Elo`_ and `Glicko`_
+  other rating system modules:
 
   - Adding :func:`rate_1vs1` a shortcut to rate 2 players individual match.
-  - :meth:`TrueSkill.transform_ratings` is now called :meth:`TrueSkill.rate`
-  - :meth:`TrueSkill.match_quality` is now called :meth:`TrueSkill.quality`
+  - Adding :func:`quality_1vs1` a shortcut to calculate match quality of 2
+    players individual match.
+  - :meth:`TrueSkill.transform_ratings` is now called :meth:`TrueSkill.rate`.
+  - :meth:`TrueSkill.match_quality` is now called :meth:`TrueSkill.quality`.
+
+- Supports that using dictionaries as a ``rating_group`` to choose specific
+  player's rating simply.
 
 .. _Elo: http://packages.python.org/elo
 .. _Glicko: http://packages.python.org/glicko
@@ -19,9 +23,12 @@ Version 0.1.4
 
 Released on Oct 5th 2012.
 
-Fixes :exc:`ZeroDivisionError` issue. For more detail, see `issue#3`_
+Fixes :exc:`ZeroDivisionError` issue. For more detail, see `issue#3`_. Thanks
+to `@youknowone`_ and `@konikos`_.
 
 .. _issue#3: https://github.com/sublee/trueskill/issues/3
+.. _@youknowone: https://github.com/youknowone
+.. _@konikos: https://github.com/konikos
 
 Version 0.1.3
 -------------

@@ -112,6 +112,20 @@ this game, a super-fair game.
 
 This feature would help you implement a fair match making system.
 
+Shortcuts for 1 vs. 1 simple game
+---------------------------------
+
+Many zero sum game needs just 2 players to make a competition.
+
+.. sourcecode:: python
+
+   >>> winner_rating = Rating(30, 1)
+   >>> loser_rating = Rating(40, 3)
+   >>> trueskill.quality_1vs1(winner_rating, loser_rating)
+   0.28806828213497176
+   >>> trueskill.rate_1vs1(winner_rating, loser_rating)
+   (Rating(mu=30.305, sigma=0.994), Rating(mu=37.268, sigma=2.729))
+
 Make players happy
 ------------------
 
@@ -146,7 +160,12 @@ TrueSkill objects
 -----------------
 
 .. autoclass:: TrueSkill
-   :members: create_rating, rate, quality, make_as_global
+   :members: create_rating,
+             rate,
+             quality,
+             rate_1vs1,
+             quality_1vs1,
+             make_as_global,
 
 .. autoclass:: Rating
    :members: exposure
@@ -157,6 +176,10 @@ Proxy functions of the global environment
 .. autofunction:: rate
 
 .. autofunction:: quality
+
+.. autofunction:: rate_1vs1
+
+.. autofunction:: quality_1vs1
 
 .. autofunction:: setup
 
