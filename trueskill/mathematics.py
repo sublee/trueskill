@@ -9,6 +9,7 @@
     :copyright: (c) 2012 by Heungsub Lee.
     :license: BSD, see LICENSE for more details.
 """
+import copy
 import math
 from numbers import Number
 
@@ -67,7 +68,7 @@ class Gaussian(object):
 
     def __init__(self, mu=None, sigma=None, pi=0, tau=0):
         if mu is not None:
-            assert sigma != 0, 'a variance(sigma^2) should be greater than 0'
+            assert sigma != 0, 'A variance(sigma**2) should be greater than 0'
             pi = sigma ** -2
             tau = pi * mu
         self.pi = pi
@@ -116,7 +117,7 @@ class Matrix(list):
         if isinstance(src, list):
             is_number = lambda x: isinstance(x, Number)
             unique_col_sizes = set(map(len, src))
-            msg = 'must be a rectangular array of numbers'
+            msg = 'Must be a rectangular array of numbers'
             assert len(unique_col_sizes) == 1, msg
             assert all(map(is_number, sum(src, []))), msg
             two_dimensional_array = src
@@ -139,7 +140,7 @@ class Matrix(list):
                 for c in xrange(width):
                     row.append(src.get((r, c), 0))
         else:
-            raise TypeError('invalid source')
+            raise TypeError('Invalid source')
         super(Matrix, self).__init__(two_dimensional_array)
 
     @property
@@ -161,7 +162,7 @@ class Matrix(list):
     def minor(self, row_n, col_n):
         width, height = self.width, self.height
         assert 0 <= row_n < height and 0 <= col_n < width, \
-               'invalid row or column number'
+               'Invalid row or column number'
         two_dimensional_array = []
         for r in xrange(height):
             if r == row_n:
@@ -175,9 +176,8 @@ class Matrix(list):
         return type(self)(two_dimensional_array)
 
     def determinant(self):
-        import copy
         width, height = self.width, self.height
-        assert width == height, 'must be a square matrix'
+        assert width == height, 'Must be a square matrix'
         tmp, rv = copy.deepcopy(self), 1.
         for c in xrange(width - 1, 0, -1):
             pivot, r = max((abs(tmp[r][c]), r) for r in xrange(c + 1))
@@ -197,7 +197,7 @@ class Matrix(list):
 
     def adjugate(self):
         width, height = self.width, self.height
-        assert width == height, 'must be a square matrix'
+        assert width == height, 'Must be a square matrix'
         if height == 2:
             a, b = self[0][0], self[0][1]
             c, d = self[1][0], self[1][1]
@@ -219,7 +219,7 @@ class Matrix(list):
     def __add__(self, other):
         width, height = self.width, self.height
         assert (width, height) == (other.width, other.height), \
-               'must be same size'
+               'Must be same size'
         src = {}
         for r in xrange(height):
             for c in xrange(width):
@@ -227,7 +227,7 @@ class Matrix(list):
         return type(self)(src, width, height)
 
     def __mul__(self, other):
-        assert self.width == other.height, 'bad size'
+        assert self.width == other.height, 'Bad size'
         width, height = other.width, self.height
         src = {}
         for r in xrange(height):

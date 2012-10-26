@@ -9,9 +9,13 @@
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
+import itertools
 from math import sqrt
 
-from .mathematics import cdf, pdf, ppf, Gaussian
+from .mathematics import Gaussian
+
+
+inf = float('inf')
 
 
 class Node(object):
@@ -138,21 +142,22 @@ class SumFactor(Factor):
         return self.update(self.terms[index], vals, msgs, coeffs)
 
     def update(self, var, vals, msgs, coeffs):
-        size = len(coeffs)
         pi_inv = 0
         mu = 0
-        for val, msg, coeff in zip(vals, msgs, coeffs):
+        for val, msg, coeff in itertools.izip(vals, msgs, coeffs):
             div = val / msg
             mu += coeff * div.mu
-            if not div.pi:
-                pi_inv = None
-            if pi_inv is None:
+            if pi_inv == inf:
                 continue
-            pi_inv += coeff ** 2 / div.pi
-        if pi_inv is None:
-            pi = 0
-        else:
-            pi = 1. / pi_inv
+            try:
+                # numpy.float64 handles floating-point error by different way.
+                # For example, it can just warn RuntimeWarning on n/0 problem
+                # instead of throwing ZeroDivisionError. So div.pi, the
+                # denominator has to be a built-in float.
+                pi_inv += coeff ** 2 / float(div.pi)
+            except ZeroDivisionError:
+                pi_inv = inf
+        pi = 1. / pi_inv
         tau = pi * mu
         return var.update_message(self, pi, tau)
 

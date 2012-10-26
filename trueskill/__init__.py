@@ -24,9 +24,8 @@ __author__ = 'Heungsub Lee'
 __author_email__ = 'h''@''subl.ee'
 __url__ = 'http://packages.python.org/trueskill'
 __all__ = ['TrueSkill', 'Rating', 'rate', 'quality', 'rate_1vs1',
-           'quality_1vs1', 'calc_draw_probability', 'calc_draw_margin',
-           'setup', 'MU', 'SIGMA', 'BETA', 'TAU', 'DRAW_PROBABILITY',
-           'transform_ratings', 'match_quality']
+           'quality_1vs1', 'setup', 'MU', 'SIGMA', 'BETA', 'TAU',
+           'DRAW_PROBABILITY', 'transform_ratings', 'match_quality']
 
 
 #: Default initial mean of ratings
@@ -43,7 +42,7 @@ DRAW_PROBABILITY = .10
 DELTA = 0.0001
 
 
-def V(diff, draw_margin):
+def v_win(diff, draw_margin):
     """The non-draw version of "V" function. "V" calculates a variation of a
     mean.
     """
@@ -51,16 +50,7 @@ def V(diff, draw_margin):
     return pdf(x) / cdf(x)
 
 
-def W(diff, draw_margin):
-    """The non-draw version of "W" function. "W" calculates a variation of a
-    standard deviation.
-    """
-    x = diff - draw_margin
-    v = V(diff, draw_margin)
-    return v * (v + x)
-
-
-def V_draw(diff, draw_margin):
+def v_draw(diff, draw_margin):
     """The draw version of "V" function."""
     abs_diff = abs(diff)
     a, b = draw_margin - abs_diff, -draw_margin - abs_diff
@@ -69,12 +59,21 @@ def V_draw(diff, draw_margin):
     return numer / denom * (-1 if diff < 0 else 1)
 
 
-def W_draw(diff, draw_margin):
+def w_win(diff, draw_margin):
+    """The non-draw version of "W" function. "W" calculates a variation of a
+    standard deviation.
+    """
+    x = diff - draw_margin
+    v = v_win(diff, draw_margin)
+    return v * (v + x)
+
+
+def w_draw(diff, draw_margin):
     """The draw version of "W" function."""
     abs_diff = abs(diff)
     a, b = draw_margin - abs_diff, -draw_margin - abs_diff
     denom = cdf(a) - cdf(b)
-    v = V_draw(abs_diff, draw_margin)
+    v = v_draw(abs_diff, draw_margin)
     return (v ** 2) + (a * pdf(a) - b * pdf(b)) / denom
 
 
@@ -259,9 +258,9 @@ class TrueSkill(object):
                 draw_margin = calc_draw_margin(self.draw_probability,
                                                self.beta, size)
                 if ranks[x] == ranks[x + 1]:
-                    v_func, w_func = V_draw, W_draw
+                    v_func, w_func = v_draw, w_draw
                 else:
-                    v_func, w_func = V, W
+                    v_func, w_func = v_win, w_win
                 yield TruncateFactor(teamdiff_var, v_func, w_func, draw_margin)
         # build layers
         return list(build_rating_layer()), \
@@ -480,8 +479,8 @@ class TrueSkill(object):
            instead.
         """
         from warnings import warn
-        warn(DeprecationWarning('TrueSkill.Rating is now called '
-                                'TrueSkill.create_rating'), stacklevel=2)
+        warn('TrueSkill.Rating is now called TrueSkill.create_rating',
+             DeprecationWarning)
         return self.create_rating(mu, sigma)
 
     def transform_ratings(self, rating_groups, ranks=None, min_delta=DELTA):
@@ -491,8 +490,8 @@ class TrueSkill(object):
            This method is deprecated with 0.2. Override :meth:`rate` instead.
         """
         from warnings import warn
-        warn(DeprecationWarning('TrueSkill.transform_ratings is now called '
-                                'TrueSkill.rate'), stacklevel=2)
+        warn('TrueSkill.transform_ratings is now called TrueSkill.rate',
+             DeprecationWarning)
         rating_groups = [(r,) if isinstance(r, Rating) else r
                          for r in rating_groups]
         return self.rate(rating_groups, ranks, min_delta)
@@ -505,8 +504,8 @@ class TrueSkill(object):
            instead.
         """
         from warnings import warn
-        warn(DeprecationWarning('TrueSkill.match_quality is now called '
-                                'TrueSkill.quality'), stacklevel=2)
+        warn('TrueSkill.match_quality is now called TrueSkill.quality',
+             DeprecationWarning)
         rating_groups = [(r,) if isinstance(r, Rating) else r
                          for r in rating_groups]
         return self.quality(rating_groups)
@@ -516,6 +515,14 @@ class TrueSkill(object):
                 self.tau, self.draw_probability * 100)
         return '<%s mu=%.3f sigma=%.3f beta=%.3f tau=%.3f ' \
                'draw_probability=%.1f%%>' % args
+
+
+_global = []
+def _g():
+    """Gets the global TrueSkill environment."""
+    if not _global:
+        setup() # setup the default environment
+    return _global[0]
 
 
 def rate(rating_groups, ranks=None, min_delta=DELTA):
@@ -552,14 +559,6 @@ def transform_ratings(rating_groups, ranks=None, min_delta=DELTA):
 
 def match_quality(rating_groups):
     return _g().match_quality(rating_groups)
-
-
-_global = []
-def _g():
-    """Gets the global TrueSkill environment."""
-    if not _global:
-        setup() # setup the default environment
-    return _global[0]
 
 
 def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,

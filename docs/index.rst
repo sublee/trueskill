@@ -115,7 +115,7 @@ This feature would help you implement a fair match making system.
 Shortcuts for 1 vs. 1 simple game
 ---------------------------------
 
-Many zero sum game needs just 2 players to make a competition.
+Many competition games need just 2 players.
 
 .. sourcecode:: python
 

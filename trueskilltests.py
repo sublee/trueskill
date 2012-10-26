@@ -1,10 +1,167 @@
 # -*- coding: utf-8 -*-
-from attest import Tests, assert_hook, raises
+import warnings
 
+from attest import Tests, assert_hook, raises
+try:
+    import numpy
+except ImportError:
+    numpy = False
+
+import trueskill
 from trueskill import *
 
 
 suite = Tests()
+
+
+# usage
+
+
+@suite.test
+def compatibility_with_another_rating_systems():
+    """All rating system modules should implement ``rate_1vs1`` and
+    ``quality_1vs1`` to provide shortcuts for 1 vs 1 simple competition games.
+    """
+    r1, r2 = Rating(30, 3), Rating(20, 2)
+    assert quality_1vs1(r1, r2) == quality([(r1,), (r2,)])
+    rated = rate([(r1,), (r2,)])
+    assert rate_1vs1(r1, r2) == (rated[0][0], rated[1][0])
+    rated = rate([(r1,), (r2,)], [0, 0])
+    assert rate_1vs1(r1, r2, drawn=True) == (rated[0][0], rated[1][0])
+
+
+@suite.test
+def compare_ratings():
+    assert Rating(1, 2) == Rating(1, 2)
+    assert Rating(1, 2) != Rating(1, 3)
+    assert Rating(2, 2) > Rating(1, 2)
+    assert Rating(3, 2) >= Rating(1, 2)
+    assert Rating(0, 2) < Rating(1, 2)
+    assert Rating(-1, 2) <= Rating(1, 2)
+
+
+@suite.test
+def unsorted_groups():
+    t1, t2, t3 = generate_teams([1, 1, 1])
+    rated = rate([t1, t2, t3], [2, 1, 0])
+    assert almost(rated) == \
+           [(18.325, 6.656), (25.000, 6.208), (31.675, 6.656)]
+
+
+@suite.test
+def custom_environment():
+    env = TrueSkill(draw_probability=.50)
+    t1, t2 = generate_teams([1, 1], env=env)
+    rated = env.rate([t1, t2])
+    assert almost(rated) == [(30.267, 7.077), (19.733, 7.077)]
+
+
+@suite.test
+def setup_global_environment():
+    try:
+        setup(draw_probability=.50)
+        t1, t2 = generate_teams([1, 1])
+        rated = rate([t1, t2])
+        assert almost(rated) == [(30.267, 7.077), (19.733, 7.077)]
+    finally:
+        # rollback
+        setup()
+
+
+@suite.test
+def invalid_rating_groups():
+    env = TrueSkill()
+    with raises(ValueError):
+        env.validate_rating_groups([])
+    with raises(ValueError):
+        env.validate_rating_groups([()])
+    with raises(ValueError):
+        env.validate_rating_groups([(Rating(),)])
+    with raises(ValueError):
+        env.validate_rating_groups([(Rating(),), ()])
+    with raises(TypeError):
+        env.validate_rating_groups([(Rating(),), {0: Rating()}])
+
+
+@suite.test
+def deprecated_methods():
+    env = TrueSkill()
+    r1, r2, r3 = Rating(), Rating(), Rating()
+    try:
+        # clear warning registry to catch all warnings explicitly
+        trueskill.__warningregistry__.clear()
+    except AttributeError:
+        pass
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter('always')
+        transform_ratings([(r1,), (r2,), (r3,)])
+        match_quality([(r1,), (r2,), (r3,)])
+        env.transform_ratings([(r1,), (r2,), (r3,)])
+        env.match_quality([(r1,), (r2,), (r3,)])
+        env.Rating()
+    assert len(w) == 5
+    assert w[0].category is DeprecationWarning
+    assert w[1].category is DeprecationWarning
+    assert w[2].category is DeprecationWarning
+    assert w[3].category is DeprecationWarning
+    assert w[4].category is DeprecationWarning
+
+
+@suite.test
+def deprecated_individual_rating_groups():
+    r1, r2, r3 = Rating(50, 1), Rating(10, 5), Rating(15, 5)
+    with raises(TypeError):
+        rate([r1, r2, r3])
+    with raises(TypeError):
+        quality([r1, r2, r3])
+    # deprecated methods accept individual rating groups
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        assert transform_ratings([r1, r2, r3]) == rate([(r1,), (r2,), (r3,)])
+        assert match_quality([r1, r2, r3]) == quality([(r1,), (r2,), (r3,)])
+
+
+@suite.test
+def rating_tuples():
+    r1, r2, r3 = Rating(), Rating(), Rating()
+    rated = rate([(r1, r2), (r3,)])
+    assert len(rated) == 2
+    assert isinstance(rated[0], tuple)
+    assert isinstance(rated[1], tuple)
+    assert len(rated[0]) == 2
+    assert len(rated[1]) == 1
+    assert isinstance(rated[0][0], Rating)
+
+
+@suite.test
+def rating_dicts():
+    class Player(object):
+        def __init__(self, name, rating, team):
+            self.name = name
+            self.rating = rating
+            self.team = team
+    p1 = Player('Player A', Rating(), 0)
+    p2 = Player('Player B', Rating(), 0)
+    p3 = Player('Player C', Rating(), 1)
+    rated = rate([{p1: p1.rating, p2: p2.rating}, {p3: p3.rating}])
+    assert len(rated) == 2
+    assert isinstance(rated[0], dict)
+    assert isinstance(rated[1], dict)
+    assert len(rated[0]) == 2
+    assert len(rated[1]) == 1
+    assert p1 in rated[0]
+    assert p2 in rated[0]
+    assert p3 in rated[1]
+    assert p1 not in rated[1]
+    assert p2 not in rated[1]
+    assert p3 not in rated[0]
+    assert isinstance(rated[0][p1], Rating)
+    p1.rating = rated[p1.team][p1]
+    p2.rating = rated[p2.team][p2]
+    p3.rating = rated[p3.team][p3]
+
+
+# algorithm
 
 
 def generate_teams(sizes, env=None):
@@ -57,110 +214,6 @@ class almost(object):
 
     def __repr__(self):
         return repr(self.val)
-
-
-@suite.test
-def compare_ratings():
-    assert Rating(1, 2) == Rating(1, 2)
-    assert Rating(2, 2) > Rating(1, 2)
-    assert Rating(3, 2) >= Rating(1, 2)
-    assert Rating(0, 2) < Rating(1, 2)
-    assert Rating(-1, 2) <= Rating(1, 2)
-
-
-@suite.test
-def unsorted_groups():
-    t1, t2, t3 = generate_teams([1, 1, 1])
-    rated = rate([t1, t2, t3], [2, 1, 0])
-    assert almost(rated) == \
-           [(18.325, 6.656), (25.000, 6.208), (31.675, 6.656)]
-
-
-@suite.test
-def custom_environment():
-    env = TrueSkill(draw_probability=.50)
-    t1, t2 = generate_teams([1, 1], env=env)
-    rated = env.rate([t1, t2])
-    assert almost(rated) == [(30.267, 7.077), (19.733, 7.077)]
-
-
-@suite.test
-def setup_global_environment():
-    try:
-        setup(draw_probability=.50)
-        t1, t2 = generate_teams([1, 1])
-        rated = rate([t1, t2])
-        assert almost(rated) == [(30.267, 7.077), (19.733, 7.077)]
-    finally:
-        # rollback
-        setup()
-
-
-@suite.test
-def invalid_rating_groups():
-    env = TrueSkill()
-    with raises(ValueError):
-        env.validate_rating_groups([])
-    with raises(ValueError):
-        env.validate_rating_groups([()])
-    with raises(ValueError):
-        env.validate_rating_groups([(Rating(),)])
-    with raises(ValueError):
-        env.validate_rating_groups([(Rating(),), ()])
-    with raises(TypeError):
-        env.validate_rating_groups([(Rating(),), {0: Rating()}])
-
-
-@suite.test
-def deprecate_individual_rating_groups():
-    r1, r2, r3 = Rating(50, 1), Rating(10, 5), Rating(15, 5)
-    with raises(TypeError):
-        rate([r1, r2, r3])
-    with raises(TypeError):
-        quality([r1, r2, r3])
-    # deprecated methods accept individual rating groups
-    assert transform_ratings([r1, r2, r3]) == rate([(r1,), (r2,), (r3,)])
-    assert match_quality([r1, r2, r3]) == quality([(r1,), (r2,), (r3,)])
-
-
-@suite.test
-def rating_tuples():
-    r1, r2, r3 = Rating(), Rating(), Rating()
-    rated = rate([(r1, r2), (r3,)])
-    assert len(rated) == 2
-    assert isinstance(rated[0], tuple)
-    assert isinstance(rated[1], tuple)
-    assert len(rated[0]) == 2
-    assert len(rated[1]) == 1
-    assert isinstance(rated[0][0], Rating)
-
-
-@suite.test
-def rating_dicts():
-    class Player(object):
-        def __init__(self, name, rating, team):
-            self.name = name
-            self.rating = rating
-            self.team = team
-    p1 = Player('Player A', Rating(), 0)
-    p2 = Player('Player B', Rating(), 0)
-    p3 = Player('Player C', Rating(), 1)
-    rated = rate([{p1: p1.rating, p2: p2.rating}, {p3: p3.rating}])
-    assert len(rated) == 2
-    assert isinstance(rated[0], dict)
-    assert isinstance(rated[1], dict)
-    assert len(rated[0]) == 2
-    assert len(rated[1]) == 1
-    assert p1 in rated[0]
-    assert p2 in rated[0]
-    assert p3 in rated[1]
-    assert p1 not in rated[1]
-    assert p2 not in rated[1]
-    assert p3 not in rated[0]
-    assert isinstance(rated[0][p1], Rating)
-    p1.rating = rated[p1.team][p1]
-    p2.rating = rated[p2.team][p2]
-    p3.rating = rated[p3.team][p3]
 
 
 @suite.test
@@ -291,12 +344,17 @@ def upset():
             (31.751, 3.064), (34.051, 2.541), (38.263, 1.849), (44.118, 0.983)]
 
 
+# reported bugs
+
+
 @suite.test
 def issue3():
-    """These inputs led to ZeroDivisionError before 0.1.4. Also another
-    TrueSkill implementations cannot calculate this case.
+    """The `issue #3`_, opened by @youknowone.
+    
+    These inputs led to ZeroDivisionError before 0.1.4. Also another TrueSkill
+    implementations cannot calculate this case.
 
-    https://github.com/sublee/trueskill/issues/3
+    .. _issue #3: https://github.com/sublee/trueskill/issues/3
     """
     # @konikos's case 1
     t1 = (Rating(42.234, 3.728), Rating(43.290, 3.842))
@@ -313,3 +371,23 @@ def issue3():
           Rating(41.667, 0.500), Rating(41.667, 0.500), Rating(41.667, 0.500))
     t2 = (Rating(42.234, 3.728), Rating(43.291, 3.842))
     rate([t1, t2], [0, 28])
+
+
+
+@suite.test_if(numpy)
+def issue4():
+    """The `issue #4`_, opened by @sublee.
+
+    numpy.float64 handles floating-point error by different way. For example,
+    it can just warn RuntimeWarning on n/0 problem instead of throwing
+    ZeroDivisionError.
+
+    .. _issue #4: https://github.com/sublee/trueskill/issues/4
+    """
+    r1, r2 = Rating(105.247, 0.439), Rating(27.030, 0.901)
+    # make numpy to raise FloatingPointError instead of warning RuntimeWarning
+    old_settings = numpy.seterr(divide='raise')
+    try:
+        rate([(r1,), (r2,)])
+    finally:
+        numpy.seterr(**old_settings)
