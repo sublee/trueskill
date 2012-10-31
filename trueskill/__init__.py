@@ -137,8 +137,9 @@ class Rating(Gaussian):
         return self.mu >= other.mu
 
     def __repr__(self):
-        args = (type(self).__name__, self.mu, self.sigma)
-        return '%s(mu=%.3f, sigma=%.3f)' % args
+        c = type(self)
+        args = (c.__module__, c.__name__, self.mu, self.sigma)
+        return '%s.%s(mu=%.3f, sigma=%.3f)' % args
 
 
 class TrueSkill(object):
@@ -511,9 +512,10 @@ class TrueSkill(object):
         return self.quality(rating_groups)
 
     def __repr__(self):
-        args = (type(self).__name__, self.mu, self.sigma, self.beta,
+        c = type(self)
+        args = (c.__module__, c.__name__, self.mu, self.sigma, self.beta,
                 self.tau, self.draw_probability * 100)
-        return '<%s mu=%.3f sigma=%.3f beta=%.3f tau=%.3f ' \
+        return '<%s.%s mu=%.3f sigma=%.3f beta=%.3f tau=%.3f ' \
                'draw_probability=%.1f%%>' % args
 
 
@@ -528,6 +530,8 @@ def _g():
 def rate(rating_groups, ranks=None, min_delta=DELTA):
     """A proxy function for :meth:`TrueSkill.rate` of the global TrueSkill
     environment.
+
+    .. versionadded:: 0.2
     """
     return _g().rate(rating_groups, ranks, min_delta)
 
@@ -535,6 +539,8 @@ def rate(rating_groups, ranks=None, min_delta=DELTA):
 def quality(rating_groups):
     """A proxy function for :meth:`TrueSkill.quality` of the global TrueSkill
     environment.
+
+    .. versionadded:: 0.2
     """
     return _g().quality(rating_groups)
 
@@ -542,6 +548,8 @@ def quality(rating_groups):
 def rate_1vs1(rating1, rating2, drawn=False, min_delta=DELTA):
     """A proxy function for :meth:`TrueSkill.rate_1vs1` of the global TrueSkill
     environment.
+
+    .. versionadded:: 0.2
     """
     return _g().rate_1vs1(rating1, rating2, drawn, min_delta)
 
@@ -549,6 +557,8 @@ def rate_1vs1(rating1, rating2, drawn=False, min_delta=DELTA):
 def quality_1vs1(rating1, rating2):
     """A proxy function for :meth:`TrueSkill.quality_1vs1` of the global
     TrueSkill environment.
+
+    .. versionadded:: 0.2
     """
     return _g().quality_1vs1(rating1, rating2)
 
