@@ -118,6 +118,15 @@ class Rating(Gaussian):
         """A value that will go up on the whole."""
         return self.mu - 3 * self.sigma
 
+    def __int__(self):
+        return int(self.mu)
+
+    def __long__(self):
+        return long(self.mu)
+
+    def __float__(self):
+        return float(self.mu)
+
     def __iter__(self):
         return iter((self.mu, self.sigma))
 

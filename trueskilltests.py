@@ -41,6 +41,14 @@ def compare_ratings():
 
 
 @suite.test
+def rating_to_number():
+    assert int(Rating(1, 2)) == 1
+    assert long(Rating(1, 2)) == 1L
+    assert float(Rating(1.1, 2)) == 1.1
+    assert complex(Rating(1.2, 2)) == 1.2+0j
+
+
+@suite.test
 def unsorted_groups():
     t1, t2, t3 = generate_teams([1, 1, 1])
     rated = rate([t1, t2, t3], [2, 1, 0])
