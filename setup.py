@@ -60,6 +60,7 @@ setup(
                  'Programming Language :: Python :: Implementation :: CPython',
                  'Programming Language :: Python :: Implementation :: PyPy',
                  'Topic :: Games/Entertainment'],
+    install_requires=['distribute'],
     test_suite='trueskilltests.suite',
     test_loader='attest:auto_reporter.test_loader',
     tests_require=['Attest'],
