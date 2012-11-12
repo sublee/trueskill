@@ -79,7 +79,7 @@ class Factor(Node):
         return self.vars[0]
 
     def __repr__(self):
-        args = (type(self).__name__, len(self.vars), \
+        args = (type(self).__name__, len(self.vars),
                 '' if len(self.vars) == 1 else 's')
         return '<%s with %d connection%s>' % args
 
@@ -105,14 +105,16 @@ class LikelihoodFactor(Factor):
         self.value = value_var
         self.variance = variance
 
-    def down(self): # update value
+    def down(self):
+        # update value
         val = self.mean
         msg = val / self.mean[self]
         pi = 1. / self.variance
         a = pi / (pi + val.pi)
         return self.value.update_message(self, a * msg.pi, a * msg.tau)
 
-    def up(self): # update mean
+    def up(self):
+        # update mean
         val = self.value
         msg = val / self.value[self]
         a = 1. / (1 + self.variance * msg.pi)

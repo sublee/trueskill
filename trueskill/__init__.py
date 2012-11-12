@@ -13,8 +13,8 @@ import itertools
 import math
 
 from .mathematics import cdf, pdf, ppf, Gaussian, Matrix
-from .factorgraph import Variable, PriorFactor, LikelihoodFactor, SumFactor, \
-                         TruncateFactor
+from .factorgraph import (
+    Variable, PriorFactor, LikelihoodFactor, SumFactor, TruncateFactor)
 
 
 __copyright__ = 'Copyright 2012 by Heungsub Lee'
@@ -239,13 +239,6 @@ class TrueSkill(object):
         teamperf_vars = [Variable() for x in xrange(group_size)]
         teamdiff_vars = [Variable() for x in xrange(group_size - 1)]
         team_sizes = _team_sizes(rating_groups)
-        def get_perf_vars_by_team(team):
-            if team > 0:
-                start = team_sizes[team - 1]
-            else:
-                start = 0
-            end = team_sizes[team]
-            return perf_vars[start:end]
         # layer builders
         def build_rating_layer():
             for rating_var, rating in zip(rating_vars, ratings):
@@ -255,9 +248,14 @@ class TrueSkill(object):
                 yield LikelihoodFactor(rating_var, perf_var, self.beta ** 2)
         def build_teamperf_layer():
             for team, teamperf_var in enumerate(teamperf_vars):
-                child_perf_vars = get_perf_vars_by_team(team)
-                yield SumFactor(teamperf_var, child_perf_vars,
-                                [1] * len(child_perf_vars))
+                if team > 0:
+                    start = team_sizes[team - 1]
+                else:
+                    start = 0
+                end = team_sizes[team]
+                child_perf_vars = perf_vars[start:end]
+                coeffs = [1] * len(child_perf_vars)
+                yield SumFactor(teamperf_var, child_perf_vars, coeffs)
         def build_teamdiff_layer():
             for team, teamdiff_var in enumerate(teamdiff_vars):
                 yield SumFactor(teamdiff_var, teamperf_vars[team:team + 2],
@@ -273,11 +271,11 @@ class TrueSkill(object):
                     v_func, w_func = v_win, w_win
                 yield TruncateFactor(teamdiff_var, v_func, w_func, draw_margin)
         # build layers
-        return list(build_rating_layer()), \
-               list(build_perf_layer()), \
-               list(build_teamperf_layer()), \
-               list(build_teamdiff_layer()), \
-               list(build_trunc_layer())
+        return (
+            list(build_rating_layer()), list(build_perf_layer()),
+            list(build_teamperf_layer()), list(build_teamdiff_layer()),
+            list(build_trunc_layer())
+        )
 
     def run_schedule(self, rating_layer, perf_layer, teamperf_layer,
                      teamdiff_layer, trunc_layer, min_delta=DELTA):
@@ -300,11 +298,11 @@ class TrueSkill(object):
                 for x in xrange(teamdiff_len - 1):
                     teamdiff_layer[x].down()
                     delta = max(delta, trunc_layer[x].up())
-                    teamdiff_layer[x].up(1) # up to right variable
+                    teamdiff_layer[x].up(1)  # up to right variable
                 for x in xrange(teamdiff_len - 1, 0, -1):
                     teamdiff_layer[x].down()
                     delta = max(delta, trunc_layer[x].up())
-                    teamdiff_layer[x].up(0) # up to left variable
+                    teamdiff_layer[x].up(0)  # up to left variable
             # repeat until to small update
             if delta <= min_delta:
                 break
@@ -341,7 +339,7 @@ class TrueSkill(object):
             for player in [p1, p2, p3]:
                 player.rating = rated_rating_groups[player.team][player]
 
-        :param rating_groups: a list of tuples or dictionaries which contain
+        :param rating_groups: a list of tuples or dictionaries containing
                               :class:`Rating` objects
         :param ranks: a ranking table. By default, it is same as the order of
                       the ``rating_groups``.
@@ -393,7 +391,7 @@ class TrueSkill(object):
             else:
                 print 'Is not there another match?'
 
-        :param rating_groups: a list of tuples or dictionaries which contain
+        :param rating_groups: a list of tuples or dictionaries containing
                               :class:`Rating` objects
 
         .. versionadded:: 0.2
@@ -529,10 +527,12 @@ class TrueSkill(object):
 
 
 _global = []
+
+
 def _g():
     """Gets the global TrueSkill environment."""
     if not _global:
-        setup() # setup the default environment
+        setup()  # setup the default environment
     return _global[0]
 
 

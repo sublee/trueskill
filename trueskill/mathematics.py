@@ -26,10 +26,11 @@ except ImportError:
         """Complementary error function (via http://bit.ly/zOLqbc)"""
         z = abs(x)
         t = 1. / (1. + z / 2.)
-        r = t * math.exp(-z * z - 1.26551223 + \
-            t * (1.00002368 + t * (0.37409196 + t * (0.09678418 + \
-            t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + \
-            t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))))
+        r = t * math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (
+                         0.37409196 + t * (0.09678418 + t * (
+                         -0.18628806 + t * (0.27886807 + t * (
+                         -1.13520398 + t * (1.48851587 + t * (
+                         -0.82215223 + t * 0.17087277)))))))))
         return 2. - r if x < 0 else r
 
     def ierfcc(y):
@@ -56,7 +57,7 @@ except ImportError:
     def pdf(x, mu=0, sigma=1):
         """Probability density function"""
         return (1 / math.sqrt(2 * math.pi) * abs(sigma)) * \
-               math.exp(-(((x - mu) / abs(sigma)) ** 2 / 2))
+            math.exp(-(((x - mu) / abs(sigma)) ** 2 / 2))
 
     def ppf(x, mu=0, sigma=1):
         """The inverse function of CDF"""
@@ -117,9 +118,9 @@ class Matrix(list):
         if isinstance(src, list):
             is_number = lambda x: isinstance(x, Number)
             unique_col_sizes = set(map(len, src))
-            msg = 'Must be a rectangular array of numbers'
-            assert len(unique_col_sizes) == 1, msg
-            assert all(map(is_number, sum(src, []))), msg
+            everything_are_number = filter(is_number, sum(src, []))
+            if len(unique_col_sizes) != 1 or not everything_are_number:
+                raise ValueError('Must be a rectangular array of numbers')
             two_dimensional_array = src
         elif isinstance(src, dict):
             if not width or not height:
@@ -162,7 +163,7 @@ class Matrix(list):
     def minor(self, row_n, col_n):
         width, height = self.width, self.height
         assert 0 <= row_n < height and 0 <= col_n < width, \
-               'Invalid row or column number'
+            'Invalid row or column number'
         two_dimensional_array = []
         for r in xrange(height):
             if r == row_n:
@@ -206,8 +207,8 @@ class Matrix(list):
             src = {}
             for r in xrange(height):
                 for c in xrange(width):
-                    src[r, c] = self.minor(r, c).determinant() * \
-                                (-1 if (r + c) % 2 else 1)
+                    sign = -1 if (r + c) % 2 else 1
+                    src[r, c] = self.minor(r, c).determinant() * sign
             return type(self)(src, width, height)
 
     def inverse(self):
@@ -218,8 +219,8 @@ class Matrix(list):
 
     def __add__(self, other):
         width, height = self.width, self.height
-        assert (width, height) == (other.width, other.height), \
-               'Must be same size'
+        if (width, height) != (other.width, other.height):
+            raise ValueError('Must be same size')
         src = {}
         for r in xrange(height):
             for c in xrange(width):
@@ -227,17 +228,19 @@ class Matrix(list):
         return type(self)(src, width, height)
 
     def __mul__(self, other):
-        assert self.width == other.height, 'Bad size'
+        if self.width != other.height:
+            raise ValueError('Bad size')
         width, height = other.width, self.height
         src = {}
         for r in xrange(height):
             for c in xrange(width):
-                src[r, c] = sum(self[r][x] * other[x][c] \
+                src[r, c] = sum(self[r][x] * other[x][c]
                                 for x in xrange(self.width))
         return type(self)(src, width, height)
 
     def __rmul__(self, other):
-        assert isinstance(other, Number)
+        if not isinstance(other, Number):
+            raise TypeError('The operand should be a number')
         width, height = self.width, self.height
         src = {}
         for r in xrange(height):
