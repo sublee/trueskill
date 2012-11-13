@@ -14,7 +14,7 @@ Under development.
 
 - Supports that using dictionaries as a ``rating_group`` to choose specific
   player's rating simply.
-- Supports Python 2.5.
+- Works well in Python 2.5.
 
 .. _Elo: http://packages.python.org/elo
 .. _Glicko: http://packages.python.org/glicko
