@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import with_statement
+import sys
 import warnings
 
 from attest import Tests, assert_hook, raises
@@ -91,7 +93,8 @@ def invalid_rating_groups():
         env.validate_rating_groups([(Rating(),), {0: Rating()}])
 
 
-@suite.test
+# there's no warnings.catch_warnings under Python 2.6
+@suite.test_if(sys.version_info >= (2, 6))
 def deprecated_methods():
     env = TrueSkill()
     r1, r2, r3 = Rating(), Rating(), Rating()
@@ -122,6 +125,9 @@ def deprecated_individual_rating_groups():
         rate([r1, r2, r3])
     with raises(TypeError):
         quality([r1, r2, r3])
+    if sys.version_info < (2, 6):
+        # there's no warnings.catch_warnings under Python 2.6
+        return
     # deprecated methods accept individual rating groups
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
@@ -214,7 +220,10 @@ class almost(object):
         else:
             if round(val1, self.precision) == round(val2, self.precision):
                 return True
-            fmt = '%.{0}f'.format(self.precision)
+            try:
+                fmt = '%.{0}f'.format(self.precision)
+            except AttributeError:
+                fmt = '%%.%df' % self.precision
             mantissa = lambda f: int((fmt % f).replace('.', ''))
             return abs(mantissa(val1) - mantissa(val2)) <= 1
 

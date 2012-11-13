@@ -13,8 +13,8 @@ import itertools
 import math
 
 from .mathematics import cdf, pdf, ppf, Gaussian, Matrix
-from .factorgraph import (
-    Variable, PriorFactor, LikelihoodFactor, SumFactor, TruncateFactor)
+from .factorgraph import (Variable, PriorFactor, LikelihoodFactor, SumFactor,
+                          TruncateFactor)
 
 
 __copyright__ = 'Copyright 2012 by Heungsub Lee'
@@ -241,10 +241,10 @@ class TrueSkill(object):
         team_sizes = _team_sizes(rating_groups)
         # layer builders
         def build_rating_layer():
-            for rating_var, rating in zip(rating_vars, ratings):
+            for rating_var, rating in itertools.izip(rating_vars, ratings):
                 yield PriorFactor(rating_var, rating, self.tau)
         def build_perf_layer():
-            for rating_var, perf_var in zip(rating_vars, perf_vars):
+            for rating_var, perf_var in itertools.izip(rating_vars, perf_vars):
                 yield LikelihoodFactor(rating_var, perf_var, self.beta ** 2)
         def build_teamperf_layer():
             for team, teamperf_var in enumerate(teamperf_vars):
@@ -271,11 +271,9 @@ class TrueSkill(object):
                     v_func, w_func = v_win, w_win
                 yield TruncateFactor(teamdiff_var, v_func, w_func, draw_margin)
         # build layers
-        return (
-            list(build_rating_layer()), list(build_perf_layer()),
-            list(build_teamperf_layer()), list(build_teamdiff_layer()),
-            list(build_trunc_layer())
-        )
+        return (list(build_rating_layer()), list(build_perf_layer()),
+                list(build_teamperf_layer()), list(build_teamdiff_layer()),
+                list(build_trunc_layer()))
 
     def run_schedule(self, rating_layer, perf_layer, teamperf_layer,
                      teamdiff_layer, trunc_layer, min_delta=DELTA):
@@ -364,7 +362,8 @@ class TrueSkill(object):
         unsorting_hint = [x for x, (r, g) in sorting]
         # build factor graph
         layers = self.build_factor_graph(sorted_groups, sorted_ranks)
-        self.run_schedule(*layers, min_delta=min_delta)
+        args = layers + (min_delta,)
+        self.run_schedule(*args)
         # make result
         rating_layer, team_sizes = layers[0], _team_sizes(sorted_groups)
         transformed_groups = []
