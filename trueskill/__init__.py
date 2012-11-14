@@ -354,9 +354,9 @@ class TrueSkill(object):
             ranks = range(group_size)
         elif len(ranks) != group_size:
             raise ValueError('Wrong ranks')
-        def compare(x, y):
-            return cmp(x[1][0], y[1][0])
-        sorting = sorted(enumerate(zip(ranks, rating_groups)), compare)
+        by_rank = lambda x: x[1][0]
+        sorting = sorted(enumerate(itertools.izip(ranks, rating_groups)),
+                         key=by_rank)
         sorted_groups = [g for x, (r, g) in sorting]
         sorted_ranks = sorted(ranks)
         unsorting_hint = [x for x, (r, g) in sorting]
@@ -367,18 +367,18 @@ class TrueSkill(object):
         # make result
         rating_layer, team_sizes = layers[0], _team_sizes(sorted_groups)
         transformed_groups = []
-        for start, end in zip([0] + team_sizes[:-1], team_sizes):
+        for start, end in itertools.izip([0] + team_sizes[:-1], team_sizes):
             group = []
             for f in rating_layer[start:end]:
                 group.append(Rating(f.var.mu, f.var.sigma))
             transformed_groups.append(tuple(group))
-        def compare(x, y):
-            return cmp(x[0], y[0])
-        unsorting = sorted(zip(unsorting_hint, transformed_groups), compare)
+        by_hint = lambda x: x[0]
+        unsorting = sorted(itertools.izip(unsorting_hint, transformed_groups),
+                           key=by_hint)
         if keys is None:
             return [g for x, g in unsorting]
         # restore the structure with input dictionary keys
-        return [dict(zip(keys[x], g)) for x, g in unsorting]
+        return [dict(itertools.izip(keys[x], g)) for x, g in unsorting]
 
     def quality(self, rating_groups):
         """Calculates the match quality of the given rating groups. A result
@@ -409,8 +409,8 @@ class TrueSkill(object):
         # the player-team assignment and comparison matrix
         def rotated_a_matrix(set_width, set_height):
             t = 0
-            for r, (cur, next) in enumerate(zip(rating_groups[:-1],
-                                                rating_groups[1:])):
+            for r, (cur, next) in enumerate(itertools.izip(rating_groups[:-1],
+                                                           rating_groups[1:])):
                 for x in xrange(t, t + len(cur)):
                     yield (r, x), 1
                     t += 1
