@@ -32,8 +32,13 @@ See Also
 
 """
 from setuptools import setup
+from setuptools.command.test import test
 
 import trueskill
+
+
+# use pytest instead
+test.run_tests = lambda s: __import__('pytest').main([s.test_suite + '.py'])
 
 
 setup(
@@ -61,7 +66,6 @@ setup(
                  'Programming Language :: Python :: Implementation :: PyPy',
                  'Topic :: Games/Entertainment'],
     install_requires=['distribute'],
-    test_suite='trueskilltests.suite',
-    test_loader='attest:auto_reporter.test_loader',
-    tests_require=['Attest'],
+    test_suite='trueskilltests',
+    tests_require=['pytest'],
 )

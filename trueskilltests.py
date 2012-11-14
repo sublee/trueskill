@@ -3,7 +3,7 @@ from __future__ import with_statement
 import sys
 import warnings
 
-from attest import Tests, assert_hook, raises
+from pytest import deprecated_call, raises
 try:
     import numpy
 except ImportError:
@@ -13,14 +13,10 @@ import trueskill
 from trueskill import *
 
 
-suite = Tests()
-
-
 # usage
 
 
-@suite.test
-def compatibility_with_another_rating_systems():
+def test_compatibility_with_another_rating_systems():
     """All rating system modules should implement ``rate_1vs1`` and
     ``quality_1vs1`` to provide shortcuts for 1 vs 1 simple competition games.
     """
@@ -32,8 +28,7 @@ def compatibility_with_another_rating_systems():
     assert rate_1vs1(r1, r2, drawn=True) == (rated[0][0], rated[1][0])
 
 
-@suite.test
-def compare_ratings():
+def test_compare_ratings():
     assert Rating(1, 2) == Rating(1, 2)
     assert Rating(1, 2) != Rating(1, 3)
     assert Rating(2, 2) > Rating(1, 2)
@@ -42,32 +37,28 @@ def compare_ratings():
     assert Rating(-1, 2) <= Rating(1, 2)
 
 
-@suite.test
-def rating_to_number():
+def test_rating_to_number():
     assert int(Rating(1, 2)) == 1
     assert long(Rating(1, 2)) == long(1)
     assert float(Rating(1.1, 2)) == 1.1
     assert complex(Rating(1.2, 2)) == 1.2 + 0j
 
 
-@suite.test
-def unsorted_groups():
+def test_unsorted_groups():
     t1, t2, t3 = generate_teams([1, 1, 1])
     rated = rate([t1, t2, t3], [2, 1, 0])
     assert almost(rated) == \
         [(18.325, 6.656), (25.000, 6.208), (31.675, 6.656)]
 
 
-@suite.test
-def custom_environment():
+def test_custom_environment():
     env = TrueSkill(draw_probability=.50)
     t1, t2 = generate_teams([1, 1], env=env)
     rated = env.rate([t1, t2])
     assert almost(rated) == [(30.267, 7.077), (19.733, 7.077)]
 
 
-@suite.test
-def setup_global_environment():
+def test_setup_global_environment():
     try:
         setup(draw_probability=.50)
         t1, t2 = generate_teams([1, 1])
@@ -78,8 +69,7 @@ def setup_global_environment():
         setup()
 
 
-@suite.test
-def invalid_rating_groups():
+def test_invalid_rating_groups():
     env = TrueSkill()
     with raises(ValueError):
         env.validate_rating_groups([])
@@ -94,8 +84,7 @@ def invalid_rating_groups():
 
 
 # there's no warnings.catch_warnings under Python 2.6
-@suite.test_if(sys.version_info >= (2, 6))
-def deprecated_methods():
+def test_deprecated_methods():
     env = TrueSkill()
     r1, r2, r3 = Rating(), Rating(), Rating()
     try:
@@ -103,23 +92,14 @@ def deprecated_methods():
         trueskill.__warningregistry__.clear()
     except AttributeError:
         pass
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter('always')
-        transform_ratings([(r1,), (r2,), (r3,)])
-        match_quality([(r1,), (r2,), (r3,)])
-        env.transform_ratings([(r1,), (r2,), (r3,)])
-        env.match_quality([(r1,), (r2,), (r3,)])
-        env.Rating()
-    assert len(w) == 5
-    assert w[0].category is DeprecationWarning
-    assert w[1].category is DeprecationWarning
-    assert w[2].category is DeprecationWarning
-    assert w[3].category is DeprecationWarning
-    assert w[4].category is DeprecationWarning
+    deprecated_call(transform_ratings, [(r1,), (r2,), (r3,)])
+    deprecated_call(match_quality, [(r1,), (r2,), (r3,)])
+    deprecated_call(env.transform_ratings, [(r1,), (r2,), (r3,)])
+    deprecated_call(env.match_quality, [(r1,), (r2,), (r3,)])
+    deprecated_call(env.Rating)
 
 
-@suite.test
-def deprecated_individual_rating_groups():
+def test_deprecated_individual_rating_groups():
     r1, r2, r3 = Rating(50, 1), Rating(10, 5), Rating(15, 5)
     with raises(TypeError):
         rate([r1, r2, r3])
@@ -135,8 +115,7 @@ def deprecated_individual_rating_groups():
         assert match_quality([r1, r2, r3]) == quality([(r1,), (r2,), (r3,)])
 
 
-@suite.test
-def rating_tuples():
+def test_rating_tuples():
     r1, r2, r3 = Rating(), Rating(), Rating()
     rated = rate([(r1, r2), (r3,)])
     assert len(rated) == 2
@@ -147,8 +126,7 @@ def rating_tuples():
     assert isinstance(rated[0][0], Rating)
 
 
-@suite.test
-def rating_dicts():
+def test_rating_dicts():
     class Player(object):
         def __init__(self, name, rating, team):
             self.name = name
@@ -234,8 +212,7 @@ class almost(object):
         return repr(self.val)
 
 
-@suite.test
-def n_vs_n():
+def test_n_vs_n():
     # 1 vs 1
     t1, t2 = generate_teams([1, 1])
     assert almost(quality([t1, t2])) == 0.447
@@ -258,8 +235,7 @@ def n_vs_n():
          (22.802, 8.059), (22.802, 8.059), (22.802, 8.059), (22.802, 8.059)]
 
 
-@suite.test
-def one_vs_n():
+def test_1_vs_n():
     t1, = generate_teams([1])
     # 1 vs 2
     t2, = generate_teams([2])
@@ -283,8 +259,7 @@ def one_vs_n():
          (9.418, 7.917), (9.418, 7.917), (9.418, 7.917), (9.418, 7.917)]
 
 
-@suite.test
-def individual():
+def test_individual():
     # 3 players
     players = generate_individual(3)
     assert almost(quality(players)) == 0.200
@@ -318,8 +293,7 @@ def individual():
          (17.664, 4.433), (15.653, 4.524), (13.190, 4.711), (9.461, 5.276)]
 
 
-@suite.test
-def multiple_teams():
+def test_multiple_teams():
     # 2 vs 4 vs 2
     t1 = (Rating(40, 4), Rating(45, 3))
     t2 = (Rating(20, 7), Rating(19, 6), Rating(30, 9), Rating(10, 4))
@@ -330,8 +304,7 @@ def multiple_teams():
          (29.353, 7.673), (9.872, 3.891), (48.830, 4.590), (29.813, 1.976)]
 
 
-@suite.test
-def upset():
+def test_upset():
     # 1 vs 1
     t1, t2 = (Rating(),), (Rating(50, 12.5),)
     assert almost(quality([t1, t2])) == 0.110
@@ -365,8 +338,7 @@ def upset():
 # reported bugs
 
 
-@suite.test
-def issue3():
+def test_issue3():
     """The `issue #3`_, opened by @youknowone.
 
     These inputs led to ZeroDivisionError before 0.1.4. Also another TrueSkill
@@ -391,20 +363,21 @@ def issue3():
     rate([t1, t2], [0, 28])
 
 
-@suite.test_if(numpy)
-def issue4():
-    """The `issue #4`_, opened by @sublee.
+if numpy:
+    def test_issue4():
+        """The `issue #4`_, opened by @sublee.
 
-    numpy.float64 handles floating-point error by different way. For example,
-    it can just warn RuntimeWarning on n/0 problem instead of throwing
-    ZeroDivisionError.
+        numpy.float64 handles floating-point error by different way. For
+        example, it can just warn RuntimeWarning on n/0 problem instead of
+        throwing ZeroDivisionError.
 
-    .. _issue #4: https://github.com/sublee/trueskill/issues/4
-    """
-    r1, r2 = Rating(105.247, 0.439), Rating(27.030, 0.901)
-    # make numpy to raise FloatingPointError instead of warning RuntimeWarning
-    old_settings = numpy.seterr(divide='raise')
-    try:
-        rate([(r1,), (r2,)])
-    finally:
-        numpy.seterr(**old_settings)
+        .. _issue #4: https://github.com/sublee/trueskill/issues/4
+        """
+        r1, r2 = Rating(105.247, 0.439), Rating(27.030, 0.901)
+        # make numpy to raise FloatingPointError instead of warning
+        # RuntimeWarning
+        old_settings = numpy.seterr(divide='raise')
+        try:
+            rate([(r1,), (r2,)])
+        finally:
+            numpy.seterr(**old_settings)
