@@ -41,6 +41,11 @@ def test_rating_to_number():
     assert int(Rating(1, 2)) == 1
     assert float(Rating(1.1, 2)) == 1.1
     assert complex(Rating(1.2, 2)) == 1.2 + 0j
+    try:
+        assert long(Rating(1, 2)) == long(1)
+    except NameError:
+        # Python 3 doesn't have `long` anymore
+        pass
 
 
 def test_unsorted_groups():
@@ -104,14 +109,10 @@ def test_deprecated_individual_rating_groups():
         rate([r1, r2, r3])
     with raises(TypeError):
         quality([r1, r2, r3])
-    if sys.version_info < (2, 6):
-        # there's no warnings.catch_warnings under Python 2.6
-        return
-    # deprecated methods accept individual rating groups
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore')
-        assert transform_ratings([r1, r2, r3]) == rate([(r1,), (r2,), (r3,)])
-        assert match_quality([r1, r2, r3]) == quality([(r1,), (r2,), (r3,)])
+    assert transform_ratings([r1, r2, r3]) == rate([(r1,), (r2,), (r3,)])
+    assert match_quality([r1, r2, r3]) == quality([(r1,), (r2,), (r3,)])
+    deprecated_call(transform_ratings, [r1, r2, r3])
+    deprecated_call(match_quality, [r1, r2, r3])
 
 
 def test_rating_tuples():
