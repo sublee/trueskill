@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
-import sys
-import warnings
 
 from pytest import deprecated_call, raises
 try:
@@ -9,7 +7,6 @@ try:
 except ImportError:
     numpy = False
 
-import trueskill
 from trueskill import *
 
 
@@ -93,7 +90,7 @@ def test_deprecated_methods():
     r1, r2, r3 = Rating(), Rating(), Rating()
     try:
         # clear warning registry to catch all warnings explicitly
-        trueskill.__warningregistry__.clear()
+        __import__('trueskill').__warningregistry__.clear()
     except AttributeError:
         pass
     deprecated_call(transform_ratings, [(r1,), (r2,), (r3,)])
