@@ -53,9 +53,11 @@ class Gaussian(object):
         pi, tau = self.pi + other.pi, self.tau + other.tau
         return Gaussian(pi=pi, tau=tau)
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         pi, tau = self.pi - other.pi, self.tau - other.tau
         return Gaussian(pi=pi, tau=tau)
+
+    __div__ = __truediv__  # for Python 2
 
     def __repr__(self):
         return 'N(mu=%.3f, sigma=%.3f)' % (self.mu, self.sigma)
