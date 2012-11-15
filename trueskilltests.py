@@ -39,7 +39,6 @@ def test_compare_ratings():
 
 def test_rating_to_number():
     assert int(Rating(1, 2)) == 1
-    assert long(Rating(1, 2)) == long(1)
     assert float(Rating(1.1, 2)) == 1.1
     assert complex(Rating(1.2, 2)) == 1.2 + 0j
 
@@ -161,7 +160,7 @@ def generate_teams(sizes, env=None):
     rating_groups = []
     for size in sizes:
         ratings = []
-        for x in xrange(size):
+        for x in range(size):
             ratings.append(rating_cls())
         rating_groups.append(tuple(ratings))
     return rating_groups

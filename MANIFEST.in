@@ -1,2 +1,1 @@
-include LICENSE
-include trueskilltests.py
+include LICENSE trueskilltests.py

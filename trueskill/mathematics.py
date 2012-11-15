@@ -9,7 +9,6 @@
     :copyright: (c) 2012 by Heungsub Lee.
     :license: BSD, see LICENSE for more details.
 """
-from __future__ import absolute_import
 import copy
 import math
 try:
@@ -101,10 +100,10 @@ class Matrix(list):
                 if not height:
                     height = h
             two_dimensional_array = []
-            for r in xrange(height):
+            for r in range(height):
                 row = []
                 two_dimensional_array.append(row)
-                for c in xrange(width):
+                for c in range(width):
                     row.append(src.get((r, c), 0))
         else:
             raise TypeError('Invalid source')
@@ -121,8 +120,8 @@ class Matrix(list):
     def transpose(self):
         width, height = self.width, self.height
         src = {}
-        for c in xrange(width):
-            for r in xrange(height):
+        for c in range(width):
+            for r in range(height):
                 src[c, r] = self[r][c]
         return type(self)(src, width=height, height=width)
 
@@ -131,12 +130,12 @@ class Matrix(list):
         assert 0 <= row_n < height and 0 <= col_n < width, \
             'Invalid row or column number'
         two_dimensional_array = []
-        for r in xrange(height):
+        for r in range(height):
             if r == row_n:
                 continue
             row = []
             two_dimensional_array.append(row)
-            for c in xrange(width):
+            for c in range(width):
                 if c == col_n:
                     continue
                 row.append(self[r][c])
@@ -146,8 +145,8 @@ class Matrix(list):
         width, height = self.width, self.height
         assert width == height, 'Must be a square matrix'
         tmp, rv = copy.deepcopy(self), 1.
-        for c in xrange(width - 1, 0, -1):
-            pivot, r = max((abs(tmp[r][c]), r) for r in xrange(c + 1))
+        for c in range(width - 1, 0, -1):
+            pivot, r = max((abs(tmp[r][c]), r) for r in range(c + 1))
             pivot = tmp[r][c]
             if not pivot:
                 return 0.
@@ -156,9 +155,9 @@ class Matrix(list):
                 rv = -rv
             rv *= pivot
             fact = -1. / pivot
-            for r in xrange(c):
+            for r in range(c):
                 f = fact * tmp[r][c]
-                for x in xrange(c):
+                for x in range(c):
                     tmp[r][x] += f * tmp[c][x]
         return rv * tmp[0][0]
 
@@ -171,8 +170,8 @@ class Matrix(list):
             return type(self)([[d, -b], [-c, a]])
         else:
             src = {}
-            for r in xrange(height):
-                for c in xrange(width):
+            for r in range(height):
+                for c in range(width):
                     sign = -1 if (r + c) % 2 else 1
                     src[r, c] = self.minor(r, c).determinant() * sign
             return type(self)(src, width, height)
@@ -188,8 +187,8 @@ class Matrix(list):
         if (width, height) != (other.width, other.height):
             raise ValueError('Must be same size')
         src = {}
-        for r in xrange(height):
-            for c in xrange(width):
+        for r in range(height):
+            for c in range(width):
                 src[r, c] = self[r][c] + other[r][c]
         return type(self)(src, width, height)
 
@@ -198,10 +197,10 @@ class Matrix(list):
             raise ValueError('Bad size')
         width, height = other.width, self.height
         src = {}
-        for r in xrange(height):
-            for c in xrange(width):
+        for r in range(height):
+            for c in range(width):
                 src[r, c] = sum(self[r][x] * other[x][c]
-                                for x in xrange(self.width))
+                                for x in range(self.width))
         return type(self)(src, width, height)
 
     def __rmul__(self, other):
@@ -209,8 +208,8 @@ class Matrix(list):
             raise TypeError('The operand should be a number')
         width, height = self.width, self.height
         src = {}
-        for r in xrange(height):
-            for c in xrange(width):
+        for r in range(height):
+            for c in range(width):
                 src[r, c] = other * self[r][c]
         return type(self)(src, width, height)
 

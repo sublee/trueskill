@@ -10,9 +10,13 @@
 """
 from __future__ import absolute_import
 import itertools
-from math import sqrt
+import math
 
 from .mathematics import Gaussian
+
+
+__all__ = ['Variable', 'PriorFactor', 'LikelihoodFactor', 'SumFactor',
+           'TruncateFactor']
 
 
 inf = float('inf')
@@ -35,7 +39,8 @@ class Variable(Node, Gaussian):
         return delta
 
     def delta(self, other):
-        return max(abs(self.tau - other.tau), sqrt(abs(self.pi - other.pi)))
+        return max(abs(self.tau - other.tau),
+                   math.sqrt(abs(self.pi - other.pi)))
 
     def update_message(self, factor, pi=0, tau=0, message=None):
         message = message or Gaussian(pi=pi, tau=tau)
@@ -92,7 +97,7 @@ class PriorFactor(Factor):
         self.dynamic = dynamic
 
     def down(self):
-        sigma = sqrt(self.val.sigma ** 2 + self.dynamic ** 2)
+        sigma = math.sqrt(self.val.sigma ** 2 + self.dynamic ** 2)
         value = Gaussian(self.val.mu, sigma)
         return self.var.update_value(self, value=value)
 
@@ -176,7 +181,7 @@ class TruncateFactor(Factor):
         val = self.var
         msg = self.var[self]
         div = val / msg
-        sqrt_pi = sqrt(div.pi)
+        sqrt_pi = math.sqrt(div.pi)
         args = (div.tau / sqrt_pi, self.draw_margin * sqrt_pi)
         v = self.v_func(*args)
         w = self.w_func(*args)
