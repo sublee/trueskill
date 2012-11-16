@@ -47,7 +47,8 @@ assert version
 
 # use pytest instead
 def run_tests(self):
-    test_file = re.sub(r'\.pyc$', '.py', __import__(self.test_suite).__file__)
+    pyc = re.compile(r'\.pyc|\$py\.class')
+    test_file = pyc.sub('.py', __import__(self.test_suite).__file__)
     raise SystemExit(__import__('pytest').main([test_file]))
 test.run_tests = run_tests
 
@@ -77,6 +78,7 @@ setup(
                  'Programming Language :: Python :: 3.2',
                  'Programming Language :: Python :: 3.3',
                  'Programming Language :: Python :: Implementation :: CPython',
+                 'Programming Language :: Python :: Implementation :: Jython',
                  'Programming Language :: Python :: Implementation :: PyPy',
                  'Topic :: Games/Entertainment'],
     install_requires=['distribute'],

@@ -12,9 +12,23 @@ Under development.
   - :meth:`TrueSkill.transform_ratings` is now called :meth:`TrueSkill.rate`.
   - :meth:`TrueSkill.match_quality` is now called :meth:`TrueSkill.quality`.
 
+- Works well in many Python versions:
+
+  - Python 2.5
+  - Python 2.6
+  - Python 2.7
+  - Python 3.1
+  - Python 3.2
+  - Python 3.3
+
+  And interpreters:
+
+  - CPython
+  - Jython
+  - PyPy
+
 - Supports that using dictionaries as a ``rating_group`` to choose specific
   player's rating simply.
-- Works well in Python 3 and Python 2.5.
 
 .. _Elo: http://packages.python.org/elo
 .. _Glicko: http://packages.python.org/glicko
