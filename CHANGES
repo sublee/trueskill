@@ -3,14 +3,19 @@ Version 0.2
 
 Under development.
 
-- Changes the interface to maximize compatibility with `Elo`_ and `Glicko`_
-  other rating system modules:
+- Renames the featured functions:
+
+  - :meth:`TrueSkill.transform_ratings` is now called :meth:`TrueSkill.rate`.
+  - :meth:`TrueSkill.match_quality` is now called :meth:`TrueSkill.quality`.
+
+- Shorcut functions:
 
   - Adding :func:`rate_1vs1` a shortcut to rate 2 players individual match.
   - Adding :func:`quality_1vs1` a shortcut to calculate match quality of 2
     players individual match.
-  - :meth:`TrueSkill.transform_ratings` is now called :meth:`TrueSkill.rate`.
-  - :meth:`TrueSkill.match_quality` is now called :meth:`TrueSkill.quality`.
+
+- Supports that using dictionaries as a ``rating_group`` to choose specific
+  player's rating simply.
 
 - Works well in many Python versions:
 
@@ -26,12 +31,6 @@ Under development.
   - CPython
   - Jython
   - PyPy
-
-- Supports that using dictionaries as a ``rating_group`` to choose specific
-  player's rating simply.
-
-.. _Elo: http://packages.python.org/elo
-.. _Glicko: http://packages.python.org/glicko
 
 Version 0.1.4
 -------------

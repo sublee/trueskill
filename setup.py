@@ -7,9 +7,9 @@ system among game players and it is used on Xbox Live to rank and match
 players.
 
 >>> from trueskill import Rating, rate_1vs1, quality_1vs1
->>> r1, r2 = Rating(mu=25, sigma=8.333333), Rating(mu=30, sigma=8.333333)
->>> print 'Match quality = {:.1%}'.format(quality_1vs1(r1, r2))
-Match quality = 41.6%
+>>> r1, r2 = Rating(mu=25, sigma=8.333), Rating(mu=30, sigma=8.333)
+>>> 'Match quality = {:.1%}'.format(quality_1vs1(r1, r2))
+'Match quality = 41.6%'
 >>> rate_1vs1(r1, r2)
 (trueskill.Rating(mu=30.768, sigma=7.030),
  trueskill.Rating(mu=24.232, sigma=7.030))
@@ -62,8 +62,8 @@ setup(
     url='http://packages.python.org/trueskill',
     description='The TrueSkill rating system',
     long_description=__doc__,
-    packages=['trueskill'],
     platforms='any',
+    packages=['trueskill'],
     classifiers=['Development Status :: 4 - Beta',
                  'Intended Audience :: Developers',
                  'Intended Audience :: Science/Research',
