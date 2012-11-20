@@ -335,8 +335,14 @@ def test_upset():
 # Partial play isn't implemented yet
 #def test_partial_play():
 #    t1, t2 = (Rating(),), (Rating(), Rating())
+#    assert almost(rate([t1, t2], weights=[[1], [1, 1]])) == \
+#        [(33.6926, 7.3184), (16.3074, 7.3184), (16.3074, 7.3184)]
+#    assert almost(rate([t1, t2], weights=[[0.5], [0.5, 0.5]])) == \
+#        [(33.8624, 7.3139), (16.1376, 7.3139), (16.1376, 7.3139)]
 #    assert almost(rate([t1, t2], weights=[[1], [0, 1]])) == \
 #        [(29.3965, 7.1714), (24.9996, 8.3337), (20.6035, 7.1714)]
+#    assert almost(rate([t1, t2], weights=[[1], [0.5, 1]])) == \
+#        [(32.3703, 7.0589), (21.3149, 8.0340), (17.6297, 7.0589)]
 
 
 # reported bugs

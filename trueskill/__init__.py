@@ -352,15 +352,15 @@ class TrueSkill(object):
         by_rank = lambda x: x[1][0]
         sorting = sorted(enumerate(itertools.izip(ranks, rating_groups)),
                          key=by_rank)
-        sorted_groups = [g for x, (r, g) in sorting]
+        unsorting_hint = (x for x, (r, g) in sorting)
+        sorted_rating_groups = [g for x, (r, g) in sorting]
         sorted_ranks = sorted(ranks)
-        unsorting_hint = [x for x, (r, g) in sorting]
         # build factor graph
-        layers = self.build_factor_graph(sorted_groups, sorted_ranks)
+        layers = self.build_factor_graph(sorted_rating_groups, sorted_ranks)
         args = layers + (min_delta,)
         self.run_schedule(*args)
         # make result
-        rating_layer, team_sizes = layers[0], _team_sizes(sorted_groups)
+        rating_layer, team_sizes = layers[0], _team_sizes(sorted_rating_groups)
         transformed_groups = []
         for start, end in itertools.izip([0] + team_sizes[:-1], team_sizes):
             group = []
