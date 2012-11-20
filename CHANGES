@@ -8,29 +8,15 @@ Under development.
   - :meth:`TrueSkill.transform_ratings` is now called :meth:`TrueSkill.rate`.
   - :meth:`TrueSkill.match_quality` is now called :meth:`TrueSkill.quality`.
 
-- Shorcut functions:
-
-  - Adding :func:`rate_1vs1` a shortcut to rate 2 players individual match.
-  - Adding :func:`quality_1vs1` a shortcut to calculate match quality of 2
-    players individual match.
-
+- Adds shorcut functions for 2 players individual match, the most usage:
+  :func:`rate_1vs1` and :func:`quality_1vs1`,
 - Supports that using dictionaries as a ``rating_group`` to choose specific
   player's rating simply.
+- Works well in many Python versions, 2.5, 2.6, 2.7, 3.1, 3.2, 3.3 and many
+  interpreters, CPython, `Jython`_, `PyPy`_.
 
-- Works well in many Python versions:
-
-  - Python 2.5
-  - Python 2.6
-  - Python 2.7
-  - Python 3.1
-  - Python 3.2
-  - Python 3.3
-
-  And interpreters:
-
-  - CPython
-  - Jython
-  - PyPy
+.. _Jython:: http://jython.org/
+.. _PyPy:: http://pypy.org/
 
 Version 0.1.4
 -------------
