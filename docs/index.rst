@@ -56,6 +56,7 @@ Then we can guess match quality which is equivalent with draw probability of
 this match using :func:`quality_1vs1`:
 
 ::
+
     >>> print '{:.1%} chance to draw'.format(quality_1vs1(r1, r2))
     44.7% chance to draw
 
@@ -63,6 +64,7 @@ After the game, TrueSkill recalculates their ratings by the game result. For
 example, if 1P beats 2P:
 
 ::
+
     >>> new_r1, new_r2 = rate_1vs1(r1, r2)
     >>> print new_r1
     trueskill.Rating(mu=29.396, sigma=7.171)
