@@ -340,6 +340,7 @@ class TrueSkill(object):
                               :class:`Rating` objects
         :param ranks: a ranking table. By default, it is same as the order of
                       the ``rating_groups``.
+        :param weights: weights of each players for "Partial Play"
         :param min_delta: each loop checks a delta of changes and the loop
                           will stop if the delta is less then this argument
         :return: a recalculated ratings same structure as ``rating_groups``
