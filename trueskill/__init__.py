@@ -9,7 +9,7 @@
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
-import itertools
+from itertools import chain, imap, izip
 import math
 
 from .mathematics import cdf, pdf, ppf, Gaussian, Matrix
@@ -223,10 +223,11 @@ class TrueSkill(object):
             keys = None
         return list(rating_groups), keys
 
-    def build_factor_graph(self, rating_groups, ranks):
+    def build_factor_graph(self, rating_groups, ranks, weights):
         """Makes nodes for the factor graph."""
-        ratings = sum(rating_groups, ())
-        size = len(ratings)
+        flatten_ratings = sum(imap(tuple, rating_groups), ())
+        flatten_weights = sum(imap(tuple, weights), ())
+        size = len(flatten_ratings)
         group_size = len(rating_groups)
         # create variables
         rating_vars = [Variable() for x in xrange(size)]
@@ -236,10 +237,10 @@ class TrueSkill(object):
         team_sizes = _team_sizes(rating_groups)
         # layer builders
         def build_rating_layer():
-            for rating_var, rating in itertools.izip(rating_vars, ratings):
+            for rating_var, rating in izip(rating_vars, flatten_ratings):
                 yield PriorFactor(rating_var, rating, self.tau)
         def build_perf_layer():
-            for rating_var, perf_var in itertools.izip(rating_vars, perf_vars):
+            for rating_var, perf_var in izip(rating_vars, perf_vars):
                 yield LikelihoodFactor(rating_var, perf_var, self.beta ** 2)
         def build_teamperf_layer():
             for team, teamperf_var in enumerate(teamperf_vars):
@@ -249,7 +250,8 @@ class TrueSkill(object):
                     start = 0
                 end = team_sizes[team]
                 child_perf_vars = perf_vars[start:end]
-                coeffs = [1] * len(child_perf_vars)
+                #coeffs = [1] * len(child_perf_vars)
+                coeffs = flatten_weights[start:end]
                 yield SumFactor(teamperf_var, child_perf_vars, coeffs)
         def build_teamdiff_layer():
             for team, teamdiff_var in enumerate(teamdiff_vars):
@@ -275,8 +277,10 @@ class TrueSkill(object):
         """Sends messages within every nodes of the factor graph until the
         result is reliable.
         """
+        if min_delta < 0:
+            raise ValueError('min_delta must be greater than 0')
         # gray arrows
-        for f in itertools.chain(rating_layer, perf_layer, teamperf_layer):
+        for f in chain(rating_layer, perf_layer, teamperf_layer):
             f.down()
         # arrow #1, #2, #3
         teamdiff_len = len(teamdiff_layer)
@@ -309,7 +313,7 @@ class TrueSkill(object):
         for f in perf_layer:
             f.up()
 
-    def rate(self, rating_groups, ranks=None, min_delta=DELTA):
+    def rate(self, rating_groups, ranks=None, weights=None, min_delta=DELTA):
         """Recalculates ratings by the ranking table::
 
             env = TrueSkill()
@@ -344,36 +348,49 @@ class TrueSkill(object):
         """
         rating_groups, keys = self.validate_rating_groups(rating_groups)
         group_size = len(rating_groups)
-        # sort rating groups by rank
         if ranks is None:
             ranks = range(group_size)
         elif len(ranks) != group_size:
             raise ValueError('Wrong ranks')
-        by_rank = lambda x: x[1][0]
-        sorting = sorted(enumerate(itertools.izip(ranks, rating_groups)),
+        if weights is None:
+            weights = [(1,) * len(g) for g in rating_groups]
+        elif isinstance(weights, dict):
+            weights_dict, weights = weights, []
+            for x, group in enumerate(rating_groups):
+                w = []
+                weights.append(w)
+                for y, rating in enumerate(group):
+                    w.append(weights_dict.get((x, y), 1))
+        # sort rating groups by rank
+        by_rank = lambda x: x[1][1]
+        sorting = sorted(enumerate(izip(rating_groups, ranks, weights)),
                          key=by_rank)
-        unsorting_hint = (x for x, (r, g) in sorting)
-        sorted_rating_groups = [g for x, (r, g) in sorting]
-        sorted_ranks = sorted(ranks)
+        sorted_rating_groups, sorted_ranks, sorted_weights = [], [], []
+        for x, (g, r, w) in sorting:
+            sorted_rating_groups.append(g)
+            sorted_ranks.append(r)
+            # make weights to be greater than 0
+            sorted_weights.append(max(min_delta, w_) for w_ in w)
         # build factor graph
-        layers = self.build_factor_graph(sorted_rating_groups, sorted_ranks)
+        args = (sorted_rating_groups, sorted_ranks, sorted_weights)
+        layers = self.build_factor_graph(*args)
         args = layers + (min_delta,)
         self.run_schedule(*args)
         # make result
         rating_layer, team_sizes = layers[0], _team_sizes(sorted_rating_groups)
         transformed_groups = []
-        for start, end in itertools.izip([0] + team_sizes[:-1], team_sizes):
+        for start, end in izip([0] + team_sizes[:-1], team_sizes):
             group = []
             for f in rating_layer[start:end]:
                 group.append(Rating(f.var.mu, f.var.sigma))
             transformed_groups.append(tuple(group))
         by_hint = lambda x: x[0]
-        unsorting = sorted(itertools.izip(unsorting_hint, transformed_groups),
+        unsorting = sorted(izip((x for x, __ in sorting), transformed_groups),
                            key=by_hint)
         if keys is None:
             return [g for x, g in unsorting]
         # restore the structure with input dictionary keys
-        return [dict(itertools.izip(keys[x], g)) for x, g in unsorting]
+        return [dict(izip(keys[x], g)) for x, g in unsorting]
 
     def quality(self, rating_groups):
         """Calculates the match quality of the given rating groups. A result
@@ -404,8 +421,8 @@ class TrueSkill(object):
         # the player-team assignment and comparison matrix
         def rotated_a_matrix(set_width, set_height):
             t = 0
-            for r, (cur, next) in enumerate(itertools.izip(rating_groups[:-1],
-                                                           rating_groups[1:])):
+            for r, (cur, next) in enumerate(izip(rating_groups[:-1],
+                                                 rating_groups[1:])):
                 for x in xrange(t, t + len(cur)):
                     yield (r, x), 1
                     t += 1
@@ -442,7 +459,7 @@ class TrueSkill(object):
         .. versionadded:: 0.2
         """
         ranks = [0, 0 if drawn else 1]
-        teams = self.rate([(rating1,), (rating2,)], ranks, min_delta)
+        teams = self.rate([(rating1,), (rating2,)], ranks, min_delta=min_delta)
         return teams[0][0], teams[1][0]
 
     def quality_1vs1(self, rating1, rating2):
@@ -496,7 +513,7 @@ class TrueSkill(object):
              DeprecationWarning)
         rating_groups = [(r,) if isinstance(r, Rating) else r
                          for r in rating_groups]
-        return self.rate(rating_groups, ranks, min_delta)
+        return self.rate(rating_groups, ranks, min_delta=min_delta)
 
     def match_quality(self, rating_groups):
         """Deprecated. Used to calculate a match quality.
@@ -530,13 +547,13 @@ def _g():
     return _global[0]
 
 
-def rate(rating_groups, ranks=None, min_delta=DELTA):
+def rate(rating_groups, ranks=None, weights=None, min_delta=DELTA):
     """A proxy function for :meth:`TrueSkill.rate` of the global TrueSkill
     environment.
 
     .. versionadded:: 0.2
     """
-    return _g().rate(rating_groups, ranks, min_delta)
+    return _g().rate(rating_groups, ranks, weights, min_delta)
 
 
 def quality(rating_groups):

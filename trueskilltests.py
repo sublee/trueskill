@@ -84,15 +84,9 @@ def test_invalid_rating_groups():
         env.validate_rating_groups([(Rating(),), {0: Rating()}])
 
 
-# there's no warnings.catch_warnings under Python 2.6
 def test_deprecated_methods():
     env = TrueSkill()
     r1, r2, r3 = Rating(), Rating(), Rating()
-    try:
-        # clear warning registry to catch all warnings explicitly
-        __import__('trueskill').__warningregistry__.clear()
-    except AttributeError:
-        pass
     deprecated_call(transform_ratings, [(r1,), (r2,), (r3,)])
     deprecated_call(match_quality, [(r1,), (r2,), (r3,)])
     deprecated_call(env.transform_ratings, [(r1,), (r2,), (r3,)])
@@ -148,6 +142,11 @@ def test_rating_dicts():
     p1.rating = rated[p1.team][p1]
     p2.rating = rated[p2.team][p2]
     p3.rating = rated[p3.team][p3]
+
+
+def dont_use_0_for_min_delta():
+    with raises(ValueError):
+        rate([(Rating(),), (Rating(),)], min_delta=0)
 
 
 # algorithm
@@ -332,17 +331,32 @@ def test_upset():
          (31.751, 3.064), (34.051, 2.541), (38.263, 1.849), (44.118, 0.983)]
 
 
-# Partial play isn't implemented yet
-#def test_partial_play():
-#    t1, t2 = (Rating(),), (Rating(), Rating())
-#    assert almost(rate([t1, t2], weights=[[1], [1, 1]])) == \
-#        [(33.6926, 7.3184), (16.3074, 7.3184), (16.3074, 7.3184)]
-#    assert almost(rate([t1, t2], weights=[[0.5], [0.5, 0.5]])) == \
-#        [(33.8624, 7.3139), (16.1376, 7.3139), (16.1376, 7.3139)]
-#    assert almost(rate([t1, t2], weights=[[1], [0, 1]])) == \
-#        [(29.3965, 7.1714), (24.9996, 8.3337), (20.6035, 7.1714)]
-#    assert almost(rate([t1, t2], weights=[[1], [0.5, 1]])) == \
-#        [(32.3703, 7.0589), (21.3149, 8.0340), (17.6297, 7.0589)]
+def test_partial_play():
+    t1, t2 = (Rating(),), (Rating(), Rating())
+    # each results from C# Skills:
+    # [(33.6926, 7.3184), (16.3974, 7.3184), (16.3074, 7.3184)]
+    # [(33.8624, 7.3139), (16.1376, 7.3139), (16.1376, 7.3139)]
+    # [(29.3965, 7.1714), (24.9996, 8.3337), (20.6035, 7.1714)]
+    # [(32.3703, 7.0589), (21.3149, 8.0340), (17.6297, 7.0589)]
+    assert rate([t1, t2], weights=[[1], [1, 1]]) == rate([t1, t2])
+    assert almost(rate([t1, t2], weights=[[1], [1, 1]])) == \
+        [(33.730, 7.317), (16.270, 7.317), (16.270, 7.317)]
+    assert almost(rate([t1, t2], weights=[[0.5], [0.5, 0.5]])) == \
+        [(33.939, 7.312), (16.061, 7.312), (16.061, 7.312)]
+    assert almost(rate([t1, t2], weights=[[1], [0, 1]])) == \
+        [(29.440, 7.166), (25.000, 8.333), (20.560, 7.166)]
+    assert almost(rate([t1, t2], weights=[[1], [0.5, 1]])) == \
+        [(32.417, 7.056), (21.291, 8.033), (17.583, 7.056)] 
+
+
+def test_partial_play_with_weights_dict():
+    t1, t2 = (Rating(),), (Rating(), Rating())
+    assert rate([t1, t2], weights={(0, 0): 0.5, (1, 0): 0.5, (1, 1): 0.5}) == \
+        rate([t1, t2], weights=[[0.5], [0.5, 0.5]])
+    assert rate([t1, t2], weights={(1, 0): 0}) == \
+        rate([t1, t2], weights=[[1], [0, 1]])
+    assert rate([t1, t2], weights={(1, 0): 0.5}) == \
+        rate([t1, t2], weights=[[1], [0.5, 1]])
 
 
 # reported bugs

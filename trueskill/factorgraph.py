@@ -141,8 +141,15 @@ class SumFactor(Factor):
 
     def up(self, index=0):
         coeff = self.coeffs[index]
-        coeffs = [-c / coeff for x, c in enumerate(self.coeffs) if x != index]
-        coeffs.insert(index, 1. / coeff)
+        coeffs = []
+        for x, c in enumerate(self.coeffs):
+            try:
+                if x == index:
+                    coeffs.append(1. / coeff)
+                else:
+                    coeffs.append(-c / coeff)
+            except ZeroDivisionError:
+                coeffs.append(0.)
         vals = self.terms[:]
         vals[index] = self.sum
         msgs = [var[self] for var in vals]
