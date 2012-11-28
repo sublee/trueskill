@@ -210,12 +210,18 @@ class TrueSkill(object):
         ... #doctest: +ELLIPSIS
         [(Rating(...),), (Rating(...),)]
         """
+        # check group sizes
         if len(rating_groups) < 2:
             raise ValueError('Need multiple rating groups')
         elif not all(rating_groups):
             raise ValueError('Each group must contain multiple ratings')
-        elif len(set(map(type, rating_groups))) != 1:
+        # check group types
+        group_types = set(imap(type, rating_groups))
+        if len(group_types) != 1:
             raise TypeError('All groups should be same type')
+        elif group_types.pop() is Rating:
+            raise TypeError('Rating cannot be a rating group')
+        # normalize rating_groups
         if isinstance(rating_groups[0], dict):
             keys = map(dict.keys, rating_groups)
             rating_groups = (tuple(g.itervalues()) for g in rating_groups)
@@ -409,7 +415,7 @@ class TrueSkill(object):
         .. versionadded:: 0.2
         """
         rating_groups, keys = self.validate_rating_groups(rating_groups)
-        ratings = sum(rating_groups, ())
+        ratings = sum(imap(tuple, rating_groups), ())
         length = len(ratings)
         # a vector of all of the skill means
         mean_matrix = Matrix([[r.mu] for r in ratings])

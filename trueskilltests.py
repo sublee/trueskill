@@ -97,9 +97,9 @@ def test_deprecated_methods():
 def test_deprecated_individual_rating_groups():
     r1, r2, r3 = Rating(50, 1), Rating(10, 5), Rating(15, 5)
     with raises(TypeError):
-        rate([r1, r2, r3])
+        deprecated_call(rate, [r1, r2, r3])
     with raises(TypeError):
-        quality([r1, r2, r3])
+        deprecated_call(quality, [r1, r2, r3])
     assert transform_ratings([r1, r2, r3]) == rate([(r1,), (r2,), (r3,)])
     assert match_quality([r1, r2, r3]) == quality([(r1,), (r2,), (r3,)])
     deprecated_call(transform_ratings, [r1, r2, r3])
@@ -147,6 +147,12 @@ def test_rating_dicts():
 def dont_use_0_for_min_delta():
     with raises(ValueError):
         rate([(Rating(),), (Rating(),)], min_delta=0)
+
+
+def list_instead_of_tuple():
+    r1, r2 = Rating(), Rating()
+    assert rate([[r1], [r2]]) == rate([(r1,), (r2,)])
+    assert quality([[r1], [r2]]) == quality([(r1,), (r2,)])
 
 
 # algorithm
