@@ -25,7 +25,7 @@ Installing
 ~~~~~~~~~~
 
 The package is available in `PyPI <http://pypi.python.org/pypi/trueskill>`_. To
-install it in your system, use `easy_install`:
+install it in your system, use :command:`easy_install`:
 
 .. sourcecode:: bash
 
