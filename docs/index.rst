@@ -21,6 +21,22 @@ This project is a Python package which implements TrueSkill rating system.
 .. _TrueSkill: http://research.microsoft.com/en-us/projects/trueskill
 .. _Xbox Live: http://www.xbox.com/live
 
+Installing
+~~~~~~~~~~
+
+The package is available in `PyPI <http://pypi.python.org/pypi/trueskill>`_. To
+install it in your system, use `easy_install`:
+
+.. sourcecode:: bash
+
+   $ easy_install trueskill
+
+Or check out developement version:
+
+.. sourcecode:: bash
+
+   $ git clone git://github.com/sublee/trueskill.git
+
 Learning
 ~~~~~~~~
 
@@ -89,7 +105,7 @@ Complex competition game
 ------------------------
 
 There are many other match rules such as N:N team match, N:N:N multiple team
-match, N:M unbalanced match, Deathmatch (Player vs. All), and so on. Mostly
+match, N:M unbalanced match, deathmatch (Player vs All), and so on. Mostly
 other rating systems cannot work with them but TrueSkill does. TrueSkill
 accepts any types of matches.
 
@@ -172,22 +188,6 @@ Constants
 .. autodata:: TAU
 
 .. autodata:: DRAW_PROBABILITY
-
-Installing
-~~~~~~~~~~
-
-The package is available in `PyPI <http://pypi.python.org/pypi/trueskill>`_. To
-install it in your system, use `easy_install`:
-
-.. sourcecode:: bash
-
-   $ easy_install trueskill
-
-Or check out developement version:
-
-.. sourcecode:: bash
-
-   $ git clone git://github.com/sublee/trueskill.git
 
 Changelog
 ~~~~~~~~~
