@@ -27,22 +27,29 @@ Learning
 Rating, a model for player's skill
 ----------------------------------
 
-In TrueSkill, rating is a Gaussian distribution. The initial mu (\\(\\mu\\);
-mean) of rating is 25 and the initial sigma (\\(\\sigma\\); standard deviation)
-is \\(\\frac{ 25 }{ 3 } \\approx 8.333\\):
+In TrueSkill, rating is a Gaussian distribution which starts from
+\\(\\mathcal{ N }( 25, \\frac{ 25 }{ 3 } )\\). \\(\\mu\\) is an average skill
+of player, and \\(\\sigma\\) is a confidence of the guessed rating. A real
+skill of player is between \\(\\mu \\pm 2\\sigma\\) with 95% confidence.
 
 ::
 
    >>> from trueskill import Rating
-   >>> my_player.rating = Rating()
-   >>> print my_player.rating
+   >>> Rating()  # use the default mu and sigma
    trueskill.Rating(mu=25.000, sigma=8.333)
+
+If some player's rating is higher \\(\\beta\\) than another player's, the
+player may have 80% of chance to beat the other player. The default value of
+\\(\\beta\\) is \\(\\frac{ 25 }{ 6 }\\).
+
+Ratings will approach real skills through few times of the TrueSkill's Bayesian
+inference algorithm.
 
 1:1 competition game
 --------------------
 
 Most competition games follows 1:1 match rule. If your game does, just use
-``1vs1`` helpers containing :func:`rate_1vs1` and :func:`quality_1vs1`. These
+``_1vs1`` helpers containing :func:`rate_1vs1` and :func:`quality_1vs1`. These
 are very easy to use.
 
 First of all, we need 2 :class:`Rating` objects:
@@ -78,21 +85,50 @@ plays and higher rating confidence.
 So 1P, a winner's skill grew up from 25 to 29.396 but 2P, a loser's skill shrank
 to 20.604. And both sigma values became narrow about same magnitude.
 
-Matchmaking
------------
+Complex competition game
+------------------------
 
-Draw probability is match quality. If you're making a matchmaking service,
-match quality will be helpful:
+There are many other match rules such as N:N team match, N:N:N multiple team
+match, N:M unbalanced match, Deathmatch (Player vs. All), and so on. Mostly
+other rating systems cannot work with them but TrueSkill does. TrueSkill
+accepts any types of matches.
+
+We should arrange ratings into a group by their team:
 
 ::
 
-    while should_match:
-        r1, r2 = next_match()
-        if quality_1vs1(r1, r2) < .30:
-            rematch(r1, r2)
-            continue
-        succeed_match(r1, r2)
-        time.sleep(match_interval)
+    >>> r1 = Rating()  # 1P's skill
+    >>> r2 = Rating()  # 2P's skill
+    >>> r3 = Rating()  # 3P's skill
+    >>> t1 = [r1]  # Team A contains just 1P
+    >>> t2 = [r2, r3]  # Team B contains 2P and 3P
+
+Then we can calculate the match quality and rate them:
+
+::
+
+    >>> print '{:.1%} chance to draw'.format(quality([t1, t2]))
+    13.5% chance to draw
+    >>> (new_r1,), (new_r2, new_r3) = rate([t1, t2])
+    >>> print new_r1
+    trueskill.Rating(mu=33.731, sigma=7.317)
+    >>> print new_r2
+    trueskill.Rating(mu=16.269, sigma=7.317)
+    >>> print new_r3
+    trueskill.Rating(mu=16.269, sigma=7.317)
+
+Here're varied patterns of rating groups. All variables which start with ``r``
+are :class:`Rating` objects:
+
+- N:N team match -- ``[(r1, r2, r3), (r4, r5, r6)]``
+- N:N:N multiple team match -- ``[(r1, r2), (r3, r4), (r5, r6)]``
+- N:M unbalanced match -- ``[(r1,), (r2, r3, r4)]``
+- Deathmatch -- ``[(r1,), (r2,), (r3,), (r4,)]``
+
+Partial play
+------------
+
+Some players contribute less than other team memebers.
 
 API
 ~~~

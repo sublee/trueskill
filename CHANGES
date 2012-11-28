@@ -10,13 +10,14 @@ Under development.
 
 - Adds shorcut functions for 2 players individual match, the most usage:
   :func:`rate_1vs1` and :func:`quality_1vs1`,
+- Implements "Partial play".
 - Supports that using dictionaries as a ``rating_group`` to choose specific
   player's rating simply.
 - Works well in many Python versions, 2.5, 2.6, 2.7, 3.1, 3.2, 3.3 and many
   interpreters, CPython, `Jython`_, `PyPy`_.
 
-.. _Jython:: http://jython.org/
-.. _PyPy:: http://pypy.org/
+.. _Jython: http://jython.org/
+.. _PyPy: http://pypy.org/
 
 Version 0.1.4
 -------------
