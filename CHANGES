@@ -3,18 +3,15 @@ Version 0.2
 
 Under development.
 
-- Renames the featured functions:
-
-  - :meth:`TrueSkill.transform_ratings` is now called :meth:`TrueSkill.rate`.
-  - :meth:`TrueSkill.match_quality` is now called :meth:`TrueSkill.quality`.
-
-- Adds shorcut functions for 2 players individual match, the most usage:
-  :func:`rate_1vs1` and :func:`quality_1vs1`,
 - Implements "Partial play".
-- Supports that using dictionaries as a ``rating_group`` to choose specific
-  player's rating simply.
 - Works well in many Python versions, 2.5, 2.6, 2.7, 3.1, 3.2, 3.3 and many
   interpreters, CPython, `Jython`_, `PyPy`_.
+- Supports that using dictionaries as a ``rating_group`` to choose specific
+  player's rating simply.
+- Adds shorcut functions for 2 players individual match, the most usage:
+  :func:`rate_1vs1` and :func:`quality_1vs1`,
+- :meth:`TrueSkill.transform_ratings` is now called :meth:`TrueSkill.rate`.
+- :meth:`TrueSkill.match_quality` is now called :meth:`TrueSkill.quality`.
 
 .. _Jython: http://jython.org/
 .. _PyPy: http://pypy.org/
