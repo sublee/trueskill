@@ -229,6 +229,18 @@ class TrueSkill(object):
             keys = None
         return list(rating_groups), keys
 
+    def validate_weights(self, weights, rating_groups):
+        if weights is None:
+            weights = [(1,) * len(g) for g in rating_groups]
+        elif isinstance(weights, dict):
+            weights_dict, weights = weights, []
+            for x, group in enumerate(rating_groups):
+                w = []
+                weights.append(w)
+                for y, rating in enumerate(group):
+                    w.append(weights_dict.get((x, y), 1))
+        return weights
+
     def build_factor_graph(self, rating_groups, ranks, weights):
         """Makes nodes for the factor graph."""
         flatten_ratings = sum(imap(tuple, rating_groups), ())
@@ -346,7 +358,7 @@ class TrueSkill(object):
                               :class:`Rating` objects
         :param ranks: a ranking table. By default, it is same as the order of
                       the ``rating_groups``.
-        :param weights: weights of each players for "Partial Play"
+        :param weights: weights of each players for "partial play"
         :param min_delta: each loop checks a delta of changes and the loop
                           will stop if the delta is less then this argument
         :return: a recalculated ratings same structure as ``rating_groups``
@@ -354,20 +366,12 @@ class TrueSkill(object):
         .. versionadded:: 0.2
         """
         rating_groups, keys = self.validate_rating_groups(rating_groups)
+        weights = self.validate_weights(weights, rating_groups)
         group_size = len(rating_groups)
         if ranks is None:
             ranks = range(group_size)
         elif len(ranks) != group_size:
             raise ValueError('Wrong ranks')
-        if weights is None:
-            weights = [(1,) * len(g) for g in rating_groups]
-        elif isinstance(weights, dict):
-            weights_dict, weights = weights, []
-            for x, group in enumerate(rating_groups):
-                w = []
-                weights.append(w)
-                for y, rating in enumerate(group):
-                    w.append(weights_dict.get((x, y), 1))
         # sort rating groups by rank
         by_rank = lambda x: x[1][1]
         sorting = sorted(enumerate(izip(rating_groups, ranks, weights)),
@@ -399,7 +403,7 @@ class TrueSkill(object):
         # restore the structure with input dictionary keys
         return [dict(izip(keys[x], g)) for x, g in unsorting]
 
-    def quality(self, rating_groups):
+    def quality(self, rating_groups, weights=None):
         """Calculates the match quality of the given rating groups. A result
         is the draw probability in the association::
 
@@ -411,18 +415,22 @@ class TrueSkill(object):
 
         :param rating_groups: a list of tuples or dictionaries containing
                               :class:`Rating` objects
+        :param weights: weights of each players for "partial play"
 
         .. versionadded:: 0.2
         """
         rating_groups, keys = self.validate_rating_groups(rating_groups)
-        ratings = sum(imap(tuple, rating_groups), ())
-        length = len(ratings)
+        weights = self.validate_weights(weights, rating_groups)
+        flatten_ratings = sum(imap(tuple, rating_groups), ())
+        flatten_weights = sum(imap(tuple, weights), ())
+        length = len(flatten_ratings)
         # a vector of all of the skill means
-        mean_matrix = Matrix([[r.mu] for r in ratings])
+        mean_matrix = Matrix([[r.mu] for r in flatten_ratings])
         # a matrix whose diagonal values are the variances (sigma^2) of each
         # of the players.
         def variance_matrix(width, height):
-            for x, variance in enumerate(r.sigma ** 2 for r in ratings):
+            for x, variance in enumerate(r.sigma ** 2
+                                         for r in flatten_ratings):
                 yield (x, x), variance
         variance_matrix = Matrix(variance_matrix, length, length)
         # the player-team assignment and comparison matrix
@@ -431,15 +439,16 @@ class TrueSkill(object):
             for r, (cur, next) in enumerate(izip(rating_groups[:-1],
                                                  rating_groups[1:])):
                 for x in xrange(t, t + len(cur)):
-                    yield (r, x), 1
+                    yield (r, x), flatten_weights[x]
                     t += 1
                 x += 1
                 for x in xrange(x, x + len(next)):
-                    yield (r, x), -1
+                    yield (r, x), -flatten_weights[x]
             set_width(x + 1)
             set_height(r + 1)
         rotated_a_matrix = Matrix(rotated_a_matrix)
         a_matrix = rotated_a_matrix.transpose()
+        print a_matrix
         # match quality further derivation
         _ata = (self.beta ** 2) * rotated_a_matrix * a_matrix
         _atsa = rotated_a_matrix * variance_matrix * a_matrix
@@ -563,13 +572,13 @@ def rate(rating_groups, ranks=None, weights=None, min_delta=DELTA):
     return _g().rate(rating_groups, ranks, weights, min_delta)
 
 
-def quality(rating_groups):
+def quality(rating_groups, weights=None):
     """A proxy function for :meth:`TrueSkill.quality` of the global TrueSkill
     environment.
 
     .. versionadded:: 0.2
     """
-    return _g().quality(rating_groups)
+    return _g().quality(rating_groups, weights)
 
 
 def rate_1vs1(rating1, rating2, drawn=False, min_delta=DELTA):

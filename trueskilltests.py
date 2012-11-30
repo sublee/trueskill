@@ -304,6 +304,11 @@ def test_multiple_teams():
     assert almost(rate([t1, t2, t3], [0, 1, 1])) == \
         [(40.877, 3.840), (45.493, 2.934), (19.609, 6.396), (18.712, 5.625),
          (29.353, 7.673), (9.872, 3.891), (48.830, 4.590), (29.813, 1.976)]
+    # 1 vs 2 vs 1
+    t1 = (Rating(),)
+    t2 = (Rating(), Rating())
+    t3 = (Rating(),)
+    assert almost(quality([t1, t2, t3])) == 0.047
 
 
 def test_upset():
@@ -344,15 +349,19 @@ def test_partial_play():
     # [(33.8624, 7.3139), (16.1376, 7.3139), (16.1376, 7.3139)]
     # [(29.3965, 7.1714), (24.9996, 8.3337), (20.6035, 7.1714)]
     # [(32.3703, 7.0589), (21.3149, 8.0340), (17.6297, 7.0589)]
-    assert rate([t1, t2], weights=[[1], [1, 1]]) == rate([t1, t2])
-    assert almost(rate([t1, t2], weights=[[1], [1, 1]])) == \
+    assert rate([t1, t2], weights=[(1,), (1, 1)]) == rate([t1, t2])
+    assert almost(rate([t1, t2], weights=[(1,), (1, 1)])) == \
         [(33.730, 7.317), (16.270, 7.317), (16.270, 7.317)]
-    assert almost(rate([t1, t2], weights=[[0.5], [0.5, 0.5]])) == \
+    assert almost(rate([t1, t2], weights=[(0.5,), (0.5, 0.5)])) == \
         [(33.939, 7.312), (16.061, 7.312), (16.061, 7.312)]
-    assert almost(rate([t1, t2], weights=[[1], [0, 1]])) == \
+    assert almost(rate([t1, t2], weights=[(1,), (0, 1)])) == \
         [(29.440, 7.166), (25.000, 8.333), (20.560, 7.166)]
-    assert almost(rate([t1, t2], weights=[[1], [0.5, 1]])) == \
+    assert almost(rate([t1, t2], weights=[(1,), (0.5, 1)])) == \
         [(32.417, 7.056), (21.291, 8.033), (17.583, 7.056)] 
+    # match quality of partial play
+    t1, t2, t3 = (Rating(),), (Rating(), Rating()), (Rating(),)
+    assert almost(quality([t1, t2, t3], [(1,), (0.25, 0.75), (1,)])) == 0.2
+    assert almost(quality([t1, t2, t3], [(1,), (0.8, 0.9), (1,)])) == 0.0809
 
 
 def test_partial_play_with_weights_dict():

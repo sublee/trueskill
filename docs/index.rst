@@ -14,7 +14,7 @@ points by a Bayesian inference algorithm.
 
 With TrueSkill, you can measure players' skill; make the best matches by skill
 points; predict who's going to win. And even it works with N:N:N, a multiple
-team game even a free-for-all not only 1:1 game.
+team game even a deathmatch not only 1:1 game.
 
 This project is a Python package which implements TrueSkill rating system.
 
@@ -84,7 +84,7 @@ this match using :func:`quality_1vs1`:
     44.7% chance to draw
 
 After the game, TrueSkill recalculates their ratings by the game result. For
-example, if 1P beats 2P:
+example, if 1P beat 2P:
 
 ::
 
@@ -100,6 +100,16 @@ plays and higher rating confidence.
 
 So 1P, a winner's skill grew up from 25 to 29.396 but 2P, a loser's skill shrank
 to 20.604. And both sigma values became narrow about same magnitude.
+
+Of course, you can also handle a tie game with ``drawn=True``:
+
+::
+
+    >>> new_r1, new_r2 = rate_1vs1(r1, r2, drawn=True)
+    >>> print new_r1
+    trueskill.Rating(mu=25.000, sigma=6.458)
+    >>> print new_e2
+    trueskill.Rating(mu=25.000, sigma=6.458)
 
 Complex competition game
 ------------------------
@@ -125,7 +135,7 @@ Then we can calculate the match quality and rate them:
 
     >>> print '{:.1%} chance to draw'.format(quality([t1, t2]))
     13.5% chance to draw
-    >>> (new_r1,), (new_r2, new_r3) = rate([t1, t2])
+    >>> (new_r1,), (new_r2, new_r3) = rate([t1, t2], ranks=[0, 1])
     >>> print new_r1
     trueskill.Rating(mu=33.731, sigma=7.317)
     >>> print new_r2
@@ -133,8 +143,14 @@ Then we can calculate the match quality and rate them:
     >>> print new_r3
     trueskill.Rating(mu=16.269, sigma=7.317)
 
-Here're varied patterns of rating groups. All variables which start with ``r``
-are :class:`Rating` objects:
+If you want to describe other game results, set the ``ranks`` argument like the
+below examples:
+
+- A drawn game -- ``ranks=[0, 0]``
+- Team B won not team A -- ``ranks=[1, 0]`` (Lower rank is better)
+
+Additionally, here are varied patterns of rating groups. All variables which
+start with ``r`` are :class:`Rating` objects:
 
 - N:N team match -- ``[(r1, r2, r3), (r4, r5, r6)]``
 - N:N:N multiple team match -- ``[(r1, r2), (r3, r4), (r5, r6)]``
@@ -144,7 +160,34 @@ are :class:`Rating` objects:
 Partial play
 ------------
 
-Some players contribute less than other team memebers.
+Let's assume that there are 2 teams which each has 2 players. The game was for
+a hour but the one of players on the first team entered the game at 30 minutes
+later.
+
+If some player wasn't present for the entire duration of the game, use the
+concept of "partial play" by ``weights`` parameter. The above situation can be
+described by the following weights:
+
+- 1P on team A -- 1 (Full time)
+- 2P on team A -- 0.5 (30/60 minutes)
+- 3P on team B -- 1
+- 4P on team B -- 1
+
+As a code with a 2-dimensional list:
+
+::
+
+    # set each weights to 1, 0.5, 1, 1
+    rate([(r1, r2), (r3, r4)], weights=[(1, 0.5), (1, 1)])
+    quality([(r1, r2), (r3, r4)], weights=[(1, 0.5), (1, 1)])
+
+Or with a dictionary:
+
+::
+
+    # set a weight of 2nd player in 1st team to 0.5, otherwise leave as 1
+    rate([(r1, r2), (r3, r4)], weights={(0, 1): 0.5})
+    quality([(r1, r2), (r3, r4)], weights={(0, 1): 0.5})
 
 API
 ~~~
