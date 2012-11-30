@@ -17,7 +17,7 @@ from .factorgraph import (Variable, PriorFactor, LikelihoodFactor, SumFactor,
                           TruncateFactor)
 
 
-__version__ = '0.2.dev'
+__version__ = '0.2'
 __all__ = ['TrueSkill', 'Rating', 'rate', 'quality', 'rate_1vs1',
            'quality_1vs1', 'setup', 'MU', 'SIGMA', 'BETA', 'TAU',
            'DRAW_PROBABILITY', 'transform_ratings', 'match_quality']
