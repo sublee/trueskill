@@ -5,7 +5,7 @@ Bayesian skill rating system
 
 .. currentmodule:: trueskill
 
-What's TrueSkiil?
+What's TrueSkill?
 ~~~~~~~~~~~~~~~~~
 
 TrueSkill_ is a rating system among game players. It has been used on `Xbox
