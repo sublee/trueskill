@@ -8,15 +8,15 @@ Bayesian skill rating system
 What's TrueSkiil?
 ~~~~~~~~~~~~~~~~~
 
-`TrueSkill`_ is a rating system among game players. It has been used on `Xbox
-Live`_ to rank and match players. TrueSkill system quantizes **TRUE** skill
-points by a Bayesian inference algorithm.
+TrueSkill_ is a rating system among game players. It has been used on `Xbox
+Live`_ to rank and match players.
 
-With TrueSkill, you can measure players' skill; make the best matches by skill
-points; predict who's going to win. And even it works with N:N:N, a multiple
-team game even a deathmatch not only 1:1 game.
+This system quantizes players' **TRUE** skill points by a Bayesian inference
+algorithm and it makes to easy to find the best match between a matchmaking
+pool. It also works well with any type of match rule including N:N team game
+or deathmatch.
 
-This project is a Python package which implements TrueSkill rating system.
+This project is a Python package which implements the TrueSkill rating system.
 
 .. _TrueSkill: http://research.microsoft.com/en-us/projects/trueskill
 .. _Xbox Live: http://www.xbox.com/live
@@ -243,21 +243,26 @@ Further Reading
 If you want to more details of the TrueSkill algorithm, see also:
 
 - `TrueSkill™ Ranking System
-  <http://research.microsoft.com/en-us/projects/trueskill/>`_ by Microsoft
-- `Computing Your Skill <http://bit.ly/moserware-trueskill>`_ by Jeff Moser
-- `The Math Behind TrueSkill <http://bit.ly/trueskill-math>`_ by Jeff Moser
+  <http://research.microsoft.com/en-us/projects/trueskill>`_
+  by Microsoft Research
 - `TrueSkill Calcurator
   <http://atom.research.microsoft.com/trueskill/rankcalculator.aspx>`_
-  by Microsoft
+  by Microsoft Research
+- `Computing Your Skill <http://bit.ly/moserware-trueskill>`_ by Jeff Moser
+- `The Math Behind TrueSkill <http://bit.ly/trueskill-math>`_ by Jeff Moser
 
 Licensing and Author
 ~~~~~~~~~~~~~~~~~~~~
 
-This project is licensed under BSD_. See LICENSE_ for the details.
+This TrueSkill package is opened under the BSD_ license but the `TrueSkill™`_
+brand is not. Microsoft permits only Xbox Live games or non-commercial projects
+to use TrueSkill™. If your project is commercial, you should find another
+rating system. See LICENSE_ for the details.
 
 I'm `Heungsub Lee`_, a game developer. Any regarding questions or patches are
 welcomed.
 
 .. _BSD: http://en.wikipedia.org/wiki/BSD_licenses
+.. _TrueSkill™: http://research.microsoft.com/en-us/projects/trueskill
 .. _LICENSE: https://github.com/sublee/trueskill/blob/master/LICENSE
 .. _Heungsub Lee: http://subl.ee/
