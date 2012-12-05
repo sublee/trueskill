@@ -17,7 +17,7 @@ from .factorgraph import (Variable, PriorFactor, LikelihoodFactor, SumFactor,
                           TruncateFactor)
 
 
-__version__ = '0.2'
+__version__ = '0.2.1'
 __all__ = ['TrueSkill', 'Rating', 'rate', 'quality', 'rate_1vs1',
            'quality_1vs1', 'setup', 'MU', 'SIGMA', 'BETA', 'TAU',
            'DRAW_PROBABILITY', 'transform_ratings', 'match_quality']
@@ -448,7 +448,6 @@ class TrueSkill(object):
             set_height(r + 1)
         rotated_a_matrix = Matrix(rotated_a_matrix)
         a_matrix = rotated_a_matrix.transpose()
-        print a_matrix
         # match quality further derivation
         _ata = (self.beta ** 2) * rotated_a_matrix * a_matrix
         _atsa = rotated_a_matrix * variance_matrix * a_matrix
