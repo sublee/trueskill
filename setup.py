@@ -84,6 +84,6 @@ setup(
                  'Topic :: Games/Entertainment'],
     install_requires=['distribute'],
     test_suite='trueskilltests',
-    tests_require=['pytest'],
-    use_2to3=(sys.version_info >= (3,)),
+    tests_require=['pytest', 'almost'],
+    use_2to3=(sys.version_info[0] >= 3),
 )

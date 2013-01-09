@@ -7,7 +7,7 @@
 
     .. _scipy:: http://www.scipy.org/
 
-    :copyright: (c) 2012 by Heungsub Lee.
+    :copyright: (c) 2012-2013 by Heungsub Lee.
     :license: BSD, see LICENSE for more details.
 """
 import math

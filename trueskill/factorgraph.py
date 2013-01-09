@@ -5,7 +5,7 @@
 
     This module contains nodes for the factor graph of TrueSkill algorithm.
 
-    :copyright: (c) 2012 by Heungsub Lee.
+    :copyright: (c) 2012-2013 by Heungsub Lee.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
@@ -194,4 +194,4 @@ class TruncateFactor(Factor):
         w = self.w_func(*args)
         denom = (1. - w)
         pi, tau = div.pi / denom, (div.tau + sqrt_pi * v) / denom
-        return self.var.update_value(self, pi, tau)
+        return val.update_value(self, pi, tau)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
 
+from almost import Approximate
 from pytest import deprecated_call, raises
 try:
     import numpy
@@ -8,6 +9,21 @@ except ImportError:
     numpy = False
 
 from trueskill import *
+
+
+class almost(Approximate):
+
+    def normalize(self, value):
+        if isinstance(value, Rating):
+            return self.normalize(tuple(value))
+        elif isinstance(value, list):
+            try:
+                if isinstance(value[0][0], Rating):
+                    # flatten transformed ratings
+                    return list(sum(value, ()))
+            except (TypeError, IndexError):
+                pass
+        return super(almost, self).normalize(value)
 
 
 # usage
@@ -171,47 +187,6 @@ def generate_teams(sizes, env=None):
 
 def generate_individual(size, env=None):
     return generate_teams([1] * size, env)
-
-
-class almost(object):
-
-    def __init__(self, val, precision=3):
-        if isinstance(val, list):
-            flatten = []
-            for item in val:
-                if isinstance(item, dict):
-                    item = tuple(item.itervalues())
-                if isinstance(item, tuple):
-                    for rating in item:
-                        flatten.append(tuple(rating))
-            self.val = flatten
-        else:
-            self.val = val
-        self.precision = precision
-
-    def almost_equals(self, val1, val2):
-        if isinstance(val1, list):
-            for item1, item2 in zip(val1, val2):
-                if not self.almost_equals(item1[0], item2[0]):
-                    return False
-                elif not self.almost_equals(item1[1], item2[1]):
-                    return False
-            return True
-        else:
-            if round(val1, self.precision) == round(val2, self.precision):
-                return True
-            try:
-                fmt = '%.{0}f'.format(self.precision)
-            except AttributeError:
-                fmt = '%%.%df' % self.precision
-            mantissa = lambda f: int((fmt % f).replace('.', ''))
-            return abs(mantissa(val1) - mantissa(val2)) <= 1
-
-    def __eq__(self, other):
-        return self.almost_equals(self.val, other)
-
-    def __repr__(self):
-        return repr(self.val)
 
 
 def test_n_vs_n():

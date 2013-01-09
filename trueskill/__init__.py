@@ -5,7 +5,7 @@
 
     The TrueSkill rating system.
 
-    :copyright: (c) 2012 by Heungsub Lee
+    :copyright: (c) 2012-2013 by Heungsub Lee
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
@@ -17,7 +17,7 @@ from .factorgraph import (Variable, PriorFactor, LikelihoodFactor, SumFactor,
                           TruncateFactor)
 
 
-__version__ = '0.2.1'
+__version__ = '0.2.2.dev'
 __all__ = ['TrueSkill', 'Rating', 'rate', 'quality', 'rate_1vs1',
            'quality_1vs1', 'setup', 'MU', 'SIGMA', 'BETA', 'TAU',
            'DRAW_PROBABILITY', 'transform_ratings', 'match_quality']
@@ -460,7 +460,7 @@ class TrueSkill(object):
         return math.exp(e_arg) * math.sqrt(s_arg)
 
     def rate_1vs1(self, rating1, rating2, drawn=False, min_delta=DELTA):
-        """A shortcut to rate just 2 players in individual match::
+        """A shortcut to rate just 2 players in a deathmatch::
 
             new_rating1, new_rating2 = env.rate_1vs1(rating1, rating2)
 
@@ -479,7 +479,7 @@ class TrueSkill(object):
 
     def quality_1vs1(self, rating1, rating2):
         """A shortcut to calculate the match quality between just 2 players in
-        individual match::
+        a deathmatch::
 
             if env.quality_1vs1(rating1, rating2) > 0.8:
                 print 'They look have similar skills.'
