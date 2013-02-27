@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
+import sys
 
 from almost import Approximate
 from pytest import deprecated_call, raises
@@ -332,7 +333,7 @@ def test_partial_play():
     assert almost(rate([t1, t2], weights=[(1,), (0, 1)])) == \
         [(29.440, 7.166), (25.000, 8.333), (20.560, 7.166)]
     assert almost(rate([t1, t2], weights=[(1,), (0.5, 1)])) == \
-        [(32.417, 7.056), (21.291, 8.033), (17.583, 7.056)] 
+        [(32.417, 7.056), (21.291, 8.033), (17.583, 7.056)]
     # match quality of partial play
     t1, t2, t3 = (Rating(),), (Rating(), Rating()), (Rating(),)
     assert almost(quality([t1, t2, t3], [(1,), (0.25, 0.75), (1,)])) == 0.2
@@ -395,3 +396,23 @@ if numpy:
             rate([(r1,), (r2,)])
         finally:
             numpy.seterr(**old_settings)
+
+
+def test_issue5():
+    """The `issue #5`_, opened by @warner121.
+
+    The result of TrueSkill calculator by Microsoft is N(-273.092, 2.683) and
+    N(-75.830, 2.080), of Moserware's C# Skills is N(NaN, 2.6826) and
+    N(NaN, 2.0798). I choose Microsoft's result as an expectation.
+
+    .. _issue #5: https://github.com/sublee/trueskill/issues/5
+    """
+    from logging import StreamHandler, DEBUG
+    from trueskillhelpers import factorgraph_logging, force_scipycompat
+    r1, r2 = Rating(-323.263, 2.965), Rating(-48.441, 2.190)
+    with factorgraph_logging() as logger:
+        logger.setLevel(DEBUG)
+        logger.addHandler(StreamHandler(sys.stderr))
+        with force_scipycompat():
+            assert almost(rate_1vs1(r1, r2)) == \
+                   [(-273.092, 2.683), (-75.830, 2.080)]
