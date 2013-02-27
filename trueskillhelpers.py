@@ -5,29 +5,24 @@ import logging
 
 @contextmanager
 def factorgraph_logging():
-    import trueskill.factorgraph as f
+    import inspect
+    from trueskill.factorgraph import Variable
+    from trueskill.mathematics import Gaussian
     logger = logging.getLogger('TrueSkill')
-    def _patch(Factor):
-        Factor._up, Factor._down = Factor.up, Factor.down
-        def up(self, *args, **kwargs):
-            rv = self._up(*args, **kwargs)
-            logger.debug('{0} up {1:.3f}'.format(Factor.__name__, rv))
-            return rv
-        def down(self, *args, **kwargs):
-            rv = self._down(*args, **kwargs)
-            logger.debug('{0} down {1:.3f}'.format(Factor.__name__, rv))
-            return rv
-        Factor.up, Factor.down = up, down
-    def _unpatch(Factor):
-        Factor.up, Factor.down = Factor._up, Factor._down
-        del Factor._up, Factor._down
-    factor_names = ['PriorFactor', 'LikelihoodFactor', 'SumFactor',
-                    'TruncateFactor']
-    for factor_name in factor_names:
-        _patch(getattr(f, factor_name))
+    orig_set = Variable.set
+    def set(self, val):
+        frames = inspect.getouterframes(inspect.currentframe())
+        for frame in frames:
+            method = frame[3]
+            if method in ('up', 'down'):
+                break
+        factor = type(frame[0].f_locals['self']).__name__
+        before = Gaussian(pi=self.pi, tau=self.tau)
+        logger.debug('{0}.{1}: {3}'.format(factor, method, before, val))
+        return orig_set(self, val)
+    Variable.set = set
     yield logger
-    for factor_name in factor_names:
-        _unpatch(getattr(f, factor_name))
+    Variable.set = orig_set
 
 
 @contextmanager
