@@ -39,8 +39,10 @@ class Variable(Node, Gaussian):
         return delta
 
     def delta(self, other):
-        return max(abs(self.tau - other.tau),
-                   math.sqrt(abs(self.pi - other.pi)))
+        pi_delta = abs(self.pi - other.pi)
+        if pi_delta == inf:
+            return 0.
+        return max(abs(self.tau - other.tau), math.sqrt(pi_delta))
 
     def update_message(self, factor, pi=0, tau=0, message=None):
         message = message or Gaussian(pi=pi, tau=tau)
@@ -193,5 +195,9 @@ class TruncateFactor(Factor):
         v = self.v_func(*args)
         w = self.w_func(*args)
         denom = (1. - w)
-        pi, tau = div.pi / denom, (div.tau + sqrt_pi * v) / denom
-        return val.update_value(self, pi, tau)
+        if denom:
+            pi, tau = div.pi / denom, (div.tau + sqrt_pi * v) / denom
+        else:
+            pi = tau = inf
+        delta = val.update_value(self, pi, tau)
+        return delta if denom else 0

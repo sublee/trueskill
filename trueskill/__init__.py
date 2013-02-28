@@ -42,7 +42,8 @@ def v_win(diff, draw_margin):
     mean.
     """
     x = diff - draw_margin
-    return pdf(x) / cdf(x)
+    denom = cdf(x)
+    return (pdf(x) / denom) if denom else -x
 
 
 def v_draw(diff, draw_margin):
@@ -51,7 +52,7 @@ def v_draw(diff, draw_margin):
     a, b = draw_margin - abs_diff, -draw_margin - abs_diff
     denom = cdf(a) - cdf(b)
     numer = pdf(b) - pdf(a)
-    return numer / denom * (-1 if diff < 0 else 1)
+    return (numer / denom) * (-1 if diff < 0 else 1)
 
 
 def w_win(diff, draw_margin):
@@ -60,6 +61,8 @@ def w_win(diff, draw_margin):
     """
     x = diff - draw_margin
     v = v_win(diff, draw_margin)
+    if v == -x:
+        return 1. if diff < 0 else 0.
     return v * (v + x)
 
 

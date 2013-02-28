@@ -10,6 +10,11 @@ except ImportError:
     numpy = False
 
 from trueskill import *
+from trueskillhelpers import with_or_without_scipy
+
+
+inf = float('inf')
+nan = float('nan')
 
 
 class almost(Approximate):
@@ -190,6 +195,7 @@ def generate_individual(size, env=None):
     return generate_teams([1] * size, env)
 
 
+@with_or_without_scipy
 def test_n_vs_n():
     # 1 vs 1
     t1, t2 = generate_teams([1, 1])
@@ -213,6 +219,7 @@ def test_n_vs_n():
          (22.802, 8.059), (22.802, 8.059), (22.802, 8.059), (22.802, 8.059)]
 
 
+@with_or_without_scipy
 def test_1_vs_n():
     t1, = generate_teams([1])
     # 1 vs 2
@@ -237,6 +244,7 @@ def test_1_vs_n():
          (9.418, 7.917), (9.418, 7.917), (9.418, 7.917), (9.418, 7.917)]
 
 
+@with_or_without_scipy
 def test_individual():
     # 3 players
     players = generate_individual(3)
@@ -271,6 +279,7 @@ def test_individual():
          (17.664, 4.433), (15.653, 4.524), (13.190, 4.711), (9.461, 5.276)]
 
 
+@with_or_without_scipy
 def test_multiple_teams():
     # 2 vs 4 vs 2
     t1 = (Rating(40, 4), Rating(45, 3))
@@ -287,6 +296,7 @@ def test_multiple_teams():
     assert almost(quality([t1, t2, t3])) == 0.047
 
 
+@with_or_without_scipy
 def test_upset():
     # 1 vs 1
     t1, t2 = (Rating(),), (Rating(50, 12.5),)
@@ -318,6 +328,7 @@ def test_upset():
          (31.751, 3.064), (34.051, 2.541), (38.263, 1.849), (44.118, 0.983)]
 
 
+@with_or_without_scipy
 def test_partial_play():
     t1, t2 = (Rating(),), (Rating(), Rating())
     # each results from C# Skills:
@@ -340,6 +351,7 @@ def test_partial_play():
     assert almost(quality([t1, t2, t3], [(1,), (0.8, 0.9), (1,)])) == 0.0809
 
 
+@with_or_without_scipy
 def test_partial_play_with_weights_dict():
     t1, t2 = (Rating(),), (Rating(), Rating())
     assert rate([t1, t2], weights={(0, 0): 0.5, (1, 0): 0.5, (1, 1): 0.5}) == \
@@ -353,6 +365,7 @@ def test_partial_play_with_weights_dict():
 # reported bugs
 
 
+@with_or_without_scipy
 def test_issue3():
     """The `issue #3`_, opened by @youknowone.
 
@@ -398,21 +411,16 @@ if numpy:
             numpy.seterr(**old_settings)
 
 
+@with_or_without_scipy
 def test_issue5():
     """The `issue #5`_, opened by @warner121.
 
     The result of TrueSkill calculator by Microsoft is N(-273.092, 2.683) and
-    N(-75.830, 2.080), of Moserware's C# Skills is N(NaN, 2.6826) and
+    N(-75.830, 2.080), of C# Skills by Moserware is N(NaN, 2.6826) and
     N(NaN, 2.0798). I choose Microsoft's result as an expectation.
 
     .. _issue #5: https://github.com/sublee/trueskill/issues/5
     """
-    from logging import StreamHandler, DEBUG
-    from trueskillhelpers import factorgraph_logging, force_scipycompat
     r1, r2 = Rating(-323.263, 2.965), Rating(-48.441, 2.190)
-    with factorgraph_logging() as logger:
-        logger.setLevel(DEBUG)
-        logger.addHandler(StreamHandler(sys.stderr))
-        with force_scipycompat():
-            assert almost(rate_1vs1(r1, r2)) == \
-                   [(-273.092, 2.683), (-75.830, 2.080)]
+    # the result of C# Skills by Moserware
+    assert almost(rate_1vs1(r1, r2)) == [(nan, 2.683), (nan, 2.080)]

@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import with_statement
 from contextlib import contextmanager
+import functools
+import inspect
 import logging
 
 
@@ -34,3 +37,27 @@ def force_scipycompat():
     t.cdf, t.pdf, t.ppf = c.cdf, c.pdf, c.ppf
     yield
     t.cdf, t.pdf, t.ppf = cdf, pdf, ppf
+
+
+def with_or_without_scipy(f=None):
+    if f is None:
+        def iterate():
+            try:
+                import scipy
+            except ImportError:
+                # without
+                yield False
+            else:
+                # with
+                yield True
+                # without
+                with force_scipycompat():
+                    yield False
+        return iterate()
+    @functools.wraps(f)
+    def wrapped(*args, **kwargs):
+        for with_scipy in with_or_without_scipy():
+            if 'with_scipy' in inspect.getargspec(f)[0]:
+                kwargs['with_scipy'] = with_scipy
+            f(*args, **kwargs)
+    return wrapped
