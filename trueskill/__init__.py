@@ -61,8 +61,6 @@ def w_win(diff, draw_margin):
     """
     x = diff - draw_margin
     v = v_win(diff, draw_margin)
-    if v == -x:
-        return 1. if diff < 0 else 0.
     return v * (v + x)
 
 
@@ -245,7 +243,31 @@ class TrueSkill(object):
         return weights
 
     def build_factor_graph(self, rating_groups, ranks, weights):
-        """Makes nodes for the factor graph."""
+        """Makes nodes for the factor graph.
+
+        Here's an example of a TrueSkill factor graph when 1 vs 2 vs 1 match::
+
+            F = a factor
+            v = a variable
+
+              rating:  F F F F
+                       | | | |
+                       v v v v
+                       | | | |
+                perf:  F F F F
+                       | \ / |
+                       v  v  v
+                       |  |  |
+            teamperf:  F  F  F
+                       \ / \ /
+                        v   v
+                        |   |
+            teamdiff:   F   F
+                        |   |
+                        v   v
+                        |   |
+               trunc:   F   F
+        """
         flatten_ratings = sum(imap(tuple, rating_groups), ())
         flatten_weights = sum(imap(tuple, weights), ())
         size = len(flatten_ratings)
@@ -271,26 +293,27 @@ class TrueSkill(object):
                     start = 0
                 end = team_sizes[team]
                 child_perf_vars = perf_vars[start:end]
-                #coeffs = [1] * len(child_perf_vars)
                 coeffs = flatten_weights[start:end]
                 yield SumFactor(teamperf_var, child_perf_vars, coeffs)
         def build_teamdiff_layer():
             for team, teamdiff_var in enumerate(teamdiff_vars):
-                yield SumFactor(teamdiff_var, teamperf_vars[team:team + 2],
-                                [+1, -1])
+                yield SumFactor(teamdiff_var,
+                                teamperf_vars[team:team + 2], [+1, -1])
         def build_trunc_layer():
             for x, teamdiff_var in enumerate(teamdiff_vars):
                 size = sum(len(group) for group in rating_groups[x:x + 2])
                 draw_margin = calc_draw_margin(self.draw_probability,
                                                self.beta, size)
-                if ranks[x] == ranks[x + 1]:
+                if ranks[x] == ranks[x + 1]:  # is a tie?
                     v_func, w_func = v_draw, w_draw
                 else:
                     v_func, w_func = v_win, w_win
                 yield TruncateFactor(teamdiff_var, v_func, w_func, draw_margin)
         # build layers
-        return (list(build_rating_layer()), list(build_perf_layer()),
-                list(build_teamperf_layer()), list(build_teamdiff_layer()),
+        return (list(build_rating_layer()),
+                list(build_perf_layer()),
+                list(build_teamperf_layer()),
+                list(build_teamdiff_layer()),
                 list(build_trunc_layer()))
 
     def run_schedule(self, rating_layer, perf_layer, teamperf_layer,

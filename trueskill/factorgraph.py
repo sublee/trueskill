@@ -195,9 +195,5 @@ class TruncateFactor(Factor):
         v = self.v_func(*args)
         w = self.w_func(*args)
         denom = (1. - w)
-        if denom:
-            pi, tau = div.pi / denom, (div.tau + sqrt_pi * v) / denom
-        else:
-            pi = tau = inf
-        delta = val.update_value(self, pi, tau)
-        return delta if denom else 0
+        pi, tau = div.pi / denom, (div.tau + sqrt_pi * v) / denom
+        return val.update_value(self, pi, tau)

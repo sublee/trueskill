@@ -10,7 +10,7 @@ except ImportError:
     numpy = False
 
 from trueskill import *
-from trueskillhelpers import with_or_without_scipy
+from trueskillhelpers import force_scipycompat, with_or_without_scipy
 
 
 inf = float('inf')
@@ -32,9 +32,16 @@ class almost(Approximate):
         return super(almost, self).normalize(value)
 
 
+_rate = lambda *a, **k: almost(rate(*a, **k))
+_rate_1vs1 = lambda *a, **k: almost(rate_1vs1(*a, **k))
+_quality = lambda *a, **k: almost(quality(*a, **k))
+_quality_1vs1 = lambda *a, **k: almost(quality_1vs1(*a, **k))
+
+
 # usage
 
 
+'''
 def test_compatibility_with_another_rating_systems():
     """All rating system modules should implement ``rate_1vs1`` and
     ``quality_1vs1`` to provide shortcuts for 1 vs 1 simple competition games.
@@ -199,22 +206,20 @@ def generate_individual(size, env=None):
 def test_n_vs_n():
     # 1 vs 1
     t1, t2 = generate_teams([1, 1])
-    assert almost(quality([t1, t2])) == 0.447
-    assert almost(rate([t1, t2])) == \
-        [(29.396, 7.171), (20.604, 7.171)]
-    assert almost(rate([t1, t2], [0, 0])) == \
-        [(25.000, 6.458), (25.000, 6.458)]
+    assert _quality([t1, t2]) == 0.447
+    assert _rate([t1, t2]) == [(29.396, 7.171), (20.604, 7.171)]
+    assert _rate([t1, t2], [0, 0]) == [(25.000, 6.458), (25.000, 6.458)]
     # 2 vs 2
     t1, t2 = generate_teams([2, 2])
-    assert almost(quality([t1, t2])) == 0.447
-    assert almost(rate([t1, t2])) == \
+    assert _quality([t1, t2]) == 0.447
+    assert _rate([t1, t2]) == \
         [(28.108, 7.774), (28.108, 7.774), (21.892, 7.774), (21.892, 7.774)]
-    assert almost(rate([t1, t2], [0, 0])) == \
+    assert _rate([t1, t2], [0, 0]) == \
         [(25.000, 7.455), (25.000, 7.455), (25.000, 7.455), (25.000, 7.455)]
     # 4 vs 4
     t1, t2 = generate_teams([4, 4])
-    assert almost(quality([t1, t2])) == 0.447
-    assert almost(rate([t1, t2])) == \
+    assert _quality([t1, t2]) == 0.447
+    assert _rate([t1, t2]) == \
         [(27.198, 8.059), (27.198, 8.059), (27.198, 8.059), (27.198, 8.059),
          (22.802, 8.059), (22.802, 8.059), (22.802, 8.059), (22.802, 8.059)]
 
@@ -224,22 +229,22 @@ def test_1_vs_n():
     t1, = generate_teams([1])
     # 1 vs 2
     t2, = generate_teams([2])
-    assert almost(quality([t1, t2])) == 0.135
-    assert almost(rate([t1, t2])) == \
+    assert _quality([t1, t2]) == 0.135
+    assert _rate([t1, t2]) == \
         [(33.730, 7.317), (16.270, 7.317), (16.270, 7.317)]
-    assert almost(rate([t1, t2], [0, 0])) == \
+    assert _rate([t1, t2], [0, 0]) == \
         [(31.660, 7.138), (18.340, 7.138), (18.340, 7.138)]
     # 1 vs 3
     t2, = generate_teams([3])
-    assert almost(quality([t1, t2])) == 0.012
-    assert almost(rate([t1, t2])) == \
+    assert _quality([t1, t2]) == 0.012
+    assert _rate([t1, t2]) == \
         [(36.337, 7.527), (13.663, 7.527), (13.663, 7.527), (13.663, 7.527)]
     assert almost(rate([t1, t2], [0, 0]), 2) == \
         [(34.990, 7.455), (15.010, 7.455), (15.010, 7.455), (15.010, 7.455)]
     # 1 vs 7
     t2, = generate_teams([7])
-    assert almost(quality([t1, t2])) == 0
-    assert almost(rate([t1, t2])) == \
+    assert _quality([t1, t2]) == 0
+    assert _rate([t1, t2]) == \
         [(40.582, 7.917), (9.418, 7.917), (9.418, 7.917), (9.418, 7.917),
          (9.418, 7.917), (9.418, 7.917), (9.418, 7.917), (9.418, 7.917)]
 
@@ -248,31 +253,31 @@ def test_1_vs_n():
 def test_individual():
     # 3 players
     players = generate_individual(3)
-    assert almost(quality(players)) == 0.200
-    assert almost(rate(players)) == \
+    assert _quality(players) == 0.200
+    assert _rate(players) == \
         [(31.675, 6.656), (25.000, 6.208), (18.325, 6.656)]
-    assert almost(rate(players, [0] * 3)) == \
+    assert _rate(players, [0] * 3) == \
         [(25.000, 5.698), (25.000, 5.695), (25.000, 5.698)]
     # 4 players
     players = generate_individual(4)
-    assert almost(quality(players)) == 0.089
-    assert almost(rate(players)) == \
+    assert _quality(players) == 0.089
+    assert _rate(players) == \
         [(33.207, 6.348), (27.401, 5.787), (22.599, 5.787), (16.793, 6.348)]
     # 5 players
     players = generate_individual(5)
-    assert almost(quality(players)) == 0.040
-    assert almost(rate(players)) == \
+    assert _quality(players) == 0.040
+    assert _rate(players) == \
         [(34.363, 6.136), (29.058, 5.536), (25.000, 5.420), (20.942, 5.536),
          (15.637, 6.136)]
     # 8 players
     players = generate_individual(8)
-    assert almost(quality(players)) == 0.004
-    assert almost(rate(players, [0] * 8)) == \
+    assert _quality(players) == 0.004
+    assert _rate(players, [0] * 8) == \
         [(25.000, 4.592), (25.000, 4.583), (25.000, 4.576), (25.000, 4.573),
          (25.000, 4.573), (25.000, 4.576), (25.000, 4.583), (25.000, 4.592)]
     # 16 players
     players = generate_individual(16)
-    assert almost(rate(players)) == \
+    assert _rate(players) == \
         [(40.539, 5.276), (36.810, 4.711), (34.347, 4.524), (32.336, 4.433),
          (30.550, 4.380), (28.893, 4.349), (27.310, 4.330), (25.766, 4.322),
          (24.234, 4.322), (22.690, 4.330), (21.107, 4.349), (19.450, 4.380),
@@ -285,45 +290,45 @@ def test_multiple_teams():
     t1 = (Rating(40, 4), Rating(45, 3))
     t2 = (Rating(20, 7), Rating(19, 6), Rating(30, 9), Rating(10, 4))
     t3 = (Rating(50, 5), Rating(30, 2))
-    assert almost(quality([t1, t2, t3])) == 0.367
-    assert almost(rate([t1, t2, t3], [0, 1, 1])) == \
+    assert _quality([t1, t2, t3]) == 0.367
+    assert _rate([t1, t2, t3], [0, 1, 1]) == \
         [(40.877, 3.840), (45.493, 2.934), (19.609, 6.396), (18.712, 5.625),
          (29.353, 7.673), (9.872, 3.891), (48.830, 4.590), (29.813, 1.976)]
     # 1 vs 2 vs 1
     t1 = (Rating(),)
     t2 = (Rating(), Rating())
     t3 = (Rating(),)
-    assert almost(quality([t1, t2, t3])) == 0.047
+    assert _quality([t1, t2, t3]) == 0.047
 
 
 @with_or_without_scipy
 def test_upset():
     # 1 vs 1
     t1, t2 = (Rating(),), (Rating(50, 12.5),)
-    assert almost(quality([t1, t2])) == 0.110
-    assert almost(rate([t1, t2], [0, 0])) == [(31.662, 7.137), (35.010, 7.910)]
+    assert _quality([t1, t2]) == 0.110
+    assert _rate([t1, t2], [0, 0]) == [(31.662, 7.137), (35.010, 7.910)]
     # 2 vs 2
     t1 = (Rating(20, 8), Rating(25, 6))
     t2 = (Rating(35, 7), Rating(40, 5))
-    assert almost(quality([t1, t2])) == 0.084
-    assert almost(rate([t1, t2])) == \
+    assert _quality([t1, t2]) == 0.084
+    assert _rate([t1, t2]) == \
         [(29.698, 7.008), (30.455, 5.594), (27.575, 6.346), (36.211, 4.768)]
     # 3 vs 2
     t1 = (Rating(28, 7), Rating(27, 6), Rating(26, 5))
     t2 = (Rating(30, 4), Rating(31, 3))
-    assert almost(quality([t1, t2])) == 0.254
-    assert almost(rate([t1, t2], [0, 1])) == \
+    assert _quality([t1, t2]) == 0.254
+    assert _rate([t1, t2], [0, 1]) == \
         [(28.658, 6.770), (27.484, 5.856), (26.336, 4.917), (29.785, 3.958),
          (30.879, 2.983)]
-    assert almost(rate([t1, t2], [1, 0])) == \
+    assert _rate([t1, t2], [1, 0]) == \
         [(21.840, 6.314), (22.474, 5.575), (22.857, 4.757), (32.012, 3.877),
          (32.132, 2.949)]
     # 8 players
     players = [(Rating(10, 8),), (Rating(15, 7),), (Rating(20, 6),),
                (Rating(25, 5),), (Rating(30, 4),), (Rating(35, 3),),
                (Rating(40, 2),), (Rating(45, 1),)]
-    assert almost(quality(players)) == 0.000
-    assert almost(rate(players)) == \
+    assert _quality(players) == 0.000
+    assert _rate(players) == \
         [(35.135, 4.506), (32.585, 4.037), (31.329, 3.756), (30.984, 3.453),
          (31.751, 3.064), (34.051, 2.541), (38.263, 1.849), (44.118, 0.983)]
 
@@ -337,18 +342,18 @@ def test_partial_play():
     # [(29.3965, 7.1714), (24.9996, 8.3337), (20.6035, 7.1714)]
     # [(32.3703, 7.0589), (21.3149, 8.0340), (17.6297, 7.0589)]
     assert rate([t1, t2], weights=[(1,), (1, 1)]) == rate([t1, t2])
-    assert almost(rate([t1, t2], weights=[(1,), (1, 1)])) == \
+    assert _rate([t1, t2], weights=[(1,), (1, 1)]) == \
         [(33.730, 7.317), (16.270, 7.317), (16.270, 7.317)]
-    assert almost(rate([t1, t2], weights=[(0.5,), (0.5, 0.5)])) == \
+    assert _rate([t1, t2], weights=[(0.5,), (0.5, 0.5)]) == \
         [(33.939, 7.312), (16.061, 7.312), (16.061, 7.312)]
-    assert almost(rate([t1, t2], weights=[(1,), (0, 1)])) == \
+    assert _rate([t1, t2], weights=[(1,), (0, 1)]) == \
         [(29.440, 7.166), (25.000, 8.333), (20.560, 7.166)]
-    assert almost(rate([t1, t2], weights=[(1,), (0.5, 1)])) == \
+    assert _rate([t1, t2], weights=[(1,), (0.5, 1)]) == \
         [(32.417, 7.056), (21.291, 8.033), (17.583, 7.056)]
     # match quality of partial play
     t1, t2, t3 = (Rating(),), (Rating(), Rating()), (Rating(),)
-    assert almost(quality([t1, t2, t3], [(1,), (0.25, 0.75), (1,)])) == 0.2
-    assert almost(quality([t1, t2, t3], [(1,), (0.8, 0.9), (1,)])) == 0.0809
+    assert _quality([t1, t2, t3], [(1,), (0.25, 0.75), (1,)]) == 0.2
+    assert _quality([t1, t2, t3], [(1,), (0.8, 0.9), (1,)]) == 0.0809
 
 
 @with_or_without_scipy
@@ -409,9 +414,11 @@ if numpy:
             rate([(r1,), (r2,)])
         finally:
             numpy.seterr(**old_settings)
+'''
 
 
-@with_or_without_scipy
+#@with_or_without_scipy
+@force_scipycompat
 def test_issue5():
     """The `issue #5`_, opened by @warner121.
 
@@ -419,8 +426,20 @@ def test_issue5():
     N(-75.830, 2.080), of C# Skills by Moserware is N(NaN, 2.6826) and
     N(NaN, 2.0798). I choose Microsoft's result as an expectation.
 
+    Thie error occurs when a winner has too low rating than a loser.
+
     .. _issue #5: https://github.com/sublee/trueskill/issues/5
     """
-    r1, r2 = Rating(-323.263, 2.965), Rating(-48.441, 2.190)
-    # the result of C# Skills by Moserware
-    assert almost(rate_1vs1(r1, r2)) == [(nan, 2.683), (nan, 2.080)]
+    from logging import DEBUG, StreamHandler
+    from trueskillhelpers import factorgraph_logging
+    #assert _rate_1vs1(Rating(-323.263, 2.965), Rating(-48.441, 2.190), drawn=True) == \
+    #    [(-273.361, 2.683), (-75.683, 2.080)]
+    #assert _rate_1vs1(Rating(-323.263, 2.965), Rating(-48.441, 2.190)) == \
+    #    [(-273.092, 2.683), (-75.830, 2.080)]
+    with factorgraph_logging(color=True) as logger:
+        logger.setLevel(DEBUG)
+        logger.addHandler(StreamHandler(sys.stderr))
+        assert _rate_1vs1(Rating(), Rating(1000)) == \
+            [(415.298, 6.455), (609.702, 6.455)]
+        assert _rate_1vs1(Rating(), Rating(1000), drawn=True) == \
+            [(414.705, 6.455), (610.295, 6.455)]

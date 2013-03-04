@@ -58,6 +58,9 @@ class Gaussian(object):
 
     __div__ = __truediv__  # for Python 2
 
+    def __eq__(self, other):
+        return self.pi == other.pi and self.tau == other.tau
+
     def __repr__(self):
         return 'N(mu=%.3f, sigma=%.3f)' % (self.mu, self.sigma)
 
