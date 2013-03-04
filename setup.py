@@ -33,6 +33,8 @@ See Also
 
 """
 from __future__ import with_statement
+import distutils
+import os
 import re
 from setuptools import setup
 from setuptools.command.test import test
@@ -51,6 +53,16 @@ def run_tests(self):
     test_file = pyc.sub('.py', __import__(self.test_suite).__file__)
     raise SystemExit(__import__('pytest').main([test_file]))
 test.run_tests = run_tests
+
+
+# increase test coverage
+tests_require = ['pytest', 'almost>=0.1.4']
+include_py = distutils.sysconfig.get_config_vars('INCLUDEPY')
+if os.path.isfile(os.path.join(include_py, 'Python.h')):  # detect python-dev
+    tests_require.append('numpy')
+    tests_require.append('scipy')
+if sys.version_info[0] < 3:
+    tests_require.append('mpmath')
 
 
 setup(
@@ -84,6 +96,6 @@ setup(
                  'Topic :: Games/Entertainment'],
     install_requires=['distribute'],
     test_suite='trueskilltests',
-    tests_require=['pytest', 'almost>=0.1.4'],
+    tests_require=tests_require,
     use_2to3=(sys.version_info[0] >= 3),
 )

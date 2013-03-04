@@ -9,6 +9,7 @@
     :copyright: (c) 2012-2013 by Heungsub Lee.
     :license: BSD, see LICENSE for more details.
 """
+from __future__ import absolute_import
 import copy
 import math
 try:
@@ -16,15 +17,8 @@ try:
 except ImportError:
     Number = (int, long, float, complex)
 
-try:
-    from scipy.stats import norm
-except ImportError:
-    from .scipycompat import cdf, pdf, ppf
-else:
-    cdf, pdf, ppf = norm.cdf, norm.pdf, norm.ppf
 
-
-__all__ = ['cdf', 'pdf', 'ppf', 'Gaussian', 'Matrix']
+__all__ = ['Gaussian', 'Matrix']
 
 
 class Gaussian(object):

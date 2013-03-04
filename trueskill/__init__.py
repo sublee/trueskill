@@ -11,8 +11,10 @@
 from __future__ import absolute_import
 from itertools import chain, imap, izip
 import math
+import weakref
 
-from .mathematics import cdf, pdf, ppf, Gaussian, Matrix
+from . import stats
+from .mathematics import Gaussian, Matrix
 from .factorgraph import (Variable, PriorFactor, LikelihoodFactor, SumFactor,
                           TruncateFactor)
 
@@ -37,49 +39,17 @@ DRAW_PROBABILITY = .10
 DELTA = 0.0001
 
 
-def v_win(diff, draw_margin):
-    """The non-draw version of "V" function. "V" calculates a variation of a
-    mean.
-    """
-    x = diff - draw_margin
-    denom = cdf(x)
-    return (pdf(x) / denom) if denom else -x
-
-
-def v_draw(diff, draw_margin):
-    """The draw version of "V" function."""
-    abs_diff = abs(diff)
-    a, b = draw_margin - abs_diff, -draw_margin - abs_diff
-    denom = cdf(a) - cdf(b)
-    numer = pdf(b) - pdf(a)
-    return (numer / denom) * (-1 if diff < 0 else 1)
-
-
-def w_win(diff, draw_margin):
-    """The non-draw version of "W" function. "W" calculates a variation of a
-    standard deviation.
-    """
-    x = diff - draw_margin
-    v = v_win(diff, draw_margin)
-    return v * (v + x)
-
-
-def w_draw(diff, draw_margin):
-    """The draw version of "W" function."""
-    abs_diff = abs(diff)
-    a, b = draw_margin - abs_diff, -draw_margin - abs_diff
-    denom = cdf(a) - cdf(b)
-    v = v_draw(abs_diff, draw_margin)
-    return (v ** 2) + (a * pdf(a) - b * pdf(b)) / denom
-
-
-def calc_draw_probability(draw_margin, beta, size):
+def calc_draw_probability(draw_margin, beta, size, cdf=None):
     """Calculates a draw-probability from the given ``draw_margin``."""
+    if cdf is None:
+        cdf = _g().cdf
     return 2 * cdf(draw_margin / (math.sqrt(size) * beta)) - 1
 
 
-def calc_draw_margin(draw_probability, beta, size):
+def calc_draw_margin(draw_probability, beta, size, ppf=None):
     """Calculates a draw-margin from the given ``draw_probability``."""
+    if ppf is None:
+        ppf = _g().ppf
     return ppf((draw_probability + 1) / 2.) * math.sqrt(size) * beta
 
 
@@ -169,12 +139,56 @@ class TrueSkill(object):
     """
 
     def __init__(self, mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
-                 draw_probability=DRAW_PROBABILITY):
+                 draw_probability=DRAW_PROBABILITY, stats_implement=None):
         self.mu = mu
         self.sigma = sigma
         self.beta = beta
         self.tau = tau
         self.draw_probability = draw_probability
+        self.cdf, self.pdf, self.ppf = stats.choose_implement(stats_implement)
+
+    def v_win(self, diff, draw_margin):
+        """The non-draw version of "V" function. "V" calculates a variation of
+        a mean.
+        """
+        x = diff - draw_margin
+        denom = self.cdf(x)
+        return (self.pdf(x) / denom) if denom else -x
+
+    def v_draw(self, diff, draw_margin):
+        """The draw version of "V" function."""
+        abs_diff = abs(diff)
+        a, b = draw_margin - abs_diff, -draw_margin - abs_diff
+        denom = self.cdf(a) - self.cdf(b)
+        numer = self.pdf(b) - self.pdf(a)
+        return ((numer / denom) if denom else a) * (-1 if diff < 0 else +1)
+
+    def w_win(self, diff, draw_margin):
+        """The non-draw version of "W" function. "W" calculates a variation of
+        a standard deviation.
+        """
+        x = diff - draw_margin
+        v = self.v_win(diff, draw_margin)
+        if v == -x:
+            raise FloatingPointError('Cannot calculate correctly, set '
+                                     'stats_implement to \'mpmath\'')
+        return v * (v + x)
+
+    def w_draw(self, diff, draw_margin):
+        """The draw version of "W" function."""
+        abs_diff = abs(diff)
+        a, b = draw_margin - abs_diff, -draw_margin - abs_diff
+        denom = self.cdf(a) - self.cdf(b)
+        if not denom:
+            raise FloatingPointError('Cannot calculate correctly, set '
+                                     'stats_implement to \'mpmath\'')
+        v = self.v_draw(abs_diff, draw_margin)
+        return (v ** 2) + (a * self.pdf(a) - b * self.pdf(b)) / denom
+
+    def calc_draw_margin(self, size):
+        """Calculates a draw-margin."""
+        return calc_draw_margin(self.draw_probability, self.beta, size,
+                                ppf=self.ppf)
 
     def create_rating(self, mu=None, sigma=None):
         """Initializes new :class:`Rating` object, but it fixes default mu and
@@ -302,12 +316,11 @@ class TrueSkill(object):
         def build_trunc_layer():
             for x, teamdiff_var in enumerate(teamdiff_vars):
                 size = sum(len(group) for group in rating_groups[x:x + 2])
-                draw_margin = calc_draw_margin(self.draw_probability,
-                                               self.beta, size)
+                draw_margin = self.calc_draw_margin(size)
                 if ranks[x] == ranks[x + 1]:  # is a tie?
-                    v_func, w_func = v_draw, w_draw
+                    v_func, w_func = self.v_draw, self.w_draw
                 else:
-                    v_func, w_func = v_win, w_win
+                    v_func, w_func = self.v_win, self.w_win
                 yield TruncateFactor(teamdiff_var, v_func, w_func, draw_margin)
         # build layers
         return (list(build_rating_layer()),
@@ -419,7 +432,7 @@ class TrueSkill(object):
         for start, end in izip([0] + team_sizes[:-1], team_sizes):
             group = []
             for f in rating_layer[start:end]:
-                group.append(Rating(f.var.mu, f.var.sigma))
+                group.append(Rating(float(f.var.mu), float(f.var.sigma)))
             transformed_groups.append(tuple(group))
         by_hint = lambda x: x[0]
         unsorting = sorted(izip((x for x, __ in sorting), transformed_groups),
@@ -633,7 +646,8 @@ def match_quality(rating_groups):
 
 
 def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
-          draw_probability=DRAW_PROBABILITY, env=None):
+          draw_probability=DRAW_PROBABILITY, stats_implement=None,
+          env=None):
     """Setups the global TrueSkill environment.
 
     >>> Rating()
@@ -647,5 +661,8 @@ def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
         _global.pop()
     except IndexError:
         pass
-    _global.append(env or TrueSkill(mu, sigma, beta, tau, draw_probability))
+    if env is None:
+        env = TrueSkill(mu, sigma, beta, tau, draw_probability,
+                        stats_implement)
+    _global.append(env)
     return _g()

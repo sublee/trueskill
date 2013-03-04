@@ -10,7 +10,7 @@ except ImportError:
     numpy = False
 
 from trueskill import *
-from trueskillhelpers import force_scipycompat, with_or_without_scipy
+from trueskillhelpers import all_stats_implements
 
 
 inf = float('inf')
@@ -41,7 +41,6 @@ _quality_1vs1 = lambda *a, **k: almost(quality_1vs1(*a, **k))
 # usage
 
 
-'''
 def test_compatibility_with_another_rating_systems():
     """All rating system modules should implement ``rate_1vs1`` and
     ``quality_1vs1`` to provide shortcuts for 1 vs 1 simple competition games.
@@ -202,7 +201,7 @@ def generate_individual(size, env=None):
     return generate_teams([1] * size, env)
 
 
-@with_or_without_scipy
+@all_stats_implements
 def test_n_vs_n():
     # 1 vs 1
     t1, t2 = generate_teams([1, 1])
@@ -224,7 +223,7 @@ def test_n_vs_n():
          (22.802, 8.059), (22.802, 8.059), (22.802, 8.059), (22.802, 8.059)]
 
 
-@with_or_without_scipy
+@all_stats_implements
 def test_1_vs_n():
     t1, = generate_teams([1])
     # 1 vs 2
@@ -249,7 +248,7 @@ def test_1_vs_n():
          (9.418, 7.917), (9.418, 7.917), (9.418, 7.917), (9.418, 7.917)]
 
 
-@with_or_without_scipy
+@all_stats_implements
 def test_individual():
     # 3 players
     players = generate_individual(3)
@@ -284,7 +283,7 @@ def test_individual():
          (17.664, 4.433), (15.653, 4.524), (13.190, 4.711), (9.461, 5.276)]
 
 
-@with_or_without_scipy
+@all_stats_implements
 def test_multiple_teams():
     # 2 vs 4 vs 2
     t1 = (Rating(40, 4), Rating(45, 3))
@@ -301,7 +300,7 @@ def test_multiple_teams():
     assert _quality([t1, t2, t3]) == 0.047
 
 
-@with_or_without_scipy
+@all_stats_implements
 def test_upset():
     # 1 vs 1
     t1, t2 = (Rating(),), (Rating(50, 12.5),)
@@ -333,7 +332,7 @@ def test_upset():
          (31.751, 3.064), (34.051, 2.541), (38.263, 1.849), (44.118, 0.983)]
 
 
-@with_or_without_scipy
+@all_stats_implements
 def test_partial_play():
     t1, t2 = (Rating(),), (Rating(), Rating())
     # each results from C# Skills:
@@ -356,7 +355,7 @@ def test_partial_play():
     assert _quality([t1, t2, t3], [(1,), (0.8, 0.9), (1,)]) == 0.0809
 
 
-@with_or_without_scipy
+@all_stats_implements
 def test_partial_play_with_weights_dict():
     t1, t2 = (Rating(),), (Rating(), Rating())
     assert rate([t1, t2], weights={(0, 0): 0.5, (1, 0): 0.5, (1, 1): 0.5}) == \
@@ -370,7 +369,7 @@ def test_partial_play_with_weights_dict():
 # reported bugs
 
 
-@with_or_without_scipy
+@all_stats_implements
 def test_issue3():
     """The `issue #3`_, opened by @youknowone.
 
@@ -414,32 +413,31 @@ if numpy:
             rate([(r1,), (r2,)])
         finally:
             numpy.seterr(**old_settings)
-'''
 
 
-#@with_or_without_scipy
-@force_scipycompat
 def test_issue5():
     """The `issue #5`_, opened by @warner121.
 
+    This error occurs when a winner has too low rating than a loser. Basically
+    Python cannot calculate correct result but mpmath_ can. I added
+    ``stats_implement`` option to :class:`TrueSkill` class. If it is set to
+    'mpmath' then the problem will have gone.
+
     The result of TrueSkill calculator by Microsoft is N(-273.092, 2.683) and
     N(-75.830, 2.080), of C# Skills by Moserware is N(NaN, 2.6826) and
-    N(NaN, 2.0798). I choose Microsoft's result as an expectation.
-
-    Thie error occurs when a winner has too low rating than a loser.
+    N(NaN, 2.0798). I choose Microsoft's result as an expectation for the test
+    suite.
 
     .. _issue #5: https://github.com/sublee/trueskill/issues/5
+    .. _mpmath: http://mpmath.googlecode.com/
     """
-    from logging import DEBUG, StreamHandler
-    from trueskillhelpers import factorgraph_logging
-    #assert _rate_1vs1(Rating(-323.263, 2.965), Rating(-48.441, 2.190), drawn=True) == \
-    #    [(-273.361, 2.683), (-75.683, 2.080)]
-    #assert _rate_1vs1(Rating(-323.263, 2.965), Rating(-48.441, 2.190)) == \
-    #    [(-273.092, 2.683), (-75.830, 2.080)]
-    with factorgraph_logging(color=True) as logger:
-        logger.setLevel(DEBUG)
-        logger.addHandler(StreamHandler(sys.stderr))
-        assert _rate_1vs1(Rating(), Rating(1000)) == \
-            [(415.298, 6.455), (609.702, 6.455)]
-        assert _rate_1vs1(Rating(), Rating(1000), drawn=True) == \
-            [(414.705, 6.455), (610.295, 6.455)]
+    with raises(FloatingPointError):
+        rate_1vs1(Rating(-323.263, 2.965), Rating(-48.441, 2.190))
+    with raises(FloatingPointError):
+        rate_1vs1(Rating(), Rating(1000))
+    env = TrueSkill(stats_implement='mpmath')
+    R = env.create_rating
+    assert almost(env.rate_1vs1(R(-323.263, 2.965), R(-48.441, 2.190)), 0) == \
+        [(-273.361, 2.683), (-75.683, 2.080)]
+    assert almost(env.rate_1vs1(R(), R(1000)), 0) == \
+        [(415.298, 6.455), (609.702, 6.455)]

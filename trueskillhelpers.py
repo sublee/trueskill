@@ -104,44 +104,26 @@ def factorgraph_logging(color=False):
     Factor.__init__, Variable.set = orig_factor_init, orig_variable_set
 
 
-def force_scipycompat(f=None):
-    """Don't use scipy within a context."""
-    if f is None:
-        @contextmanager
-        def context():
-            import trueskill as t
-            import trueskill.scipycompat as c
-            cdf, pdf, ppf = t.cdf, t.pdf, t.ppf
-            t.cdf, t.pdf, t.ppf = c.cdf, c.pdf, c.ppf
-            yield
-            t.cdf, t.pdf, t.ppf = cdf, pdf, ppf
-        return context()
-    @functools.wraps(f)
-    def wrapped(*args, **kwargs):
-        with force_scipycompat():
-            return f(*args, **kwargs)
-    return wrapped
-
-
-def with_or_without_scipy(f=None):
+def all_stats_implements(f=None):
+    import trueskill
     if f is None:
         def iterate():
-            try:
-                import scipy
-            except ImportError:
-                # without
-                yield False
-            else:
-                # with
-                yield True
-                # without
-                with force_scipycompat():
-                    yield False
+            env = trueskill._g()
+            args = [env.mu, env.sigma, env.beta, env.tau, env.draw_probability]
+            for name in [None, 'mpmath', 'scipy']:
+                if name is not None:
+                    try:
+                        __import__(name)
+                    except ImportError:
+                        continue
+                trueskill.setup(*(args + [name]))
+                yield name
+            trueskill.setup(env=env)
         return iterate()
     @functools.wraps(f)
     def wrapped(*args, **kwargs):
-        for with_scipy in with_or_without_scipy():
-            if 'with_scipy' in inspect.getargspec(f)[0]:
-                kwargs['with_scipy'] = with_scipy
+        for stats_implement in all_stats_implements():
+            if 'stats_implement' in inspect.getargspec(f)[0]:
+                kwargs['stats_implement'] = stats_implement
             f(*args, **kwargs)
     return wrapped

@@ -1,22 +1,19 @@
 # -*- coding: utf-8 -*-
 """
-    trueskill.scipycompat
-    ~~~~~~~~~~~~~~~~~~~~~
-
-    A fallback of `scipy`_.
-
-    .. _scipy:: http://www.scipy.org/
+    trueskill.stats
+    ~~~~~~~~~~~~~~~
 
     :copyright: (c) 2012-2013 by Heungsub Lee.
     :license: BSD, see LICENSE for more details.
 """
+import functools
 import math
 
 
-__all__ = ['cdf', 'pdf', 'ppf']
+__all__ = ['choose_implement', 'cdf', 'pdf', 'ppf']
 
 
-def erfcc(x):
+def erfc(x):
     """Complementary error function (via http://bit.ly/zOLqbc)"""
     z = abs(x)
     t = 1. / (1. + z / 2.)
@@ -28,8 +25,8 @@ def erfcc(x):
     return 2. - r if x < 0 else r
 
 
-def ierfcc(y):
-    """The inverse function of erfcc"""
+def erfcinv(y, erfc=erfc):
+    """The inverse function of erfc"""
     if y >= 2:
         return -100
     elif y <= 0:
@@ -41,22 +38,37 @@ def ierfcc(y):
     x = -0.70711 * \
         ((2.30753 + t * 0.27061) / (1. + t * (0.99229 + t * 0.04481)) - t)
     for i in xrange(2):
-        err = erfcc(x) - y
+        err = erfc(x) - y
         x += err / (1.12837916709551257 * math.exp(-(x ** 2)) - x * err)
     return x if zero_point else -x
 
 
 def cdf(x, mu=0, sigma=1):
     """Cumulative distribution function"""
-    return 0.5 * erfcc(-(x - mu) / (sigma * math.sqrt(2)))
+    return 0.5 * erfc(-(x - mu) / (sigma * math.sqrt(2)))
 
 
 def pdf(x, mu=0, sigma=1):
     """Probability density function"""
-    return (1 / math.sqrt(2 * math.pi) * abs(sigma)) * \
-        math.exp(-(((x - mu) / abs(sigma)) ** 2 / 2))
+    return (1 / math.sqrt(2 * math.pi) * abs(sigma) *
+            math.exp(-(((x - mu) / abs(sigma)) ** 2 / 2)))
 
 
 def ppf(x, mu=0, sigma=1):
     """The inverse function of CDF"""
-    return mu - sigma * math.sqrt(2) * ierfcc(2 * x)
+    return mu - sigma * math.sqrt(2) * erfcinv(2 * x)
+
+
+def choose_implement(name):
+    if name is None:  # fallback
+        return cdf, pdf, ppf
+    elif name == 'mpmath':
+        import mpmath
+        mpmath_erfcinv = functools.partial(erfcinv, erfc=mpmath.erfc)
+        def mpmath_ppf(x, mu=0, sigma=1):
+            return (mu - sigma * mpmath.sqrt(2) * mpmath_erfcinv(2 * x))
+        return mpmath.ncdf, mpmath.npdf, mpmath_ppf
+    elif name == 'scipy':
+        from scipy.stats import norm
+        return norm.cdf, norm.pdf, norm.ppf
+    raise ValueError('Unknown statistics implement: %r' % name)
