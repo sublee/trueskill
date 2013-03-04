@@ -1,7 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-    trueskill.stats
-    ~~~~~~~~~~~~~~~
+    trueskill.statistics
+    ~~~~~~~~~~~~~~~~~~~~
+
+    Provides mathematical statistics implement chooser.
+
+    Available implements:
+
+    - ``None`` (default)
+    - scipy_
+    - mpmath_
+
+    .. _scipy: http://www.scipy.org/
+    .. _mpmath: https://code.google.com/p/mpmath
 
     :copyright: (c) 2012-2013 by Heungsub Lee.
     :license: BSD, see LICENSE for more details.
@@ -10,7 +21,7 @@ import functools
 import math
 
 
-__all__ = ['choose_implement', 'cdf', 'pdf', 'ppf']
+__all__ = ['available_implements', 'choose_implement', 'cdf', 'pdf', 'ppf']
 
 
 def erfc(x):
@@ -57,6 +68,17 @@ def pdf(x, mu=0, sigma=1):
 def ppf(x, mu=0, sigma=1):
     """The inverse function of CDF"""
     return mu - sigma * math.sqrt(2) * erfcinv(2 * x)
+
+
+def available_implements():
+    implements = [None]
+    for name in ['mpmath', 'scipy']:
+        try:
+            __import__(name)
+        except ImportError:
+            continue
+        implements.append(name)
+    return implements
 
 
 def choose_implement(name):

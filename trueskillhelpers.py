@@ -5,6 +5,11 @@ import functools
 import inspect
 import logging
 
+import trueskill
+from trueskill.factorgraph import Factor, Variable
+from trueskill.mathematics import Gaussian
+from trueskill.statistics import available_implements
+
 
 @contextmanager
 def factorgraph_logging(color=False):
@@ -19,8 +24,6 @@ def factorgraph_logging(color=False):
             rate_1vs1(Rating(), Rating())
     """
     import inspect
-    from trueskill.factorgraph import Factor, Variable
-    from trueskill.mathematics import Gaussian
     # color mode uses the termcolor module
     if color:
         try:
@@ -104,21 +107,24 @@ def factorgraph_logging(color=False):
     Factor.__init__, Variable.set = orig_factor_init, orig_variable_set
 
 
+@contextmanager
+def similar_env(env=None, **kwargs):
+    if env is None:
+        env = trueskill._g()
+    env_kwargs = {'mu': env.mu, 'sigma': env.sigma, 'beta': env.beta,
+                  'tau': env.tau, 'draw_probability': env.draw_probability,
+                  'stats_implement': env.stats_implement}
+    env_kwargs.update(kwargs)
+    yield trueskill.setup(**env_kwargs)
+    trueskill.setup(env=env)
+
+
 def all_stats_implements(f=None):
-    import trueskill
     if f is None:
         def iterate():
-            env = trueskill._g()
-            args = [env.mu, env.sigma, env.beta, env.tau, env.draw_probability]
-            for name in [None, 'mpmath', 'scipy']:
-                if name is not None:
-                    try:
-                        __import__(name)
-                    except ImportError:
-                        continue
-                trueskill.setup(*(args + [name]))
-                yield name
-            trueskill.setup(env=env)
+            for name in available_implements():
+                with similar_env(stats_implement=name) as env:
+                    yield env
         return iterate()
     @functools.wraps(f)
     def wrapped(*args, **kwargs):

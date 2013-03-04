@@ -13,10 +13,10 @@ from itertools import chain, imap, izip
 import math
 import weakref
 
-from . import stats
-from .mathematics import Gaussian, Matrix
 from .factorgraph import (Variable, PriorFactor, LikelihoodFactor, SumFactor,
                           TruncateFactor)
+from .mathematics import Gaussian, Matrix
+from .statistics import choose_implement as choose_stats_implement
 
 
 __version__ = '0.2.2.dev'
@@ -145,7 +145,8 @@ class TrueSkill(object):
         self.beta = beta
         self.tau = tau
         self.draw_probability = draw_probability
-        self.cdf, self.pdf, self.ppf = stats.choose_implement(stats_implement)
+        self.stats_implement = stats_implement
+        self.cdf, self.pdf, self.ppf = choose_stats_implement(stats_implement)
 
     def v_win(self, diff, draw_margin):
         """The non-draw version of "V" function. "V" calculates a variation of

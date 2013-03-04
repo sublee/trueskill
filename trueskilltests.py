@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
-from __future__ import with_statement
+from __future__ import print_function, with_statement
 import sys
 
 from almost import Approximate
 from pytest import deprecated_call, raises
-try:
-    import numpy
-except ImportError:
-    numpy = False
 
 from trueskill import *
+from trueskill.statistics import available_implements
 from trueskillhelpers import all_stats_implements
+
+
+stats_implements = available_implements()
+print('stats_implements:', stats_implements)
 
 
 inf = float('inf')
@@ -395,7 +396,7 @@ def test_issue3():
     rate([t1, t2], [0, 28])
 
 
-if numpy:
+if 'scipy' in stats_implements:
     def test_issue4():
         """The `issue #4`_, opened by @sublee.
 
@@ -405,6 +406,7 @@ if numpy:
 
         .. _issue #4: https://github.com/sublee/trueskill/issues/4
         """
+        import numpy
         r1, r2 = Rating(105.247, 0.439), Rating(27.030, 0.901)
         # make numpy to raise FloatingPointError instead of warning
         # RuntimeWarning
@@ -415,29 +417,31 @@ if numpy:
             numpy.seterr(**old_settings)
 
 
-def test_issue5():
-    """The `issue #5`_, opened by @warner121.
+if 'mpmath' in stats_implements:
+    def test_issue5():
+        """The `issue #5`_, opened by @warner121.
 
-    This error occurs when a winner has too low rating than a loser. Basically
-    Python cannot calculate correct result but mpmath_ can. I added
-    ``stats_implement`` option to :class:`TrueSkill` class. If it is set to
-    'mpmath' then the problem will have gone.
+        This error occurs when a winner has too low rating than a loser.
+        Basically Python cannot calculate correct result but mpmath_ can. I
+        added ``stats_implement`` option to :class:`TrueSkill` class. If it is
+        set to 'mpmath' then the problem will have gone.
 
-    The result of TrueSkill calculator by Microsoft is N(-273.092, 2.683) and
-    N(-75.830, 2.080), of C# Skills by Moserware is N(NaN, 2.6826) and
-    N(NaN, 2.0798). I choose Microsoft's result as an expectation for the test
-    suite.
+        The result of TrueSkill calculator by Microsoft is N(-273.092, 2.683)
+        and N(-75.830, 2.080), of C# Skills by Moserware is N(NaN, 2.6826) and
+        N(NaN, 2.0798). I choose Microsoft's result as an expectation for the
+        test suite.
 
-    .. _issue #5: https://github.com/sublee/trueskill/issues/5
-    .. _mpmath: http://mpmath.googlecode.com/
-    """
-    with raises(FloatingPointError):
-        rate_1vs1(Rating(-323.263, 2.965), Rating(-48.441, 2.190))
-    with raises(FloatingPointError):
-        rate_1vs1(Rating(), Rating(1000))
-    env = TrueSkill(stats_implement='mpmath')
-    R = env.create_rating
-    assert almost(env.rate_1vs1(R(-323.263, 2.965), R(-48.441, 2.190)), 0) == \
-        [(-273.361, 2.683), (-75.683, 2.080)]
-    assert almost(env.rate_1vs1(R(), R(1000)), 0) == \
-        [(415.298, 6.455), (609.702, 6.455)]
+        .. _issue #5: https://github.com/sublee/trueskill/issues/5
+        .. _mpmath: http://mpmath.googlecode.com/
+        """
+        with raises(FloatingPointError):
+            rate_1vs1(Rating(-323.263, 2.965), Rating(-48.441, 2.190))
+        with raises(FloatingPointError):
+            rate_1vs1(Rating(), Rating(1000))
+        env = TrueSkill(stats_implement='mpmath')
+        R = env.create_rating
+        _rate_1vs1 = lambda *a, **k: almost(env.rate_1vs1(*a, **k), 0)
+        assert _rate_1vs1(R(-323.263, 2.965), R(-48.441, 2.190)) == \
+            [(-273.361, 2.683), (-75.683, 2.080)]
+        assert _rate_1vs1(R(), R(1000)) == \
+            [(415.298, 6.455), (609.702, 6.455)]
