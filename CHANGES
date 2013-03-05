@@ -1,17 +1,16 @@
 Version 0.3
 -----------
 
+Released on Mar 6th 2013.
+
 :class:`TrueSkill` got a new option ``backend`` to choose cdf, pdf, ppf
-implementation. There are 3 choices; ``None`` -- internal implementation,
-scipy_, mpmath_.
+implementation.
 
 When winners have too lower rating than losers, :meth:`TrueSkill.rate` will
-raise :exc:`FloatingPointError` if the backend is ``None`` or scipy. This
-is reported at `issue #5`_. From this version, you can avoid the problem with
-mpmath backend.
+raise :exc:`FloatingPointError` if the backend is ``None`` or 'scipy'. But from
+this version, you can avoid the problem with 'mpmath' backend. This was
+reported at `issue #5`_.
 
-.. _scipy: http://www.scipy.org/
-.. _mpmath: https://code.google.com/p/mpmath
 .. _issue #5: https://github.com/sublee/trueskill/issues/5
 
 Version 0.2.1

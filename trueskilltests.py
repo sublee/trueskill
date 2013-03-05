@@ -179,10 +179,13 @@ def test_list_instead_of_tuple():
     assert quality([[r1], [r2]]) == quality([(r1,), (r2,)])
 
 
-def test_custom_backend():
+def test_backend():
     env = TrueSkill(backend=(NotImplemented, NotImplemented, NotImplemented))
     with raises(TypeError):
         env.rate_1vs1(Rating(), Rating())
+    with raises(ValueError):
+        # '__not_defined__' backend is not defined
+        TrueSkill(backend='__not_defined__')
 
 
 # algorithm

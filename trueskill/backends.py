@@ -76,12 +76,37 @@ def pdf(x, mu=0, sigma=1):
 ppf = _gen_ppf(erfc)
 
 
-def available_backends():
-    """Detects list of available backends. All of supported backends are:
+def choose_backend(backend):
+    """Returns a tuple containing cdf, pdf, ppf from the chosen backend.
 
-    - ``None`` -- internal implementation
-    - mpmath_
-    - scipy_
+    >>> cdf, pdf, ppf = choose_backend(None)
+    >>> cdf(-10)
+    7.619853263532764e-24
+    >>> cdf, pdf, ppf = choose_backend('mpmath')
+    >>> cdf(-10)
+    mpf('7.6198530241605255e-24')
+    """
+    if backend is None:  # fallback
+        return cdf, pdf, ppf
+    elif backend == 'mpmath':
+        import mpmath
+        return mpmath.ncdf, mpmath.npdf, _gen_ppf(mpmath.erfc, math=mpmath)
+    elif backend == 'scipy':
+        from scipy.stats import norm
+        return norm.cdf, norm.pdf, norm.ppf
+    raise ValueError('%r backend is not defined' % backend)
+
+
+def available_backends():
+    """Detects list of available backends. All of defined backends are ``None``
+    -- internal implementation, mpmath_, scipy_.
+
+    You can check if the backend is available in the current environment with
+    this function::
+
+        if 'mpmath' in available_backends():
+            # mpmath can be used in the current environment
+            setup(backend='mpmath')
 
     .. _scipy: http://www.scipy.org/
     .. _mpmath: https://code.google.com/p/mpmath
@@ -94,16 +119,3 @@ def available_backends():
             continue
         backends.append(backend)
     return backends
-
-
-def choose_backend(backend):
-    """Returns a tuple containing cdf, pdf, ppf from the choosen backend."""
-    if backend is None:  # fallback
-        return cdf, pdf, ppf
-    elif backend == 'mpmath':
-        import mpmath
-        return mpmath.ncdf, mpmath.npdf, _gen_ppf(mpmath.erfc, math=mpmath)
-    elif backend == 'scipy':
-        from scipy.stats import norm
-        return norm.cdf, norm.pdf, norm.ppf
-    raise ValueError('%r backend is not available' % backend)

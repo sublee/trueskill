@@ -121,7 +121,7 @@ class TrueSkill(object):
     :param beta: the distance that guarantees about an 80% chance of winning
     :param tau: the dynamic factor
     :param draw_probability: the draw probability of the game
-    :param backend: the name of a backend which provide cdf, pdf, ppf. see
+    :param backend: the name of a backend which implements cdf, pdf, ppf. see
                     :mod:`trueskill.backends` for more details
     """
 
@@ -248,30 +248,23 @@ class TrueSkill(object):
         return weights
 
     def build_factor_graph(self, rating_groups, ranks, weights):
-        """Makes nodes for the factor graph.
+        """Makes nodes for the TrueSkill factor graph.
 
         Here's an example of a TrueSkill factor graph when 1 vs 2 vs 1 match::
 
-            F = a factor
-            v = a variable
-
-              rating:  F F F F
-                       | | | |
-                       v v v v
-                       | | | |
-                perf:  F F F F
-                       | \ / |
-                       v  v  v
-                       |  |  |
-            teamperf:  F  F  F
-                       \ / \ /
-                        v   v
-                        |   |
-            teamdiff:   F   F
-                        |   |
-                        v   v
-                        |   |
-               trunc:   F   F
+              rating_layer:  O O O O  (PriorFactor)
+                             | | | |
+                             | | | |
+                perf_layer:  O O O O  (LikelihoodFactor)
+                             | \ / |
+                             |  |  |
+            teamperf_layer:  O  O  O  (SumFactor)
+                             \ / \ /
+                              |   |
+            teamdiff_layer:   O   O   (SumFactor)
+                              |   |
+                              |   |
+               trunc_layer:   O   O   (TruncateFactor)
         """
         flatten_ratings = sum(imap(tuple, rating_groups), ())
         flatten_weights = sum(imap(tuple, weights), ())
