@@ -13,13 +13,13 @@ from itertools import chain, imap, izip
 import math
 import weakref
 
+from .backends import choose_backend
 from .factorgraph import (Variable, PriorFactor, LikelihoodFactor, SumFactor,
                           TruncateFactor)
 from .mathematics import Gaussian, Matrix
-from .statistics import choose_implement as choose_stats_implement
 
 
-__version__ = '0.2.2.dev'
+__version__ = '0.3'
 __all__ = ['TrueSkill', 'Rating', 'rate', 'quality', 'rate_1vs1',
            'quality_1vs1', 'setup', 'MU', 'SIGMA', 'BETA', 'TAU',
            'DRAW_PROBABILITY', 'transform_ratings', 'match_quality']
@@ -96,21 +96,6 @@ class Rating(Gaussian):
     def __iter__(self):
         return iter((self.mu, self.sigma))
 
-    def __eq__(self, other):
-        return self.pi == other.pi and self.tau == other.tau
-
-    def __lt__(self, other):
-        return self.mu < other.mu
-
-    def __le__(self, other):
-        return self.mu <= other.mu
-
-    def __gt__(self, other):
-        return self.mu > other.mu
-
-    def __ge__(self, other):
-        return self.mu >= other.mu
-
     def __repr__(self):
         c = type(self)
         args = (c.__module__, c.__name__, self.mu, self.sigma)
@@ -136,17 +121,22 @@ class TrueSkill(object):
     :param beta: the distance that guarantees about an 80% chance of winning
     :param tau: the dynamic factor
     :param draw_probability: the draw probability of the game
+    :param backend: the name of a backend which provide cdf, pdf, ppf. see
+                    :mod:`trueskill.backends` for more details
     """
 
     def __init__(self, mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
-                 draw_probability=DRAW_PROBABILITY, stats_implement=None):
+                 draw_probability=DRAW_PROBABILITY, backend=None):
         self.mu = mu
         self.sigma = sigma
         self.beta = beta
         self.tau = tau
         self.draw_probability = draw_probability
-        self.stats_implement = stats_implement
-        self.cdf, self.pdf, self.ppf = choose_stats_implement(stats_implement)
+        self.backend = backend
+        if isinstance(backend, tuple):
+            self.cdf, self.pdf, self.ppf = backend
+        else:
+            self.cdf, self.pdf, self.ppf = choose_backend(backend)
 
     def v_win(self, diff, draw_margin):
         """The non-draw version of "V" function. "V" calculates a variation of
@@ -171,8 +161,8 @@ class TrueSkill(object):
         x = diff - draw_margin
         v = self.v_win(diff, draw_margin)
         if v == -x:
-            raise FloatingPointError('Cannot calculate correctly, set '
-                                     'stats_implement to \'mpmath\'')
+            raise FloatingPointError('Cannot calculate correctly, '
+                                     'set backend to \'mpmath\'')
         return v * (v + x)
 
     def w_draw(self, diff, draw_margin):
@@ -181,8 +171,8 @@ class TrueSkill(object):
         a, b = draw_margin - abs_diff, -draw_margin - abs_diff
         denom = self.cdf(a) - self.cdf(b)
         if not denom:
-            raise FloatingPointError('Cannot calculate correctly, set '
-                                     'stats_implement to \'mpmath\'')
+            raise FloatingPointError('Cannot calculate correctly, '
+                                     'set backend to \'mpmath\'')
         v = self.v_draw(abs_diff, draw_margin)
         return (v ** 2) + (a * self.pdf(a) - b * self.pdf(b)) / denom
 
@@ -335,7 +325,7 @@ class TrueSkill(object):
         """Sends messages within every nodes of the factor graph until the
         result is reliable.
         """
-        if min_delta < 0:
+        if min_delta <= 0:
             raise ValueError('min_delta must be greater than 0')
         # gray arrows
         for f in chain(rating_layer, perf_layer, teamperf_layer):
@@ -402,6 +392,10 @@ class TrueSkill(object):
         :param min_delta: each loop checks a delta of changes and the loop
                           will stop if the delta is less then this argument
         :return: a recalculated ratings same structure as ``rating_groups``
+        :raises ValueError: wrong ranks or math domain error
+        :raised FloatingPointError: occurs when winners have too lower rating
+                                    than losers. 'mpmath' backend could solve
+                                    this error
 
         .. versionadded:: 0.2
         """
@@ -586,10 +580,16 @@ class TrueSkill(object):
 
     def __repr__(self):
         c = type(self)
+        if self.backend is None:
+            backend = ''
+        elif isinstance(self.backend, tuple):
+            backend = ' backend=...'
+        else:
+            backend = ' backend=%r' % self.backend
         args = (c.__module__, c.__name__, self.mu, self.sigma, self.beta,
-                self.tau, self.draw_probability * 100)
+                self.tau, self.draw_probability * 100, backend)
         return '<%s.%s mu=%.3f sigma=%.3f beta=%.3f tau=%.3f ' \
-               'draw_probability=%.1f%%>' % args
+               'draw_probability=%.1f%%%s>' % args
 
 
 _global = []
@@ -647,7 +647,7 @@ def match_quality(rating_groups):
 
 
 def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
-          draw_probability=DRAW_PROBABILITY, stats_implement=None,
+          draw_probability=DRAW_PROBABILITY, backend=None,
           env=None):
     """Setups the global TrueSkill environment.
 
@@ -663,7 +663,6 @@ def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
     except IndexError:
         pass
     if env is None:
-        env = TrueSkill(mu, sigma, beta, tau, draw_probability,
-                        stats_implement)
+        env = TrueSkill(mu, sigma, beta, tau, draw_probability, backend)
     _global.append(env)
     return _g()

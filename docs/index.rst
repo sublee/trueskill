@@ -232,6 +232,15 @@ Constants
 
 .. autodata:: DRAW_PROBABILITY
 
+Mathematical statistics backends
+--------------------------------
+
+.. module:: trueskill.backends
+
+.. autofunction:: trueskill.backends.choose_backend
+
+.. autofunction:: trueskill.backends.available_backends
+
 Changelog
 ~~~~~~~~~
 

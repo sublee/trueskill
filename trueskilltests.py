@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, with_statement
+from __future__ import with_statement
 import sys
 
 from almost import Approximate
 from pytest import deprecated_call, raises
 
+from conftest import various_backends
 from trueskill import *
-from trueskill.statistics import available_implements
-from trueskillhelpers import all_stats_implements
-
-
-stats_implements = available_implements()
-print('stats_implements:', stats_implements)
 
 
 inf = float('inf')
@@ -173,15 +168,21 @@ def test_rating_dicts():
     p3.rating = rated[p3.team][p3]
 
 
-def dont_use_0_for_min_delta():
+def test_dont_use_0_for_min_delta():
     with raises(ValueError):
         rate([(Rating(),), (Rating(),)], min_delta=0)
 
 
-def list_instead_of_tuple():
+def test_list_instead_of_tuple():
     r1, r2 = Rating(), Rating()
     assert rate([[r1], [r2]]) == rate([(r1,), (r2,)])
     assert quality([[r1], [r2]]) == quality([(r1,), (r2,)])
+
+
+def test_custom_backend():
+    env = TrueSkill(backend=(NotImplemented, NotImplemented, NotImplemented))
+    with raises(TypeError):
+        env.rate_1vs1(Rating(), Rating())
 
 
 # algorithm
@@ -202,7 +203,7 @@ def generate_individual(size, env=None):
     return generate_teams([1] * size, env)
 
 
-@all_stats_implements
+@various_backends
 def test_n_vs_n():
     # 1 vs 1
     t1, t2 = generate_teams([1, 1])
@@ -224,7 +225,7 @@ def test_n_vs_n():
          (22.802, 8.059), (22.802, 8.059), (22.802, 8.059), (22.802, 8.059)]
 
 
-@all_stats_implements
+@various_backends
 def test_1_vs_n():
     t1, = generate_teams([1])
     # 1 vs 2
@@ -249,7 +250,7 @@ def test_1_vs_n():
          (9.418, 7.917), (9.418, 7.917), (9.418, 7.917), (9.418, 7.917)]
 
 
-@all_stats_implements
+@various_backends
 def test_individual():
     # 3 players
     players = generate_individual(3)
@@ -284,7 +285,7 @@ def test_individual():
          (17.664, 4.433), (15.653, 4.524), (13.190, 4.711), (9.461, 5.276)]
 
 
-@all_stats_implements
+@various_backends
 def test_multiple_teams():
     # 2 vs 4 vs 2
     t1 = (Rating(40, 4), Rating(45, 3))
@@ -301,7 +302,7 @@ def test_multiple_teams():
     assert _quality([t1, t2, t3]) == 0.047
 
 
-@all_stats_implements
+@various_backends
 def test_upset():
     # 1 vs 1
     t1, t2 = (Rating(),), (Rating(50, 12.5),)
@@ -333,7 +334,7 @@ def test_upset():
          (31.751, 3.064), (34.051, 2.541), (38.263, 1.849), (44.118, 0.983)]
 
 
-@all_stats_implements
+@various_backends
 def test_partial_play():
     t1, t2 = (Rating(),), (Rating(), Rating())
     # each results from C# Skills:
@@ -356,7 +357,7 @@ def test_partial_play():
     assert _quality([t1, t2, t3], [(1,), (0.8, 0.9), (1,)]) == 0.0809
 
 
-@all_stats_implements
+@various_backends
 def test_partial_play_with_weights_dict():
     t1, t2 = (Rating(),), (Rating(), Rating())
     assert rate([t1, t2], weights={(0, 0): 0.5, (1, 0): 0.5, (1, 1): 0.5}) == \
@@ -370,7 +371,7 @@ def test_partial_play_with_weights_dict():
 # reported bugs
 
 
-@all_stats_implements
+@various_backends
 def test_issue3():
     """The `issue #3`_, opened by @youknowone.
 
@@ -396,52 +397,60 @@ def test_issue3():
     rate([t1, t2], [0, 28])
 
 
-if 'scipy' in stats_implements:
-    def test_issue4():
-        """The `issue #4`_, opened by @sublee.
+@various_backends(['scipy'])
+def test_issue4():
+    """The `issue #4`_, opened by @sublee.
 
-        numpy.float64 handles floating-point error by different way. For
-        example, it can just warn RuntimeWarning on n/0 problem instead of
-        throwing ZeroDivisionError.
+    numpy.float64 handles floating-point error by different way. For example,
+    it can just warn RuntimeWarning on n/0 problem instead of throwing
+    ZeroDivisionError.
 
-        .. _issue #4: https://github.com/sublee/trueskill/issues/4
-        """
-        import numpy
-        r1, r2 = Rating(105.247, 0.439), Rating(27.030, 0.901)
-        # make numpy to raise FloatingPointError instead of warning
-        # RuntimeWarning
-        old_settings = numpy.seterr(divide='raise')
-        try:
-            rate([(r1,), (r2,)])
-        finally:
-            numpy.seterr(**old_settings)
+    .. _issue #4: https://github.com/sublee/trueskill/issues/4
+    """
+    import numpy
+    r1, r2 = Rating(105.247, 0.439), Rating(27.030, 0.901)
+    # make numpy to raise FloatingPointError instead of warning
+    # RuntimeWarning
+    old_settings = numpy.seterr(divide='raise')
+    try:
+        rate([(r1,), (r2,)])
+    finally:
+        numpy.seterr(**old_settings)
 
 
-if 'mpmath' in stats_implements:
-    def test_issue5():
-        """The `issue #5`_, opened by @warner121.
+@various_backends([None, 'scipy'])
+def test_issue5():
+    """The `issue #5`_, opened by @warner121.
 
-        This error occurs when a winner has too low rating than a loser.
-        Basically Python cannot calculate correct result but mpmath_ can. I
-        added ``stats_implement`` option to :class:`TrueSkill` class. If it is
-        set to 'mpmath' then the problem will have gone.
+    This error occurs when a winner has too low rating than a loser. Basically
+    Python cannot calculate correct result but mpmath_ can. I added ``backend``
+    option to :class:`TrueSkill` class. If it is set to 'mpmath' then the
+    problem will have gone.
 
-        The result of TrueSkill calculator by Microsoft is N(-273.092, 2.683)
-        and N(-75.830, 2.080), of C# Skills by Moserware is N(NaN, 2.6826) and
-        N(NaN, 2.0798). I choose Microsoft's result as an expectation for the
-        test suite.
+    The result of TrueSkill calculator by Microsoft is N(-273.092, 2.683) and
+    N(-75.830, 2.080), of C# Skills by Moserware is N(NaN, 2.6826) and
+    N(NaN, 2.0798). I choose Microsoft's result as an expectation for the test
+    suite.
 
-        .. _issue #5: https://github.com/sublee/trueskill/issues/5
-        .. _mpmath: http://mpmath.googlecode.com/
-        """
-        with raises(FloatingPointError):
-            rate_1vs1(Rating(-323.263, 2.965), Rating(-48.441, 2.190))
-        with raises(FloatingPointError):
-            rate_1vs1(Rating(), Rating(1000))
-        env = TrueSkill(stats_implement='mpmath')
-        R = env.create_rating
-        _rate_1vs1 = lambda *a, **k: almost(env.rate_1vs1(*a, **k), 0)
-        assert _rate_1vs1(R(-323.263, 2.965), R(-48.441, 2.190)) == \
-            [(-273.361, 2.683), (-75.683, 2.080)]
-        assert _rate_1vs1(R(), R(1000)) == \
-            [(415.298, 6.455), (609.702, 6.455)]
+    .. _issue #5: https://github.com/sublee/trueskill/issues/5
+    .. _mpmath: http://mpmath.googlecode.com/
+    """
+    assert _quality_1vs1(Rating(-323.263, 2.965), Rating(-48.441, 2.190)) == 0
+    with raises(FloatingPointError):
+        rate_1vs1(Rating(-323.263, 2.965), Rating(-48.441, 2.190))
+    assert _quality_1vs1(Rating(), Rating(1000)) == 0
+    with raises(FloatingPointError):
+        rate_1vs1(Rating(), Rating(1000))
+
+
+@various_backends(['mpmath'])
+def test_issue5_with_mpmath():
+    env = TrueSkill(backend='mpmath')
+    R = env.create_rating
+    _rate_1vs1 = lambda *a, **k: almost(env.rate_1vs1(*a, **k), 0)
+    assert _quality_1vs1(Rating(-323.263, 2.965), Rating(-48.441, 2.190)) == 0
+    assert _rate_1vs1(R(-323.263, 2.965), R(-48.441, 2.190)) == \
+        [(-273.361, 2.683), (-75.683, 2.080)]
+    assert _quality_1vs1(Rating(), Rating(1000)) == 0
+    assert _rate_1vs1(R(), R(1000)) == \
+        [(415.298, 6.455), (609.702, 6.455)]

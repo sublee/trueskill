@@ -6,9 +6,28 @@ import inspect
 import logging
 
 import trueskill
+from trueskill.backends import available_backends
 from trueskill.factorgraph import Factor, Variable
 from trueskill.mathematics import Gaussian
-from trueskill.statistics import available_implements
+
+
+__all__ = ['substituted_trueskill', 'factograph_logging']
+
+
+@contextmanager
+def substituted_trueskill(*args, **kwargs):
+    env = trueskill._g()
+    params = [['mu', env.mu], ['sigma', env.sigma], ['beta', env.beta],
+              ['tau', env.tau], ['draw_probability', env.draw_probability],
+              ['backend', env.backend]]
+    # merge settings with previous TrueSkill object
+    for x, arg in enumerate(args):
+        params[x][1] = arg
+    params = dict(params)
+    for kw, arg in kwargs.items():
+        params[kw] = arg
+    yield trueskill.setup(**params)
+    trueskill.setup(env=env)
 
 
 @contextmanager
@@ -57,7 +76,7 @@ def factorgraph_logging(color=False):
     def variable_set(self, val):
         old_value = Gaussian(pi=self.pi, tau=self.tau)
         old_messages = dict((fac, Gaussian(pi=msg.pi, tau=msg.tau))
-                            for fac, msg in self.messages.iteritems())
+                            for fac, msg in self.messages.items())
         delta = orig_variable_set(self, val)
         # inspect outer frames
         frames = inspect.getouterframes(inspect.currentframe())
@@ -91,7 +110,7 @@ def factorgraph_logging(color=False):
         l(bullet(methods[0] == 'update_value') + line)
         # print messages
         fmt = '{0}: {1} -> {2}'.format
-        for fac, msg in self.messages.iteritems():
+        for fac, msg in self.messages.items():
             old_msg = old_messages[fac]
             changed = fac is factor and methods[0] == 'update_message'
             if old_msg == msg:
@@ -105,31 +124,3 @@ def factorgraph_logging(color=False):
     Factor.__init__, Variable.set = factor_init, variable_set
     yield logger
     Factor.__init__, Variable.set = orig_factor_init, orig_variable_set
-
-
-@contextmanager
-def similar_env(env=None, **kwargs):
-    if env is None:
-        env = trueskill._g()
-    env_kwargs = {'mu': env.mu, 'sigma': env.sigma, 'beta': env.beta,
-                  'tau': env.tau, 'draw_probability': env.draw_probability,
-                  'stats_implement': env.stats_implement}
-    env_kwargs.update(kwargs)
-    yield trueskill.setup(**env_kwargs)
-    trueskill.setup(env=env)
-
-
-def all_stats_implements(f=None):
-    if f is None:
-        def iterate():
-            for name in available_implements():
-                with similar_env(stats_implement=name) as env:
-                    yield env
-        return iterate()
-    @functools.wraps(f)
-    def wrapped(*args, **kwargs):
-        for stats_implement in all_stats_implements():
-            if 'stats_implement' in inspect.getargspec(f)[0]:
-                kwargs['stats_implement'] = stats_implement
-            f(*args, **kwargs)
-    return wrapped

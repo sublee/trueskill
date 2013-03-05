@@ -55,12 +55,8 @@ def run_tests(self):
 test.run_tests = run_tests
 
 
-# increase test coverage
 tests_require = ['pytest', 'almost>=0.1.4']
-#include_py = distutils.sysconfig.get_config_vars('INCLUDEPY')[0]
-#if os.path.isfile(os.path.join(include_py, 'Python.h')):  # detect python-dev
-#    tests_require.append('numpy')
-#    tests_require.append('scipy')
+# install mpmath to increase test coverage
 if sys.version_info[0] < 3:
     tests_require.append('mpmath')
 
