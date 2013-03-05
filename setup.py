@@ -55,12 +55,6 @@ def run_tests(self):
 test.run_tests = run_tests
 
 
-tests_require = ['pytest', 'almost>=0.1.4']
-# install mpmath to increase test coverage
-if sys.version_info[0] < 3:
-    tests_require.append('mpmath')
-
-
 setup(
     name='trueskill',
     version=version,
@@ -92,6 +86,6 @@ setup(
                  'Topic :: Games/Entertainment'],
     install_requires=['distribute'],
     test_suite='trueskilltests',
-    tests_require=tests_require,
+    tests_require=['pytest', 'almost>=0.1.4', 'mpmath>=0.17'],
     use_2to3=(sys.version_info[0] >= 3),
 )
