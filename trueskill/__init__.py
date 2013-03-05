@@ -386,7 +386,7 @@ class TrueSkill(object):
                           will stop if the delta is less then this argument
         :return: a recalculated ratings same structure as ``rating_groups``
         :raises ValueError: wrong ranks or math domain error
-        :raised FloatingPointError: occurs when winners have too lower rating
+        :raises FloatingPointError: occurs when winners have too lower rating
                                     than losers. 'mpmath' backend could solve
                                     this error
 
