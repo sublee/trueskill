@@ -1,7 +1,14 @@
+Version 0.3.1
+-------------
+
+Released on Mar 6th 2013.
+
+Fixes a problem similar to `issue #5`_ but with more extreme input.
+
 Version 0.3
 -----------
 
-Released on Mar 6th 2013.
+Released on Mar 5th 2013.
 
 :class:`TrueSkill` got a new option ``backend`` to choose cdf, pdf, ppf
 implementation.
