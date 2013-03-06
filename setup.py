@@ -87,6 +87,6 @@ setup(
                  'Topic :: Scientific/Engineering :: Mathematics'],
     install_requires=['distribute'],
     test_suite='trueskilltests',
-    tests_require=['pytest', 'almost>=0.1.4', 'mpmath>=0.17'],
+    tests_require=['pytest', 'almost>=0.1.5', 'mpmath>=0.17'],
     use_2to3=(sys.version_info[0] >= 3),
 )
