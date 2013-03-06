@@ -62,6 +62,14 @@ def _team_sizes(rating_groups):
     return team_sizes
 
 
+def _floating_point_error(env):
+    if env.backend == 'mpmath':
+        msg = 'Set \'mpmath.mp.dps\' to higher'
+    else:
+        msg = 'Cannot calculate correctly, set backend to \'mpmath\''
+    return FloatingPointError(msg)
+
+
 class Rating(Gaussian):
     """Represents a player's skill as Gaussian distrubution. The default mu and
     sigma value follows the global TrueSkill environment's settings.
@@ -160,10 +168,10 @@ class TrueSkill(object):
         """
         x = diff - draw_margin
         v = self.v_win(diff, draw_margin)
-        if v == -x:
-            raise FloatingPointError('Cannot calculate correctly, '
-                                     'set backend to \'mpmath\'')
-        return v * (v + x)
+        w = v * (v + x)
+        if 0 < w < 1:
+            return w
+        raise _floating_point_error(self)
 
     def w_draw(self, diff, draw_margin):
         """The draw version of "W" function."""
@@ -171,8 +179,7 @@ class TrueSkill(object):
         a, b = draw_margin - abs_diff, -draw_margin - abs_diff
         denom = self.cdf(a) - self.cdf(b)
         if not denom:
-            raise FloatingPointError('Cannot calculate correctly, '
-                                     'set backend to \'mpmath\'')
+            raise _floating_point_error(self)
         v = self.v_draw(abs_diff, draw_margin)
         return (v ** 2) + (a * self.pdf(a) - b * self.pdf(b)) / denom
 

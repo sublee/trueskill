@@ -18,7 +18,10 @@ except ImportError:
     Number = (int, long, float, complex)
 
 
-__all__ = ['Gaussian', 'Matrix']
+__all__ = ['Gaussian', 'Matrix', 'inf']
+
+
+inf = float('inf')
 
 
 class Gaussian(object):
@@ -40,7 +43,7 @@ class Gaussian(object):
     @property
     def sigma(self):
         """A square root of a variance"""
-        return math.sqrt(1 / self.pi) if self.pi else float('inf')
+        return math.sqrt(1 / self.pi) if self.pi else inf
 
     def __mul__(self, other):
         pi, tau = self.pi + other.pi, self.tau + other.tau

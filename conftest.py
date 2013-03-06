@@ -26,11 +26,14 @@ def pytest_generate_tests(metafunc):
 
 
 def various_backends(backends=None):
+    import inspect
     from trueskillhelpers import substituted_trueskill
     if hasattr(backends, '__call__'):
         return various_backends(True)(backends)
     def decorator(f):
         def wrapped(backend, *args, **kwargs):
+            if 'backend' in inspect.getargspec(f)[0]:
+                kwargs['backend'] = kwargs.get('backend', backend)
             with substituted_trueskill(backend=backend):
                 return f(*args, **kwargs)
         wrapped.__name__ = f.__name__

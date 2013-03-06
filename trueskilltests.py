@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
-import sys
 
 from almost import Approximate
 from pytest import deprecated_call, raises
@@ -27,11 +26,15 @@ class almost(Approximate):
                 pass
         return super(almost, self).normalize(value)
 
+    @classmethod
+    def wrap(cls, f, *args, **kwargs):
+        return lambda *a, **k: cls(f(*a, **k), *args, **kwargs)
 
-_rate = lambda *a, **k: almost(rate(*a, **k))
-_rate_1vs1 = lambda *a, **k: almost(rate_1vs1(*a, **k))
-_quality = lambda *a, **k: almost(quality(*a, **k))
-_quality_1vs1 = lambda *a, **k: almost(quality_1vs1(*a, **k))
+
+_rate = almost.wrap(rate)
+_rate_1vs1 = almost.wrap(rate_1vs1)
+_quality = almost.wrap(quality)
+_quality_1vs1 = almost.wrap(quality_1vs1)
 
 
 # usage
@@ -422,7 +425,7 @@ def test_issue4():
 
 
 @various_backends([None, 'scipy'])
-def test_issue5():
+def test_issue5(backend):
     """The `issue #5`_, opened by @warner121.
 
     This error occurs when a winner has too low rating than a loser. Basically
@@ -448,12 +451,32 @@ def test_issue5():
 
 @various_backends(['mpmath'])
 def test_issue5_with_mpmath():
-    env = TrueSkill(backend='mpmath')
-    R = env.create_rating
-    _rate_1vs1 = lambda *a, **k: almost(env.rate_1vs1(*a, **k), 0)
+    _rate_1vs1 = almost.wrap(rate_1vs1, 0)
     assert _quality_1vs1(Rating(-323.263, 2.965), Rating(-48.441, 2.190)) == 0
-    assert _rate_1vs1(R(-323.263, 2.965), R(-48.441, 2.190)) == \
+    assert _rate_1vs1(Rating(-323.263, 2.965), Rating(-48.441, 2.190)) == \
         [(-273.361, 2.683), (-75.683, 2.080)]
     assert _quality_1vs1(Rating(), Rating(1000)) == 0
-    assert _rate_1vs1(R(), R(1000)) == \
+    assert _rate_1vs1(Rating(), Rating(1000)) == \
         [(415.298, 6.455), (609.702, 6.455)]
+
+
+@various_backends(['mpmath'])
+def test_issue5_with_more_extreme(): 
+    """If the input is more extreme, 'mpmath' backend also made an exception.
+    But we can avoid the problem with higher precision.
+    """
+    import mpmath
+    try:
+        dps = mpmath.mp.dps
+        with raises(FloatingPointError):
+            rate_1vs1(Rating(), Rating(1000000))
+        mpmath.mp.dps = 50
+        assert almost(rate_1vs1(Rating(), Rating(1000000)), prec=-1) == \
+            [(400016.896, 6.455), (600008.104, 6.455)]
+        with raises(FloatingPointError):
+            rate_1vs1(Rating(), Rating(1000000000000))
+        mpmath.mp.dps = 100
+        assert almost(rate_1vs1(Rating(), Rating(1000000000000)), prec=-7) == \
+            [(400001600117.693, 6.455), (599998399907.307, 6.455)]
+    finally:
+        mpmath.mp.dps = dps

@@ -12,14 +12,11 @@ from __future__ import absolute_import
 import itertools
 import math
 
-from .mathematics import Gaussian
+from .mathematics import Gaussian, inf
 
 
 __all__ = ['Variable', 'PriorFactor', 'LikelihoodFactor', 'SumFactor',
            'TruncateFactor']
-
-
-inf = float('inf')
 
 
 class Node(object):

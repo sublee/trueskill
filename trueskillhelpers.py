@@ -11,7 +11,7 @@ from trueskill.factorgraph import Factor, Variable
 from trueskill.mathematics import Gaussian
 
 
-__all__ = ['substituted_trueskill', 'factograph_logging']
+__all__ = ['substituted_trueskill', 'factor_graph_logging']
 
 
 @contextmanager
@@ -31,13 +31,13 @@ def substituted_trueskill(*args, **kwargs):
 
 
 @contextmanager
-def factorgraph_logging(color=False):
-    """In the context, a factorgraph prints logs as DEBUG level. It will help
-    to follow factograph running schedule.
+def factor_graph_logging(color=False):
+    """In the context, a factor graph prints logs as DEBUG level. It will help
+    to follow factor graph running schedule.
 
     ::
 
-        with factograph_logging() as logger:
+        with factor_graph_logging() as logger:
             logger.setLevel(DEBUG)
             logger.addHandler(StreamHandler(sys.stderr))
             rate_1vs1(Rating(), Rating())
@@ -88,8 +88,6 @@ def factorgraph_logging(color=False):
             elif method in ('up', 'down'):
                 methods[1] = method
                 break
-        if methods[1] == 'down':
-            return delta
         factor = frame[0].f_locals['self']
         before = Gaussian(pi=self.pi, tau=self.tau)
         # helpers for logging
@@ -121,6 +119,8 @@ def factorgraph_logging(color=False):
         # print buffered logs
         map(logger.debug, logs)
         return delta
-    Factor.__init__, Variable.set = factor_init, variable_set
-    yield logger
-    Factor.__init__, Variable.set = orig_factor_init, orig_variable_set
+    try:
+        Factor.__init__, Variable.set = factor_init, variable_set
+        yield logger
+    finally:
+        Factor.__init__, Variable.set = orig_factor_init, orig_variable_set
