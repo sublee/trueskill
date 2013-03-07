@@ -74,8 +74,8 @@ class Rating(Gaussian):
     """Represents a player's skill as Gaussian distrubution. The default mu and
     sigma value follows the global TrueSkill environment's settings.
 
-    :param mu: mean
-    :param sigma: standard deviation
+    :param mu: the mean.
+    :param sigma: the standard deviation.
     """
 
     def __init__(self, mu=None, sigma=None):
@@ -124,13 +124,13 @@ class TrueSkill(object):
 
     .. _The Math Behind TrueSkill:: http://bit.ly/trueskill-math
 
-    :param mu: the initial mean of ratings
-    :param sigma: the initial standard deviation of ratings
-    :param beta: the distance that guarantees about an 80% chance of winning
-    :param tau: the dynamic factor
-    :param draw_probability: the draw probability of the game
+    :param mu: the initial mean of ratings.
+    :param sigma: the initial standard deviation of ratings.
+    :param beta: the distance that guarantees about an 80% chance of winning.
+    :param tau: the dynamic factor.
+    :param draw_probability: the draw probability of the game.
     :param backend: the name of a backend which implements cdf, pdf, ppf. see
-                    :mod:`trueskill.backends` for more details
+                    :mod:`trueskill.backends` for more details.
     """
 
     def __init__(self, mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
@@ -385,17 +385,16 @@ class TrueSkill(object):
                 player.rating = rated_rating_groups[player.team][player]
 
         :param rating_groups: a list of tuples or dictionaries containing
-                              :class:`Rating` objects
+                              :class:`Rating` objects.
         :param ranks: a ranking table. By default, it is same as the order of
                       the ``rating_groups``.
-        :param weights: weights of each players for "partial play"
+        :param weights: weights of each players for "partial play".
         :param min_delta: each loop checks a delta of changes and the loop
-                          will stop if the delta is less then this argument
-        :return: a recalculated ratings same structure as ``rating_groups``
-        :raises ValueError: wrong ranks or math domain error
-        :raises FloatingPointError: occurs when winners have too lower rating
-                                    than losers. 'mpmath' backend could solve
-                                    this error
+                          will stop if the delta is less then this argument.
+        :returns: recalculated ratings same structure as ``rating_groups``.
+        :raises: :exc:`FloatingPointError` occurs when winners have too lower
+                 rating than losers. higher floating-point precision couls
+                 solve this error. set the backend to "mpmath".
 
         .. versionadded:: 0.2
         """
@@ -448,8 +447,8 @@ class TrueSkill(object):
                 print 'Is not there another match?'
 
         :param rating_groups: a list of tuples or dictionaries containing
-                              :class:`Rating` objects
-        :param weights: weights of each players for "partial play"
+                              :class:`Rating` objects.
+        :param weights: weights of each players for "partial play".
 
         .. versionadded:: 0.2
         """
@@ -498,12 +497,12 @@ class TrueSkill(object):
 
             new_rating1, new_rating2 = env.rate_1vs1(rating1, rating2)
 
-        :param rating1: the winner's rating if they didn't draw
-        :param rating2: the loser's rating if they didn't draw
+        :param rating1: the winner's rating if they didn't draw.
+        :param rating2: the loser's rating if they didn't draw.
         :param drawn: if the players drew, set this to ``True``. Defaults to
                       ``False``.
-        :param min_delta: will be passed to :meth:`rate`
-        :return: recalculated 2 ratings
+        :param min_delta: will be passed to :meth:`rate`.
+        :returns: a tuple containing recalculated 2 ratings.
 
         .. versionadded:: 0.2
         """

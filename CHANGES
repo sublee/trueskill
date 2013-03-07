@@ -3,7 +3,8 @@ Version 0.3.1
 
 Released on Mar 6th 2013.
 
-Fixes a problem similar to `issue #5`_ but with more extreme input.
+Raises :exc:`FloatingPointError` instead of :exc:`ValueError` (math domain
+error) for a problem similar to `issue #5`_ but with more extreme input.
 
 Version 0.3
 -----------
@@ -14,8 +15,8 @@ Released on Mar 5th 2013.
 implementation.
 
 When winners have too lower rating than losers, :meth:`TrueSkill.rate` will
-raise :exc:`FloatingPointError` if the backend is ``None`` or 'scipy'. But from
-this version, you can avoid the problem with 'mpmath' backend. This was
+raise :exc:`FloatingPointError` if the backend is ``None`` or "scipy". But from
+this version, you can avoid the problem with "mpmath" backend. This was
 reported at `issue #5`_.
 
 .. _issue #5: https://github.com/sublee/trueskill/issues/5
