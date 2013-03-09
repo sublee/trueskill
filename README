@@ -1,8 +1,6 @@
-                                // TrueSkill //
+TrueSkill, a rating system for vedio games
 
-                        A rating system for vedio games
+The documentation is available at
+http://pythonhosted.org/trueskill
 
-                       The documentation is available at
-                      http://packages.python.org/trueskill
-
-                                by Heungsub Lee
+by Heungsub Lee
