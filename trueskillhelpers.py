@@ -26,8 +26,12 @@ def substituted_trueskill(*args, **kwargs):
     params = dict(params)
     for kw, arg in kwargs.items():
         params[kw] = arg
-    yield trueskill.setup(**params)
-    trueskill.setup(env=env)
+    try:
+        # setup the environment
+        yield trueskill.setup(**params)
+    finally:
+        # revert the environment
+        trueskill.setup(env=env)
 
 
 @contextmanager
