@@ -1,9 +1,6 @@
+TrueSkill, a rating system for video games
 
-                                // TrueSkill //
+The documentation is available at
+http://pythonhosted.org/trueskill
 
-                         A Bayesian Skill Rating System
-
-                       The documentation is available at
-                      http://packages.python.org/trueskill
-
-                                by Heungsub Lee
+by Heungsub Lee
