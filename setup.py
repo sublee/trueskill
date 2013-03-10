@@ -62,7 +62,7 @@ setup(
     author='Heungsub Lee',
     author_email=re.sub('((sub).)(.*)', r'\2@\1.\3', 'sublee'),
     url='http://pythonhosted.org/trueskill',
-    description='The TrueSkill rating system',
+    description='A rating system for video games',
     long_description=__doc__,
     platforms='any',
     packages=['trueskill'],
