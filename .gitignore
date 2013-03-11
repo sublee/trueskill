@@ -28,3 +28,11 @@ pip-log.txt
 
 # Vim
 .*.sw[op]
+
+# Testing
+.cache
+*$py.class
+
+# Shinx
+docs/Makefile
+docs/_build
