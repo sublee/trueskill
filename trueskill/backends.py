@@ -51,7 +51,7 @@ def _gen_ppf(erfc, math=math):
 
 
 def erfc(x):
-    """Complementary error function (via http://bit.ly/zOLqbc)"""
+    """Complementary error function (via `http://bit.ly/zOLqbc`_)"""
     z = abs(x)
     t = 1. / (1. + z / 2.)
     r = t * math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (
@@ -89,10 +89,16 @@ def choose_backend(backend):
     if backend is None:  # fallback
         return cdf, pdf, ppf
     elif backend == 'mpmath':
-        import mpmath
+        try:
+            import mpmath
+        except ImportError:
+            raise ImportError('Install "mpmath" to use this backend')
         return mpmath.ncdf, mpmath.npdf, _gen_ppf(mpmath.erfc, math=mpmath)
     elif backend == 'scipy':
-        from scipy.stats import norm
+        try:
+            from scipy.stats import norm
+        except ImportError:
+            raise ImportError('Install "scipy" to use this backend')
         return norm.cdf, norm.pdf, norm.ppf
     raise ValueError('%r backend is not defined' % backend)
 

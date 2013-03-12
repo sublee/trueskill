@@ -64,9 +64,9 @@ def _team_sizes(rating_groups):
 
 def _floating_point_error(env):
     if env.backend == 'mpmath':
-        msg = 'Set \'mpmath.mp.dps\' to higher'
+        msg = 'Set "mpmath.mp.dps" to higher'
     else:
-        msg = 'Cannot calculate correctly, set backend to \'mpmath\''
+        msg = 'Cannot calculate correctly, set backend to "mpmath"'
     return FloatingPointError(msg)
 
 
