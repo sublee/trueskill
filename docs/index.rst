@@ -244,7 +244,7 @@ Mathematical statistics backends
 Changelog
 ~~~~~~~~~
 
-.. include:: ../CHANGES
+.. include:: ../changelog.rst
 
 Further Reading
 ~~~~~~~~~~~~~~~

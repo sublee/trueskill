@@ -364,9 +364,15 @@ class TrueSkill(object):
     def rate(self, rating_groups, ranks=None, weights=None, min_delta=DELTA):
         """Recalculates ratings by the ranking table::
 
-            env = TrueSkill()
-            rating_groups = [(env.create_rating(),), (env.create_rating(),)]
+            env = TrueSkill()  # uses default settings
+            # create ratings
+            r1 = env.create_rating(42.222)
+            r2 = env.create_rating(89.999)
+            # calculate new ratings
+            rating_groups = [(r1,), (r2,)]
             rated_rating_groups = env.rate(rating_groups, ranks=[0, 1])
+            # save new ratings
+            (r1,), (r2,) = rated_rating_groups
 
         ``rating_groups`` is a list of rating tuples or dictionaries that
         represents each team of the match. You will get a result as same
