@@ -1,7 +1,7 @@
 TrueSkill
 =========
 
-Bayesian skill rating system
+a rating system for video games
 
 .. currentmodule:: trueskill
 
