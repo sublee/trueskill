@@ -1,0 +1,230 @@
+@import url(basic.css);
+@import url(http://fonts.googleapis.com/css?family=Galindo);
+@import url(http://fonts.googleapis.com/css?family=Ubuntu:400,500,400italic);
+@import url(http://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700);
+
+
+
+
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-width: 750px;
+  font-family: Ubuntu, sans-serif;
+  line-height: 1.5;
+  color: #634;
+  background: #f7eed7 url(bg.gif) repeat-x left top;
+}
+
+.wrap {
+  margin: 0 auto;
+  padding: 50px;
+  width: 650px;
+}
+
+h1 {
+  margin: 10px 0 0 0;
+  padding-top: 90px;
+  text-align: center;
+  font-family: Galindo, sans-serif;
+  font-size: 30px;
+  background: url(logo.gif) no-repeat center top;
+}
+
+h1 a {
+  display: none;
+}
+
+/* subtitle */
+.section p {
+  margin: -9px 0 10px 0;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: #c65;
+}
+.section .section p {
+  margin: 20px 0;
+  text-align: left;
+  font-size: 16px;
+  font-weight: 400;
+  color: #634;
+  letter-spacing: 0;
+}
+
+h2 {
+  float: left;
+  margin: 20px -30px;
+  padding-left: 30px;
+  padding-bottom: 5px;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 45px;
+  color: #c65;
+  background: url(title.gif) no-repeat left;
+}
+
+h2 a {
+  display: block;
+  position: relative;
+  float: right;
+  margin-right: -10px;
+  margin-bottom: -5px;
+  width: 20px;
+  height: 50px;
+  visibility: visible !important;
+  text-indent: -9999px;
+  background: url(title.gif) no-repeat right;
+}
+
+h2:hover a {
+  padding: 0 10px;
+  text-indent: 0;
+}
+
+h2 a:link, h2 a:visited {
+  text-decoration: none;
+  color: #634;
+}
+
+h3 {
+  float: left;
+  margin: 8px 0 24px -20px;
+  padding-left: 10px;
+  border-left: 10px solid #c65;
+  height: 10px;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 10px;
+}
+
+p, dl, .section {
+  clear: left;
+}
+
+ul, ol {
+  margin: 20px 0 20px 40px;
+}
+
+a:link, a:visited {
+  text-decoration: none;
+}
+a:link {
+  color: #47a;
+}
+a:visited {
+  color: #969;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+tt, .highlight pre, .pre {
+  font-family: 'Ubuntu Mono', monospace;
+}
+
+tt {
+  color: #a57;
+}
+
+.highlight pre {
+  margin: 20px 0;
+  padding-left: 30px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.figure {
+  text-align: center;
+}
+
+.headerlink {
+  padding-left: 0.5em;
+}
+
+.footer {
+  margin-top: 50px;
+  text-align: center;
+  font-size: 11px;
+  color: #c65;
+}
+.footer a:link, .footer a:visited {
+  text-decoration: none;
+  color: #634;
+}
+
+dl {
+  font-size: 16px;
+}
+dt em {
+  font-family: 'Times New Roman', Times, serif;
+}
+dt:target, .highlighted {
+  background: #fef5d1;
+}
+.section .section dd p {
+  margin-top: 0;
+}
+
+tt.descclassname {
+  color: #c65;
+}
+tt.descname {
+  font-size: 18px;
+  color: #634;
+}
+
+table.docutils {
+  margin: 0 auto 20px;
+  font-size: 16px;
+}
+table.docutils th {
+  border-bottom: 3px double #c65;
+}
+table.docutils td {
+  border-color: #f0d4bb;
+}
+table.docutils th, table.docutils td {
+  padding: 2px 5px;
+}
+
+table.field-list {
+  margin: 0;
+  margin-bottom: 10px;
+}
+table.field-list ul {
+  list-style: square;
+}
+table.field-list .field-name {
+  font-weight: 400;
+}
+table.field-list td, table.field-list th {
+  padding: 0;
+  padding-right: 20px;
+}
+table.field-list th {
+  color: #c65;
+}
+table.field-list strong {
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-weight: normal;
+}
+table.field-list .field-body {
+  padding-bottom: 10px;
+}
+table.field-list .field-body p {
+  margin: 0;
+  font-size: 16px;
+}
+
+#MathJax_Message {
+  font-size: 10px;
+  font-family: 'Ubuntu Mono', monospace;
+}

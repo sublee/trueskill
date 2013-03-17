@@ -1,0 +1,704 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>TrueSkill &mdash; trueskill 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/style.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="top" title="trueskill 0.4 documentation" href="#" />
+  <meta name="viewport" content="width=750px" />
+  
+  
+    <link rel="image_src" href="_static/image.png" />
+  
+
+
+  </head>
+  <body>
+  <div class="wrap">
+    
+    
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="trueskill">
+<h1>TrueSkill<a class="headerlink" href="#trueskill" title="Permalink to this headline">¶</a></h1>
+<p>a rating system for video games</p>
+<div class="section" id="what-s-trueskill">
+<h2>What&#8217;s TrueSkill?<a class="headerlink" href="#what-s-trueskill" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://research.microsoft.com/en-us/projects/trueskill">TrueSkill</a> is a rating system among game players. It has been used on <a class="reference external" href="http://www.xbox.com/live">Xbox
+Live</a> to rank and match players.</p>
+<p>This system quantizes players&#8217; <strong>TRUE</strong> skill points by a Bayesian inference
+algorithm and it makes to easy to find the best match between a matchmaking
+pool. It also works well with any type of match rule including N:N team game
+or deathmatch.</p>
+<p>This project is a Python package which implements the TrueSkill rating system.</p>
+</div>
+<div class="section" id="installing">
+<h2>Installing<a class="headerlink" href="#installing" title="Permalink to this headline">¶</a></h2>
+<p>The package is available in <a class="reference external" href="http://pypi.python.org/pypi/trueskill">PyPI</a>. To
+install it in your system, use <strong class="command">easy_install</strong>:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span>easy_install trueskill
+</pre></div>
+</div>
+<p>Or check out developement version:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span>git clone git://github.com/sublee/trueskill.git
+</pre></div>
+</div>
+</div>
+<div class="section" id="learning">
+<h2>Learning<a class="headerlink" href="#learning" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="rating-a-model-for-player-s-skill">
+<h3>Rating, a model for player&#8217;s skill<a class="headerlink" href="#rating-a-model-for-player-s-skill" title="Permalink to this headline">¶</a></h3>
+<p>In TrueSkill, rating is a Gaussian distribution which starts from
+\(\mathcal{ N }( 25, \frac{ 25 }{ 3 } )\). \(\mu\) is an average skill
+of player, and \(\sigma\) is a confidence of the guessed rating. A real
+skill of player is between \(\mu \pm 2\sigma\) with 95% confidence.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">trueskill</span> <span class="kn">import</span> <span class="n">Rating</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Rating</span><span class="p">()</span>  <span class="c"># use the default mu and sigma</span>
+<span class="go">trueskill.Rating(mu=25.000, sigma=8.333)</span>
+</pre></div>
+</div>
+<p>If some player&#8217;s rating is higher \(\beta\) than another player&#8217;s, the
+player may have 80% of chance to beat the other player. The default value of
+\(\beta\) is \(\frac{ 25 }{ 6 }\).</p>
+<p>Ratings will approach real skills through few times of the TrueSkill&#8217;s Bayesian
+inference algorithm.</p>
+</div>
+<div class="section" id="competition-game">
+<h3>1:1 competition game<a class="headerlink" href="#competition-game" title="Permalink to this headline">¶</a></h3>
+<p>Most competition games follows 1:1 match rule. If your game does, just use
+<tt class="docutils literal"><span class="pre">_1vs1</span></tt> helpers containing <a class="reference internal" href="#trueskill.rate_1vs1" title="trueskill.rate_1vs1"><tt class="xref py py-func docutils literal"><span class="pre">rate_1vs1()</span></tt></a> and <a class="reference internal" href="#trueskill.quality_1vs1" title="trueskill.quality_1vs1"><tt class="xref py py-func docutils literal"><span class="pre">quality_1vs1()</span></tt></a>. These
+are very easy to use.</p>
+<p>First of all, we need 2 <a class="reference internal" href="#trueskill.Rating" title="trueskill.Rating"><tt class="xref py py-class docutils literal"><span class="pre">Rating</span></tt></a> objects:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">r1</span> <span class="o">=</span> <span class="n">Rating</span><span class="p">()</span>  <span class="c"># 1P&#39;s skill</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r2</span> <span class="o">=</span> <span class="n">Rating</span><span class="p">()</span>  <span class="c"># 2P&#39;s skill</span>
+</pre></div>
+</div>
+<p>Then we can guess match quality which is equivalent with draw probability of
+this match using <a class="reference internal" href="#trueskill.quality_1vs1" title="trueskill.quality_1vs1"><tt class="xref py py-func docutils literal"><span class="pre">quality_1vs1()</span></tt></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;{:.1%} chance to draw&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">quality_1vs1</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">))</span>
+<span class="go">44.7% chance to draw</span>
+</pre></div>
+</div>
+<p>After the game, TrueSkill recalculates their ratings by the game result. For
+example, if 1P beat 2P:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">new_r1</span><span class="p">,</span> <span class="n">new_r2</span> <span class="o">=</span> <span class="n">rate_1vs1</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">new_r1</span>
+<span class="go">trueskill.Rating(mu=29.396, sigma=7.171)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">new_e2</span>
+<span class="go">trueskill.Rating(mu=20.604, sigma=7.171)</span>
+</pre></div>
+</div>
+<p>Mu value follows player&#8217;s win/draw/lose records. Higher value means higher game
+skill. And sigma value follows the number of games. Lower value means many game
+plays and higher rating confidence.</p>
+<p>So 1P, a winner&#8217;s skill grew up from 25 to 29.396 but 2P, a loser&#8217;s skill shrank
+to 20.604. And both sigma values became narrow about same magnitude.</p>
+<p>Of course, you can also handle a tie game with <tt class="docutils literal"><span class="pre">drawn=True</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">new_r1</span><span class="p">,</span> <span class="n">new_r2</span> <span class="o">=</span> <span class="n">rate_1vs1</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">drawn</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">new_r1</span>
+<span class="go">trueskill.Rating(mu=25.000, sigma=6.458)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">new_e2</span>
+<span class="go">trueskill.Rating(mu=25.000, sigma=6.458)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="complex-competition-game">
+<h3>Complex competition game<a class="headerlink" href="#complex-competition-game" title="Permalink to this headline">¶</a></h3>
+<p>There are many other match rules such as N:N team match, N:N:N multiple team
+match, N:M unbalanced match, deathmatch (Player vs All), and so on. Mostly
+other rating systems cannot work with them but TrueSkill does. TrueSkill
+accepts any types of matches.</p>
+<p>We should arrange ratings into a group by their team:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">r1</span> <span class="o">=</span> <span class="n">Rating</span><span class="p">()</span>  <span class="c"># 1P&#39;s skill</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r2</span> <span class="o">=</span> <span class="n">Rating</span><span class="p">()</span>  <span class="c"># 2P&#39;s skill</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r3</span> <span class="o">=</span> <span class="n">Rating</span><span class="p">()</span>  <span class="c"># 3P&#39;s skill</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t1</span> <span class="o">=</span> <span class="p">[</span><span class="n">r1</span><span class="p">]</span>  <span class="c"># Team A contains just 1P</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t2</span> <span class="o">=</span> <span class="p">[</span><span class="n">r2</span><span class="p">,</span> <span class="n">r3</span><span class="p">]</span>  <span class="c"># Team B contains 2P and 3P</span>
+</pre></div>
+</div>
+<p>Then we can calculate the match quality and rate them:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;{:.1%} chance to draw&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">quality</span><span class="p">([</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">]))</span>
+<span class="go">13.5% chance to draw</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">new_r1</span><span class="p">,),</span> <span class="p">(</span><span class="n">new_r2</span><span class="p">,</span> <span class="n">new_r3</span><span class="p">)</span> <span class="o">=</span> <span class="n">rate</span><span class="p">([</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">],</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">new_r1</span>
+<span class="go">trueskill.Rating(mu=33.731, sigma=7.317)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">new_r2</span>
+<span class="go">trueskill.Rating(mu=16.269, sigma=7.317)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">new_r3</span>
+<span class="go">trueskill.Rating(mu=16.269, sigma=7.317)</span>
+</pre></div>
+</div>
+<p>If you want to describe other game results, set the <tt class="docutils literal"><span class="pre">ranks</span></tt> argument like the
+below examples:</p>
+<ul class="simple">
+<li>A drawn game &#8211; <tt class="docutils literal"><span class="pre">ranks=[0,</span> <span class="pre">0]</span></tt></li>
+<li>Team B won not team A &#8211; <tt class="docutils literal"><span class="pre">ranks=[1,</span> <span class="pre">0]</span></tt> (Lower rank is better)</li>
+</ul>
+<p>Additionally, here are varied patterns of rating groups. All variables which
+start with <tt class="docutils literal"><span class="pre">r</span></tt> are <a class="reference internal" href="#trueskill.Rating" title="trueskill.Rating"><tt class="xref py py-class docutils literal"><span class="pre">Rating</span></tt></a> objects:</p>
+<ul class="simple">
+<li>N:N team match &#8211; <tt class="docutils literal"><span class="pre">[(r1,</span> <span class="pre">r2,</span> <span class="pre">r3),</span> <span class="pre">(r4,</span> <span class="pre">r5,</span> <span class="pre">r6)]</span></tt></li>
+<li>N:N:N multiple team match &#8211; <tt class="docutils literal"><span class="pre">[(r1,</span> <span class="pre">r2),</span> <span class="pre">(r3,</span> <span class="pre">r4),</span> <span class="pre">(r5,</span> <span class="pre">r6)]</span></tt></li>
+<li>N:M unbalanced match &#8211; <tt class="docutils literal"><span class="pre">[(r1,),</span> <span class="pre">(r2,</span> <span class="pre">r3,</span> <span class="pre">r4)]</span></tt></li>
+<li>Deathmatch &#8211; <tt class="docutils literal"><span class="pre">[(r1,),</span> <span class="pre">(r2,),</span> <span class="pre">(r3,),</span> <span class="pre">(r4,)]</span></tt></li>
+</ul>
+</div>
+<div class="section" id="partial-play">
+<h3>Partial play<a class="headerlink" href="#partial-play" title="Permalink to this headline">¶</a></h3>
+<p>Let&#8217;s assume that there are 2 teams which each has 2 players. The game was for
+a hour but the one of players on the first team entered the game at 30 minutes
+later.</p>
+<p>If some player wasn&#8217;t present for the entire duration of the game, use the
+concept of &#8220;partial play&#8221; by <tt class="docutils literal"><span class="pre">weights</span></tt> parameter. The above situation can be
+described by the following weights:</p>
+<ul class="simple">
+<li>1P on team A &#8211; 1 (Full time)</li>
+<li>2P on team A &#8211; 0.5 (30/60 minutes)</li>
+<li>3P on team B &#8211; 1</li>
+<li>4P on team B &#8211; 1</li>
+</ul>
+<p>As a code with a 2-dimensional list:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># set each weights to 1, 0.5, 1, 1</span>
+<span class="n">rate</span><span class="p">([(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">),</span> <span class="p">(</span><span class="n">r3</span><span class="p">,</span> <span class="n">r4</span><span class="p">)],</span> <span class="n">weights</span><span class="o">=</span><span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+<span class="n">quality</span><span class="p">([(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">),</span> <span class="p">(</span><span class="n">r3</span><span class="p">,</span> <span class="n">r4</span><span class="p">)],</span> <span class="n">weights</span><span class="o">=</span><span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>Or with a dictionary:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># set a weight of 2nd player in 1st team to 0.5, otherwise leave as 1</span>
+<span class="n">rate</span><span class="p">([(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">),</span> <span class="p">(</span><span class="n">r3</span><span class="p">,</span> <span class="n">r4</span><span class="p">)],</span> <span class="n">weights</span><span class="o">=</span><span class="p">{(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="mf">0.5</span><span class="p">})</span>
+<span class="n">quality</span><span class="p">([(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">),</span> <span class="p">(</span><span class="n">r3</span><span class="p">,</span> <span class="n">r4</span><span class="p">)],</span> <span class="n">weights</span><span class="o">=</span><span class="p">{(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="mf">0.5</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="api">
+<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="trueskill-objects">
+<h3>TrueSkill objects<a class="headerlink" href="#trueskill-objects" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="trueskill.Rating">
+<em class="property">class </em><tt class="descclassname">trueskill.</tt><tt class="descname">Rating</tt><big>(</big><em>mu=None</em>, <em>sigma=None</em><big>)</big><a class="headerlink" href="#trueskill.Rating" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a player&#8217;s skill as Gaussian distrubution.</p>
+<p>The default mu and sigma value follows the global TrueSkill environment&#8217;s
+settings. If you don&#8217;t want to use the global, use
+<a class="reference internal" href="#trueskill.TrueSkill.create_rating" title="trueskill.TrueSkill.create_rating"><tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.create_rating()</span></tt></a> to create the rating object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mu</strong> &#8211; the mean.</li>
+<li><strong>sigma</strong> &#8211; the standard deviation.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="trueskill.TrueSkill">
+<em class="property">class </em><tt class="descclassname">trueskill.</tt><tt class="descname">TrueSkill</tt><big>(</big><em>mu=25.0</em>, <em>sigma=8.333333333333334</em>, <em>beta=4.166666666666667</em>, <em>tau=0.08333333333333334</em>, <em>draw_probability=0.1</em>, <em>backend=None</em><big>)</big><a class="headerlink" href="#trueskill.TrueSkill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implements a TrueSkill environment. An environment could have customized
+constants. Every games have not same design and may need to customize
+TrueSkill constants.</p>
+<p>For example, 60% of matches in your game have finished as draw then you
+should set <tt class="docutils literal"><span class="pre">draw_probability</span></tt> to 0.60:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">env</span> <span class="o">=</span> <span class="n">TrueSkill</span><span class="p">(</span><span class="n">draw_probability</span><span class="o">=</span><span class="mf">0.60</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For more details of the constants, see <a class="reference external" href="http://bit.ly/trueskill-math">The Math Behind TrueSkill</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mu</strong> &#8211; the initial mean of ratings.</li>
+<li><strong>sigma</strong> &#8211; the initial standard deviation of ratings. The recommended
+value is a third of <tt class="docutils literal"><span class="pre">mu</span></tt>.</li>
+<li><strong>beta</strong> &#8211; the distance which guarantees about an 80% chance of winning.
+The recommended value is a half of <tt class="docutils literal"><span class="pre">sigma</span></tt>.</li>
+<li><strong>tau</strong> &#8211; the dynamic factor which restrains a fixation of rating. The
+recommended value is <tt class="docutils literal"><span class="pre">sigma</span> <span class="pre">/</span> <span class="pre">100</span></tt>.</li>
+<li><strong>draw_probability</strong> &#8211; the draw probability of the game. It can be a
+<tt class="docutils literal"><span class="pre">float</span></tt> or function which returns a <tt class="docutils literal"><span class="pre">float</span></tt> by
+the given rating groups argument. If it is a
+<tt class="docutils literal"><span class="pre">float</span></tt>, the game has fixed draw probability.
+Otherwise, the draw probability will be decided
+dynamically per each match.</li>
+<li><strong>backend</strong> &#8211; the name of a backend which implements cdf, pdf, ppf. See
+<a class="reference internal" href="#module-trueskill.backends" title="trueskill.backends"><tt class="xref py py-mod docutils literal"><span class="pre">trueskill.backends</span></tt></a> for more details.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="trueskill.TrueSkill.create_rating">
+<tt class="descname">create_rating</tt><big>(</big><em>mu=None</em>, <em>sigma=None</em><big>)</big><a class="headerlink" href="#trueskill.TrueSkill.create_rating" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes new <a class="reference internal" href="#trueskill.Rating" title="trueskill.Rating"><tt class="xref py py-class docutils literal"><span class="pre">Rating</span></tt></a> object, but it fixes default mu and
+sigma to the environment&#8217;s.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">env</span> <span class="o">=</span> <span class="n">TrueSkill</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">Rating</span><span class="p">()</span>
+<span class="go">trueskill.Rating(mu=0.000, sigma=1.000)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="trueskill.TrueSkill.rate">
+<tt class="descname">rate</tt><big>(</big><em>rating_groups</em>, <em>ranks=None</em>, <em>weights=None</em>, <em>min_delta=0.0001</em><big>)</big><a class="headerlink" href="#trueskill.TrueSkill.rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recalculates ratings by the ranking table:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">env</span> <span class="o">=</span> <span class="n">TrueSkill</span><span class="p">()</span>  <span class="c"># uses default settings</span>
+<span class="c"># create ratings</span>
+<span class="n">r1</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">create_rating</span><span class="p">(</span><span class="mf">42.222</span><span class="p">)</span>
+<span class="n">r2</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">create_rating</span><span class="p">(</span><span class="mf">89.999</span><span class="p">)</span>
+<span class="c"># calculate new ratings</span>
+<span class="n">rating_groups</span> <span class="o">=</span> <span class="p">[(</span><span class="n">r1</span><span class="p">,),</span> <span class="p">(</span><span class="n">r2</span><span class="p">,)]</span>
+<span class="n">rated_rating_groups</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="n">rating_groups</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="c"># save new ratings</span>
+<span class="p">(</span><span class="n">r1</span><span class="p">,),</span> <span class="p">(</span><span class="n">r2</span><span class="p">,)</span> <span class="o">=</span> <span class="n">rated_rating_groups</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">rating_groups</span></tt> is a list of rating tuples or dictionaries that
+represents each team of the match. You will get a result as same
+structure as this argument. Rating dictionaries for this may be useful
+to choose specific player&#8217;s new rating:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># load players from the database</span>
+<span class="n">p1</span> <span class="o">=</span> <span class="n">load_player_from_database</span><span class="p">(</span><span class="s">&#39;Arpad Emrick Elo&#39;</span><span class="p">)</span>
+<span class="n">p2</span> <span class="o">=</span> <span class="n">load_player_from_database</span><span class="p">(</span><span class="s">&#39;Mark Glickman&#39;</span><span class="p">)</span>
+<span class="n">p3</span> <span class="o">=</span> <span class="n">load_player_from_database</span><span class="p">(</span><span class="s">&#39;Heungsub Lee&#39;</span><span class="p">)</span>
+<span class="c"># calculate new ratings</span>
+<span class="n">rating_groups</span> <span class="o">=</span> <span class="p">[{</span><span class="n">p1</span><span class="p">:</span> <span class="n">p1</span><span class="o">.</span><span class="n">rating</span><span class="p">,</span> <span class="n">p2</span><span class="p">:</span> <span class="n">p2</span><span class="o">.</span><span class="n">rating</span><span class="p">},</span> <span class="p">{</span><span class="n">p3</span><span class="p">:</span> <span class="n">p3</span><span class="o">.</span><span class="n">rating</span><span class="p">}]</span>
+<span class="n">rated_rating_groups</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="n">rating_groups</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="c"># save new ratings</span>
+<span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="p">[</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">]:</span>
+    <span class="n">player</span><span class="o">.</span><span class="n">rating</span> <span class="o">=</span> <span class="n">rated_rating_groups</span><span class="p">[</span><span class="n">player</span><span class="o">.</span><span class="n">team</span><span class="p">][</span><span class="n">player</span><span class="p">]</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rating_groups</strong> &#8211; a list of tuples or dictionaries containing
+<a class="reference internal" href="#trueskill.Rating" title="trueskill.Rating"><tt class="xref py py-class docutils literal"><span class="pre">Rating</span></tt></a> objects.</li>
+<li><strong>ranks</strong> &#8211; a ranking table. By default, it is same as the order of
+the <tt class="docutils literal"><span class="pre">rating_groups</span></tt>.</li>
+<li><strong>weights</strong> &#8211; weights of each players for &#8220;partial play&#8221;.</li>
+<li><strong>min_delta</strong> &#8211; each loop checks a delta of changes and the loop
+will stop if the delta is less then this argument.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">recalculated ratings same structure as <tt class="docutils literal"><span class="pre">rating_groups</span></tt>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises :</th><td class="field-body"><p class="first last"><tt class="xref py py-exc docutils literal"><span class="pre">FloatingPointError</span></tt> occurs when winners have too lower
+rating than losers. higher floating-point precision couls
+solve this error. set the backend to &#8220;mpmath&#8221;.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="versionadded">
+<span class="versionmodified">New in version 0.2.</span></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="trueskill.TrueSkill.quality">
+<tt class="descname">quality</tt><big>(</big><em>rating_groups</em>, <em>weights=None</em><big>)</big><a class="headerlink" href="#trueskill.TrueSkill.quality" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the match quality of the given rating groups. A result
+is the draw probability in the association:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">env</span> <span class="o">=</span> <span class="n">TrueSkill</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">quality</span><span class="p">([</span><span class="n">team1</span><span class="p">,</span> <span class="n">team2</span><span class="p">,</span> <span class="n">team3</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mf">0.8</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&#39;It may be a good match.&#39;</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&#39;Is not there another match?&#39;</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>rating_groups</strong> &#8211; a list of tuples or dictionaries containing
+<a class="reference internal" href="#trueskill.Rating" title="trueskill.Rating"><tt class="xref py py-class docutils literal"><span class="pre">Rating</span></tt></a> objects.</li>
+<li><strong>weights</strong> &#8211; weights of each players for &#8220;partial play&#8221;.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="versionadded">
+<span class="versionmodified">New in version 0.2.</span></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="trueskill.TrueSkill.rate_1vs1">
+<tt class="descname">rate_1vs1</tt><big>(</big><em>rating1</em>, <em>rating2</em>, <em>drawn=False</em>, <em>min_delta=0.0001</em><big>)</big><a class="headerlink" href="#trueskill.TrueSkill.rate_1vs1" title="Permalink to this definition">¶</a></dt>
+<dd><p>A shortcut to rate just 2 players in a deathmatch:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">new_rating1</span><span class="p">,</span> <span class="n">new_rating2</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">rate_1vs1</span><span class="p">(</span><span class="n">rating1</span><span class="p">,</span> <span class="n">rating2</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rating1</strong> &#8211; the winner&#8217;s rating if they didn&#8217;t draw.</li>
+<li><strong>rating2</strong> &#8211; the loser&#8217;s rating if they didn&#8217;t draw.</li>
+<li><strong>drawn</strong> &#8211; if the players drew, set this to <tt class="docutils literal"><span class="pre">True</span></tt>. Defaults to
+<tt class="docutils literal"><span class="pre">False</span></tt>.</li>
+<li><strong>min_delta</strong> &#8211; will be passed to <a class="reference internal" href="#trueskill.rate" title="trueskill.rate"><tt class="xref py py-meth docutils literal"><span class="pre">rate()</span></tt></a>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a tuple containing recalculated 2 ratings.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="versionadded">
+<span class="versionmodified">New in version 0.2.</span></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="trueskill.TrueSkill.quality_1vs1">
+<tt class="descname">quality_1vs1</tt><big>(</big><em>rating1</em>, <em>rating2</em><big>)</big><a class="headerlink" href="#trueskill.TrueSkill.quality_1vs1" title="Permalink to this definition">¶</a></dt>
+<dd><p>A shortcut to calculate the match quality between just 2 players in
+a deathmatch:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">quality_1vs1</span><span class="p">(</span><span class="n">rating1</span><span class="p">,</span> <span class="n">rating2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.8</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&#39;They look have similar skills.&#39;</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&#39;This match may be unfair!&#39;</span>
+</pre></div>
+</div>
+<p class="versionadded">
+<span class="versionmodified">New in version 0.2.</span></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="trueskill.TrueSkill.expose">
+<tt class="descname">expose</tt><big>(</big><em>rating</em><big>)</big><a class="headerlink" href="#trueskill.TrueSkill.expose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the value of the rating that will go up from 0 on the whole.
+Use this as a sort key in a leaderboard:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">leaderboard</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ratings</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">expose</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="versionadded">
+<span class="versionmodified">New in version 0.4.</span></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="trueskill.TrueSkill.make_as_global">
+<tt class="descname">make_as_global</tt><big>(</big><big>)</big><a class="headerlink" href="#trueskill.TrueSkill.make_as_global" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers the environment as the global environment.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">env</span> <span class="o">=</span> <span class="n">TrueSkill</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Rating</span><span class="p">()</span>
+<span class="go">trueskill.Rating(mu=25.000, sigma=8.333)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">make_as_global</span><span class="p">()</span>  
+<span class="go">trueskill.TrueSkill(mu=50.000, ...)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Rating</span><span class="p">()</span>
+<span class="go">trueskill.Rating(mu=50.000, sigma=8.333)</span>
+</pre></div>
+</div>
+<p>But if you need just one environment, use <a class="reference internal" href="#trueskill.setup" title="trueskill.setup"><tt class="xref py py-func docutils literal"><span class="pre">setup()</span></tt></a> instead.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="proxy-functions-of-the-global-environment">
+<h3>Proxy functions of the global environment<a class="headerlink" href="#proxy-functions-of-the-global-environment" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="trueskill.setup">
+<tt class="descclassname">trueskill.</tt><tt class="descname">setup</tt><big>(</big><em>mu=25.0</em>, <em>sigma=8.333333333333334</em>, <em>beta=4.166666666666667</em>, <em>tau=0.08333333333333334</em>, <em>draw_probability=0.1</em>, <em>backend=None</em>, <em>env=None</em><big>)</big><a class="headerlink" href="#trueskill.setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setups the global TrueSkill environment.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">Rating</span><span class="p">()</span>
+<span class="go">trueskill.Rating(mu=25.000, sigma=8.333)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">setup</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>  
+<span class="go">trueskill.TrueSkill(mu=50.000, ...)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Rating</span><span class="p">()</span>
+<span class="go">trueskill.Rating(mu=50.000, sigma=8.333)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="trueskill.rate">
+<tt class="descclassname">trueskill.</tt><tt class="descname">rate</tt><big>(</big><em>rating_groups</em>, <em>ranks=None</em>, <em>weights=None</em>, <em>min_delta=0.0001</em><big>)</big><a class="headerlink" href="#trueskill.rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>A proxy function for <a class="reference internal" href="#trueskill.TrueSkill.rate" title="trueskill.TrueSkill.rate"><tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.rate()</span></tt></a> of the global TrueSkill
+environment.</p>
+<p class="versionadded">
+<span class="versionmodified">New in version 0.2.</span></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="trueskill.quality">
+<tt class="descclassname">trueskill.</tt><tt class="descname">quality</tt><big>(</big><em>rating_groups</em>, <em>weights=None</em><big>)</big><a class="headerlink" href="#trueskill.quality" title="Permalink to this definition">¶</a></dt>
+<dd><p>A proxy function for <a class="reference internal" href="#trueskill.TrueSkill.quality" title="trueskill.TrueSkill.quality"><tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.quality()</span></tt></a> of the global TrueSkill
+environment.</p>
+<p class="versionadded">
+<span class="versionmodified">New in version 0.2.</span></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="trueskill.rate_1vs1">
+<tt class="descclassname">trueskill.</tt><tt class="descname">rate_1vs1</tt><big>(</big><em>rating1</em>, <em>rating2</em>, <em>drawn=False</em>, <em>min_delta=0.0001</em><big>)</big><a class="headerlink" href="#trueskill.rate_1vs1" title="Permalink to this definition">¶</a></dt>
+<dd><p>A proxy function for <a class="reference internal" href="#trueskill.TrueSkill.rate_1vs1" title="trueskill.TrueSkill.rate_1vs1"><tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.rate_1vs1()</span></tt></a> of the global TrueSkill
+environment.</p>
+<p class="versionadded">
+<span class="versionmodified">New in version 0.2.</span></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="trueskill.quality_1vs1">
+<tt class="descclassname">trueskill.</tt><tt class="descname">quality_1vs1</tt><big>(</big><em>rating1</em>, <em>rating2</em><big>)</big><a class="headerlink" href="#trueskill.quality_1vs1" title="Permalink to this definition">¶</a></dt>
+<dd><p>A proxy function for <a class="reference internal" href="#trueskill.TrueSkill.quality_1vs1" title="trueskill.TrueSkill.quality_1vs1"><tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.quality_1vs1()</span></tt></a> of the global
+TrueSkill environment.</p>
+<p class="versionadded">
+<span class="versionmodified">New in version 0.2.</span></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="trueskill.expose">
+<tt class="descclassname">trueskill.</tt><tt class="descname">expose</tt><big>(</big><em>rating</em><big>)</big><a class="headerlink" href="#trueskill.expose" title="Permalink to this definition">¶</a></dt>
+<dd><p>A proxy function for <a class="reference internal" href="#trueskill.TrueSkill.expose" title="trueskill.TrueSkill.expose"><tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.expose()</span></tt></a> of the global TrueSkill
+environment.</p>
+<p class="versionadded">
+<span class="versionmodified">New in version 0.4.</span></p>
+</dd></dl>
+
+</div>
+<div class="section" id="default-values">
+<h3>Default values<a class="headerlink" href="#default-values" title="Permalink to this headline">¶</a></h3>
+<dl class="data">
+<dt id="trueskill.MU">
+<tt class="descclassname">trueskill.</tt><tt class="descname">MU</tt><em class="property"> = 25.0</em><a class="headerlink" href="#trueskill.MU" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default initial mean of ratings</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="trueskill.SIGMA">
+<tt class="descclassname">trueskill.</tt><tt class="descname">SIGMA</tt><em class="property"> = 8.333333333333334</em><a class="headerlink" href="#trueskill.SIGMA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default initial standard deviation of ratings</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="trueskill.BETA">
+<tt class="descclassname">trueskill.</tt><tt class="descname">BETA</tt><em class="property"> = 4.166666666666667</em><a class="headerlink" href="#trueskill.BETA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default guarantee about an 80% chance of winning</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="trueskill.TAU">
+<tt class="descclassname">trueskill.</tt><tt class="descname">TAU</tt><em class="property"> = 0.08333333333333334</em><a class="headerlink" href="#trueskill.TAU" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default dynamic factor</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="trueskill.DRAW_PROBABILITY">
+<tt class="descclassname">trueskill.</tt><tt class="descname">DRAW_PROBABILITY</tt><em class="property"> = 0.1</em><a class="headerlink" href="#trueskill.DRAW_PROBABILITY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default draw probability of the game</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-trueskill.backends">
+<span id="mathematical-statistics-backends"></span><h3>Mathematical statistics backends<a class="headerlink" href="#module-trueskill.backends" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="trueskill.backends.choose_backend">
+<tt class="descclassname">trueskill.backends.</tt><tt class="descname">choose_backend</tt><big>(</big><em>backend</em><big>)</big><a class="headerlink" href="#trueskill.backends.choose_backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a tuple containing cdf, pdf, ppf from the chosen backend.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cdf</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">ppf</span> <span class="o">=</span> <span class="n">choose_backend</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cdf</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">)</span>
+<span class="go">7.619853263532764e-24</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cdf</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">ppf</span> <span class="o">=</span> <span class="n">choose_backend</span><span class="p">(</span><span class="s">&#39;mpmath&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cdf</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">)</span>
+<span class="go">mpf(&#39;7.6198530241605255e-24&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="trueskill.backends.available_backends">
+<tt class="descclassname">trueskill.backends.</tt><tt class="descname">available_backends</tt><big>(</big><big>)</big><a class="headerlink" href="#trueskill.backends.available_backends" title="Permalink to this definition">¶</a></dt>
+<dd><p>Detects list of available backends. All of defined backends are <tt class="docutils literal"><span class="pre">None</span></tt>
+&#8211; internal implementation, <a class="reference external" href="https://code.google.com/p/mpmath">mpmath</a>, <a class="reference external" href="http://www.scipy.org/">scipy</a>.</p>
+<p>You can check if the backend is available in the current environment with
+this function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="s">&#39;mpmath&#39;</span> <span class="ow">in</span> <span class="n">available_backends</span><span class="p">():</span>
+    <span class="c"># mpmath can be used in the current environment</span>
+    <span class="n">setup</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s">&#39;mpmath&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="changelog">
+<h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="version-0-4">
+<h3>Version 0.4<a class="headerlink" href="#version-0-4" title="Permalink to this headline">¶</a></h3>
+<p>Under development.</p>
+<ul class="simple">
+<li>Replaces <tt class="xref py py-meth docutils literal"><span class="pre">Rating.exposure()</span></tt> with <tt class="xref py py-meth docutils literal"><span class="pre">TrueSkiil.expose()</span></tt>. Because the
+TrueSkill settings have to adjust a fomula to calculate an exposure.</li>
+<li>Supports dynamic draw probability. To use this feature, set
+<tt class="docutils literal"><span class="pre">draw_probability</span></tt> option to a function which returns a <tt class="docutils literal"><span class="pre">float</span></tt> by the
+given <tt class="docutils literal"><span class="pre">rating_groups</span></tt> argument.</li>
+</ul>
+</div>
+<div class="section" id="version-0-3-1">
+<h3>Version 0.3.1<a class="headerlink" href="#version-0-3-1" title="Permalink to this headline">¶</a></h3>
+<p>Released on Mar 6th 2013.</p>
+<p>Raises <tt class="xref py py-exc docutils literal"><span class="pre">FloatingPointError</span></tt> instead of <tt class="xref py py-exc docutils literal"><span class="pre">ValueError</span></tt> (math domain
+error) for a problem similar to <a class="reference external" href="https://github.com/sublee/trueskill/issues/5">issue #5</a> but with more extreme input.</p>
+</div>
+<div class="section" id="version-0-3">
+<h3>Version 0.3<a class="headerlink" href="#version-0-3" title="Permalink to this headline">¶</a></h3>
+<p>Released on Mar 5th 2013.</p>
+<p><tt class="xref py py-class docutils literal"><span class="pre">TrueSkill</span></tt> got a new option <tt class="docutils literal"><span class="pre">backend</span></tt> to choose cdf, pdf, ppf
+implementation.</p>
+<p>When winners have too lower rating than losers, <tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.rate()</span></tt> will
+raise <tt class="xref py py-exc docutils literal"><span class="pre">FloatingPointError</span></tt> if the backend is <tt class="docutils literal"><span class="pre">None</span></tt> or &#8220;scipy&#8221;. But from
+this version, you can avoid the problem with &#8220;mpmath&#8221; backend. This was
+reported at <a class="reference external" href="https://github.com/sublee/trueskill/issues/5">issue #5</a>.</p>
+</div>
+<div class="section" id="version-0-2-1">
+<h3>Version 0.2.1<a class="headerlink" href="#version-0-2-1" title="Permalink to this headline">¶</a></h3>
+<p>Released on Dec 6th 2012.</p>
+<p>Fixes a printing bug on <tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.quality()</span></tt>.</p>
+</div>
+<div class="section" id="version-0-2">
+<h3>Version 0.2<a class="headerlink" href="#version-0-2" title="Permalink to this headline">¶</a></h3>
+<p>Released on Nov 30th 2012.</p>
+<ul class="simple">
+<li>Implements &#8220;Partial play&#8221;.</li>
+<li>Works well in many Python versions, 2.5, 2.6, 2.7, 3.1, 3.2, 3.3 and many
+interpreters, CPython, <a class="reference external" href="http://jython.org/">Jython</a>, <a class="reference external" href="http://pypy.org/">PyPy</a>.</li>
+<li>Supports that using dictionaries as a <tt class="docutils literal"><span class="pre">rating_group</span></tt> to choose specific
+player&#8217;s rating simply.</li>
+<li>Adds shorcut functions for 2 players individual match, the most usage:
+<tt class="xref py py-func docutils literal"><span class="pre">rate_1vs1()</span></tt> and <tt class="xref py py-func docutils literal"><span class="pre">quality_1vs1()</span></tt>,</li>
+<li><tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.transform_ratings()</span></tt> is now called <tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.rate()</span></tt>.</li>
+<li><tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.match_quality()</span></tt> is now called <tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.quality()</span></tt>.</li>
+</ul>
+</div>
+<div class="section" id="version-0-1-4">
+<h3>Version 0.1.4<a class="headerlink" href="#version-0-1-4" title="Permalink to this headline">¶</a></h3>
+<p>Released on Oct 5th 2012.</p>
+<p>Fixes <tt class="xref py py-exc docutils literal"><span class="pre">ZeroDivisionError</span></tt> issue. For more detail, see <a class="reference external" href="https://github.com/sublee/trueskill/issues/3">issue#3</a>. Thanks
+to <a class="reference external" href="https://github.com/youknowone">&#64;youknowone</a> and <a class="reference external" href="https://github.com/konikos">&#64;konikos</a>.</p>
+</div>
+<div class="section" id="version-0-1-3">
+<h3>Version 0.1.3<a class="headerlink" href="#version-0-1-3" title="Permalink to this headline">¶</a></h3>
+<p>Released on Mar 10th 2012.</p>
+<p>Improves the match quality performance.</p>
+</div>
+<div class="section" id="version-0-1-2">
+<h3>Version 0.1.2<a class="headerlink" href="#version-0-1-2" title="Permalink to this headline">¶</a></h3>
+<p>Released on Jan 22nd 2012.</p>
+<p>Just more detailed docstrings.</p>
+</div>
+<div class="section" id="version-0-1-1">
+<h3>Version 0.1.1<a class="headerlink" href="#version-0-1-1" title="Permalink to this headline">¶</a></h3>
+<p>Released on Jan 12th 2012.</p>
+<p>Fixes an error in &#8220;A&#8221; matrix of the match quality algorithm.</p>
+</div>
+<div class="section" id="version-0-1">
+<h3>Version 0.1<a class="headerlink" href="#version-0-1" title="Permalink to this headline">¶</a></h3>
+<p>First public preview release.</p>
+</div>
+</div>
+<div class="section" id="further-reading">
+<h2>Further Reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h2>
+<p>If you want to more details of the TrueSkill algorithm, see also:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://research.microsoft.com/en-us/projects/trueskill">TrueSkill™ Ranking System</a>
+by Microsoft Research</li>
+<li><a class="reference external" href="http://atom.research.microsoft.com/trueskill/rankcalculator.aspx">TrueSkill Calcurator</a>
+by Microsoft Research</li>
+<li><a class="reference external" href="http://bit.ly/moserware-trueskill">Computing Your Skill</a> by Jeff Moser</li>
+<li><a class="reference external" href="http://bit.ly/trueskill-math">The Math Behind TrueSkill</a> by Jeff Moser</li>
+</ul>
+</div>
+<div class="section" id="licensing-and-author">
+<h2>Licensing and Author<a class="headerlink" href="#licensing-and-author" title="Permalink to this headline">¶</a></h2>
+<p>This TrueSkill package is opened under the <a class="reference external" href="http://en.wikipedia.org/wiki/BSD_licenses">BSD</a> license but the <a class="reference external" href="http://research.microsoft.com/en-us/projects/trueskill">TrueSkill™</a>
+brand is not. Microsoft permits only Xbox Live games or non-commercial projects
+to use TrueSkill™. If your project is commercial, you should find another
+rating system. See <a class="reference external" href="https://github.com/sublee/trueskill/blob/master/LICENSE">LICENSE</a> for the details.</p>
+<p>I&#8217;m <a class="reference external" href="http://subl.ee/">Heungsub Lee</a>, a game developer. Any regarding questions or patches are
+welcomed.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <a href="http://github.com/sublee/trueskill" style="
+      display: block; position: absolute; top: 0; right: 0;
+      width: 149px; height: 149px; text-indent: -9999px;
+      background: url('_static/github.png') no-repeat;
+    ">Fork me on GitHub</a>
+  
+
+    
+    <div class="footer">
+        &copy; Copyright 2012-2013, Heungsub Lee.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </div>
+  
+    <script>
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-28655602-1']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var isHTTPS = 'https:' == document.location.protocol;
+        var ga = document.createElement('script');
+        ga.type = 'text/javascript';
+        ga.async = true;
+        var url = isHTTPS ? 'https://ssl' : 'http://www';
+        url += '.google-analytics.com/ga.js';
+        ga.src = url;
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  
+
+  </body>
+</html>
