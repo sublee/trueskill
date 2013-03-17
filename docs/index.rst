@@ -196,7 +196,6 @@ TrueSkill objects
 -----------------
 
 .. autoclass:: Rating
-   :members: exposure
 
 .. autoclass:: TrueSkill
    :members: create_rating,
@@ -204,6 +203,7 @@ TrueSkill objects
              quality,
              rate_1vs1,
              quality_1vs1,
+             expose,
              make_as_global,
 
 Proxy functions of the global environment
@@ -219,8 +219,10 @@ Proxy functions of the global environment
 
 .. autofunction:: quality_1vs1
 
-Constants
----------
+.. autofunction:: expose
+
+Default values
+--------------
 
 .. autodata:: MU
 

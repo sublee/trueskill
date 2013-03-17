@@ -63,7 +63,7 @@ setup(
     license='BSD',
     author='Heungsub Lee',
     author_email=re.sub('((sub).)(.*)', r'\2@\1.\3', 'sublee'),
-    url='http://pythonhosted.org/trueskill',
+    url='http://trueskill.org/',
     description='A rating system for video games',
     long_description=__doc__,
     platforms='any',

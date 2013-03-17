@@ -19,10 +19,12 @@ from .factorgraph import (Variable, PriorFactor, LikelihoodFactor, SumFactor,
 from .mathematics import Gaussian, Matrix
 
 
-__version__ = '0.3.1'
+__version__ = '0.4'
 __all__ = ['TrueSkill', 'Rating', 'rate', 'quality', 'rate_1vs1',
-           'quality_1vs1', 'setup', 'MU', 'SIGMA', 'BETA', 'TAU',
-           'DRAW_PROBABILITY', 'transform_ratings', 'match_quality']
+           'quality_1vs1', 'expose', 'setup', 'global_env',
+           'MU', 'SIGMA', 'BETA', 'TAU', 'DRAW_PROBABILITY',
+           # deprecated functions
+           'transform_ratings', 'match_quality']
 
 
 #: Default initial mean of ratings
@@ -39,17 +41,17 @@ DRAW_PROBABILITY = .10
 DELTA = 0.0001
 
 
-def calc_draw_probability(draw_margin, beta, size, cdf=None):
+def calc_draw_probability(draw_margin, size, beta, cdf=None):
     """Calculates a draw-probability from the given ``draw_margin``."""
     if cdf is None:
-        cdf = _g().cdf
+        cdf = global_env().cdf
     return 2 * cdf(draw_margin / (math.sqrt(size) * beta)) - 1
 
 
-def calc_draw_margin(draw_probability, beta, size, ppf=None):
+def calc_draw_margin(draw_probability, size, beta, ppf=None):
     """Calculates a draw-margin from the given ``draw_probability``."""
     if ppf is None:
-        ppf = _g().ppf
+        ppf = global_env().ppf
     return ppf((draw_probability + 1) / 2.) * math.sqrt(size) * beta
 
 
@@ -71,8 +73,11 @@ def _floating_point_error(env):
 
 
 class Rating(Gaussian):
-    """Represents a player's skill as Gaussian distrubution. The default mu and
-    sigma value follows the global TrueSkill environment's settings.
+    """Represents a player's skill as Gaussian distrubution.
+
+    The default mu and sigma value follows the global TrueSkill environment's
+    settings. If you don't want to use the global, use
+    :meth:`TrueSkill.create_rating` to create the rating object.
 
     :param mu: the mean.
     :param sigma: the standard deviation.
@@ -82,15 +87,10 @@ class Rating(Gaussian):
         if isinstance(mu, tuple):
             mu, sigma = mu
         if mu is None:
-            mu = _g().mu
+            mu = global_env().mu
         if sigma is None:
-            sigma = _g().sigma
+            sigma = global_env().sigma
         super(Rating, self).__init__(mu, sigma)
-
-    @property
-    def exposure(self):
-        """A value that will go up on the whole."""
-        return self.mu - 3 * self.sigma
 
     def __int__(self):
         return int(self.mu)
@@ -106,8 +106,8 @@ class Rating(Gaussian):
 
     def __repr__(self):
         c = type(self)
-        args = (c.__module__, c.__name__, self.mu, self.sigma)
-        return '%s.%s(mu=%.3f, sigma=%.3f)' % args
+        args = ('.'.join([c.__module__, c.__name__]), self.mu, self.sigma)
+        return '%s(mu=%.3f, sigma=%.3f)' % args
 
 
 class TrueSkill(object):
@@ -125,11 +125,19 @@ class TrueSkill(object):
     .. _The Math Behind TrueSkill:: http://bit.ly/trueskill-math
 
     :param mu: the initial mean of ratings.
-    :param sigma: the initial standard deviation of ratings.
-    :param beta: the distance that guarantees about an 80% chance of winning.
-    :param tau: the dynamic factor.
-    :param draw_probability: the draw probability of the game.
-    :param backend: the name of a backend which implements cdf, pdf, ppf. see
+    :param sigma: the initial standard deviation of ratings. The recommended
+                  value is a third of ``mu``.
+    :param beta: the distance which guarantees about an 80% chance of winning.
+                 The recommended value is a half of ``sigma``.
+    :param tau: the dynamic factor which restrains a fixation of rating. The
+                recommended value is ``sigma / 100``.
+    :param draw_probability: the draw probability of the game. It can be a
+                             ``float`` or function which returns a ``float`` by
+                             the given rating groups argument. If it is a
+                             ``float``, the game has fixed draw probability.
+                             Otherwise, the draw probability will be decided
+                             dynamically per each match.
+    :param backend: the name of a backend which implements cdf, pdf, ppf. See
                     :mod:`trueskill.backends` for more details.
     """
 
@@ -183,10 +191,9 @@ class TrueSkill(object):
         v = self.v_draw(abs_diff, draw_margin)
         return (v ** 2) + (a * self.pdf(a) - b * self.pdf(b)) / denom
 
-    def calc_draw_margin(self, size):
+    def calc_draw_margin(self, draw_probability, size):
         """Calculates a draw-margin."""
-        return calc_draw_margin(self.draw_probability, self.beta, size,
-                                ppf=self.ppf)
+        return calc_draw_margin(draw_probability, size, self.beta, self.ppf)
 
     def create_rating(self, mu=None, sigma=None):
         """Initializes new :class:`Rating` object, but it fixes default mu and
@@ -194,7 +201,7 @@ class TrueSkill(object):
 
         >>> env = TrueSkill(mu=0, sigma=1)
         >>> env.Rating()
-        Rating(mu=0.000, sigma=1.000)
+        trueskill.Rating(mu=0.000, sigma=1.000)
         """
         if mu is None:
             mu = self.mu
@@ -221,7 +228,7 @@ class TrueSkill(object):
         ValueError: each group must contain multiple ratings
         >>> env.validate_rating_groups([(Rating(),), (Rating(),)])
         ... #doctest: +ELLIPSIS
-        [(Rating(...),), (Rating(...),)]
+        [(truekill.Rating(...),), (trueskill.Rating(...),)]
         """
         # check group sizes
         if len(rating_groups) < 2:
@@ -305,9 +312,13 @@ class TrueSkill(object):
                 yield SumFactor(teamdiff_var,
                                 teamperf_vars[team:team + 2], [+1, -1])
         def build_trunc_layer():
+            if callable(self.draw_probability):
+                draw_probability = self.draw_probability(rating_groups)
+            else:
+                draw_probability = self.draw_probability
             for x, teamdiff_var in enumerate(teamdiff_vars):
                 size = sum(len(group) for group in rating_groups[x:x + 2])
-                draw_margin = self.calc_draw_margin(size)
+                draw_margin = self.calc_draw_margin(draw_probability, size)
                 if ranks[x] == ranks[x + 1]:  # is a tie?
                     v_func, w_func = self.v_draw, self.w_draw
                 else:
@@ -529,82 +540,49 @@ class TrueSkill(object):
         """
         return self.quality([(rating1,), (rating2,)])
 
+    def expose(self, rating):
+        """Returns the value of the rating that will go up from 0 on the whole.
+        Use this as a sort key in a leaderboard::
+
+            leaderboard = sorted(ratings, key=env.expose, reverse=True)
+
+        .. versionadded:: 0.4
+        """
+        k = self.mu / self.sigma
+        return rating.mu - k * rating.sigma
+
     def make_as_global(self):
         """Registers the environment as the global environment.
 
         >>> env = TrueSkill(mu=50)
         >>> Rating()
-        Rating(mu=25.000, sigma=8.333)
-        >>> env.make_as_global() #doctest: +ELLIPSIS
-        <TrueSkill mu=50...>
+        trueskill.Rating(mu=25.000, sigma=8.333)
+        >>> env.make_as_global()  #doctest: +ELLIPSIS
+        trueskill.TrueSkill(mu=50.000, ...)
         >>> Rating()
-        Rating(mu=50.000, sigma=8.333)
+        trueskill.Rating(mu=50.000, sigma=8.333)
 
         But if you need just one environment, use :func:`setup` instead.
         """
         return setup(env=self)
 
-    def Rating(self, mu=None, sigma=None):
-        """Deprecated. Used to create a :class:`Rating` object.
-
-        .. versionchanged:: 0.2
-           This method is deprecated with 0.2. Override :meth:`create_rating`
-           instead.
-        """
-        from warnings import warn
-        warn('TrueSkill.Rating is now called TrueSkill.create_rating',
-             DeprecationWarning)
-        return self.create_rating(mu, sigma)
-
-    def transform_ratings(self, rating_groups, ranks=None, min_delta=DELTA):
-        """Deprecated. Used to rate the given ratings.
-
-        .. versionchanged:: 0.2
-           This method is deprecated with 0.2. Override :meth:`rate` instead.
-        """
-        from warnings import warn
-        warn('TrueSkill.transform_ratings is now called TrueSkill.rate',
-             DeprecationWarning)
-        rating_groups = [(r,) if isinstance(r, Rating) else r
-                         for r in rating_groups]
-        return self.rate(rating_groups, ranks, min_delta=min_delta)
-
-    def match_quality(self, rating_groups):
-        """Deprecated. Used to calculate a match quality.
-
-        .. versionchanged:: 0.2
-           This method is deprecated with 0.2. Override :meth:`quality`
-           instead.
-        """
-        from warnings import warn
-        warn('TrueSkill.match_quality is now called TrueSkill.quality',
-             DeprecationWarning)
-        rating_groups = [(r,) if isinstance(r, Rating) else r
-                         for r in rating_groups]
-        return self.quality(rating_groups)
-
     def __repr__(self):
         c = type(self)
+        if callable(self.draw_probability):
+            f = self.draw_probability
+            draw_probability = '.'.join([f.__module__, f.__name__])
+        else:
+            draw_probability = '%.1f%%' % (self.draw_probability * 100)
         if self.backend is None:
             backend = ''
         elif isinstance(self.backend, tuple):
-            backend = ' backend=...'
+            backend = ', backend=...'
         else:
-            backend = ' backend=%r' % self.backend
-        args = (c.__module__, c.__name__, self.mu, self.sigma, self.beta,
-                self.tau, self.draw_probability * 100, backend)
-        return '<%s.%s mu=%.3f sigma=%.3f beta=%.3f tau=%.3f ' \
-               'draw_probability=%.1f%%%s>' % args
-
-
-_global = []
-
-
-def _g():
-    """Gets the global TrueSkill environment."""
-    if not _global:
-        setup()  # setup the default environment
-    return _global[0]
+            backend = ', backend=%r' % self.backend
+        args = ('.'.join([c.__module__, c.__name__]), self.mu, self.sigma,
+                self.beta, self.tau, draw_probability, backend)
+        return ('%s(mu=%.3f, sigma=%.3f, beta=%.3f, tau=%.3f, '
+                'draw_probability=%s%s)' % args)
 
 
 def rate(rating_groups, ranks=None, weights=None, min_delta=DELTA):
@@ -613,7 +591,7 @@ def rate(rating_groups, ranks=None, weights=None, min_delta=DELTA):
 
     .. versionadded:: 0.2
     """
-    return _g().rate(rating_groups, ranks, weights, min_delta)
+    return global_env().rate(rating_groups, ranks, weights, min_delta)
 
 
 def quality(rating_groups, weights=None):
@@ -622,7 +600,7 @@ def quality(rating_groups, weights=None):
 
     .. versionadded:: 0.2
     """
-    return _g().quality(rating_groups, weights)
+    return global_env().quality(rating_groups, weights)
 
 
 def rate_1vs1(rating1, rating2, drawn=False, min_delta=DELTA):
@@ -631,7 +609,7 @@ def rate_1vs1(rating1, rating2, drawn=False, min_delta=DELTA):
 
     .. versionadded:: 0.2
     """
-    return _g().rate_1vs1(rating1, rating2, drawn, min_delta)
+    return global_env().rate_1vs1(rating1, rating2, drawn, min_delta)
 
 
 def quality_1vs1(rating1, rating2):
@@ -640,15 +618,16 @@ def quality_1vs1(rating1, rating2):
 
     .. versionadded:: 0.2
     """
-    return _g().quality_1vs1(rating1, rating2)
+    return global_env().quality_1vs1(rating1, rating2)
 
 
-def transform_ratings(rating_groups, ranks=None, min_delta=DELTA):
-    return _g().transform_ratings(rating_groups, ranks, min_delta)
+def expose(rating):
+    """A proxy function for :meth:`TrueSkill.expose` of the global TrueSkill
+    environment.
 
-
-def match_quality(rating_groups):
-    return _g().match_quality(rating_groups)
+    .. versionadded:: 0.4
+    """
+    return global_env().expose(rating)
 
 
 def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
@@ -657,17 +636,29 @@ def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
     """Setups the global TrueSkill environment.
 
     >>> Rating()
-    Rating(mu=25.000, sigma=8.333)
-    >>> setup(mu=50) #doctest: +ELLIPSIS
-    <TrueSkill mu=50...>
+    trueskill.Rating(mu=25.000, sigma=8.333)
+    >>> setup(mu=50)  #doctest: +ELLIPSIS
+    trueskill.TrueSkill(mu=50.000, ...)
     >>> Rating()
-    Rating(mu=50.000, sigma=8.333)
+    trueskill.Rating(mu=50.000, sigma=8.333)
     """
-    try:
-        _global.pop()
-    except IndexError:
-        pass
     if env is None:
         env = TrueSkill(mu, sigma, beta, tau, draw_probability, backend)
-    _global.append(env)
-    return _g()
+    global_env.__trueskill__ = env
+    return env
+
+
+def global_env():
+    """Gets the global TrueSkill environment."""
+    try:
+        global_env.__trueskill__
+    except AttributeError:
+        # setup the default environment
+        setup()
+    return global_env.__trueskill__
+
+
+# append deprecated methods into :class:`TrueSkill` and :class:`Rating`
+from . import deprecated
+from .deprecated import transform_ratings, match_quality
+deprecated.ensure_backward_compatibility(TrueSkill, Rating)

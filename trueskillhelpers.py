@@ -16,7 +16,7 @@ __all__ = ['substituted_trueskill', 'factor_graph_logging']
 
 @contextmanager
 def substituted_trueskill(*args, **kwargs):
-    env = trueskill._g()
+    env = trueskill.global_env()
     params = [['mu', env.mu], ['sigma', env.sigma], ['beta', env.beta],
               ['tau', env.tau], ['draw_probability', env.draw_probability],
               ['backend', env.backend]]
@@ -32,6 +32,14 @@ def substituted_trueskill(*args, **kwargs):
     finally:
         # revert the environment
         trueskill.setup(env=env)
+
+
+def win_probability(rating1, rating2, env=None):
+    if env is None:
+        env = trueskill.global_env()
+    exp = (rating1.mu - rating2.mu) / env.beta
+    n = 4. ** exp
+    return n / (n + 1)
 
 
 @contextmanager

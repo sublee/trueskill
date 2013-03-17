@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
+import warnings
 
 from almost import Approximate
 from pytest import deprecated_call, raises
@@ -103,12 +104,29 @@ def test_invalid_rating_groups():
         env.validate_rating_groups([])
     with raises(ValueError):
         env.validate_rating_groups([()])
+    # need multiple groups not just one
     with raises(ValueError):
         env.validate_rating_groups([(Rating(),)])
+    # empty group is not allowed
     with raises(ValueError):
         env.validate_rating_groups([(Rating(),), ()])
+    # all groups should be same structure
     with raises(TypeError):
         env.validate_rating_groups([(Rating(),), {0: Rating()}])
+
+
+def test_draw_probability_generator():
+    def roshambo_draw_probability(rating_groups):
+        return 3. / (3 ** len(rating_groups))
+    dynamic_env = TrueSkill(draw_probability=roshambo_draw_probability)
+    fixed_2_env = TrueSkill(draw_probability=1 / 3.)
+    fixed_3_env = TrueSkill(draw_probability=1 / 9.)
+    assert dynamic_env.rate([(Rating(),), (Rating(),)]) == \
+           fixed_2_env.rate([(Rating(),), (Rating(),)])
+    assert dynamic_env.rate([(Rating(),), (Rating(),), (Rating(),)]) == \
+           fixed_3_env.rate([(Rating(),), (Rating(),), (Rating(),)])
+    assert dynamic_env.rate([(Rating(),), (Rating(),), (Rating(),)]) != \
+           fixed_2_env.rate([(Rating(),), (Rating(),), (Rating(),)])
 
 
 def test_deprecated_methods():
@@ -119,6 +137,7 @@ def test_deprecated_methods():
     deprecated_call(env.transform_ratings, [(r1,), (r2,), (r3,)])
     deprecated_call(env.match_quality, [(r1,), (r2,), (r3,)])
     deprecated_call(env.Rating)
+    deprecated_call(lambda: Rating().exposure)
 
 
 def test_deprecated_individual_rating_groups():
@@ -372,6 +391,14 @@ def test_partial_play_with_weights_dict():
         rate([t1, t2], weights=[[1], [0, 1]])
     assert rate([t1, t2], weights={(1, 0): 0.5}) == \
         rate([t1, t2], weights=[[1], [0.5, 1]])
+
+
+@various_backends
+def test_exposure():
+    env = TrueSkill()
+    assert env.expose(env.create_rating()) == 0
+    env = TrueSkill(1000, 200)
+    assert env.expose(env.create_rating()) == 0
 
 
 # reported bugs
