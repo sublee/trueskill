@@ -1,3 +1,14 @@
+Version 0.4
+-----------
+
+Under development.
+
+- Replaces :meth:`Rating.exposure` with :meth:`TrueSkiil.expose`. Because the
+  TrueSkill settings have to adjust a fomula to calculate an exposure.
+- Supports dynamic draw probability. To use this feature, set
+  ``draw_probability`` option to a function which returns a ``float`` by the
+  given ``rating_groups`` argument.
+
 Version 0.3.1
 -------------
 
