@@ -115,7 +115,7 @@ def test_invalid_rating_groups():
         env.validate_rating_groups([(Rating(),), {0: Rating()}])
 
 
-def test_draw_probability_generator():
+def test_dynamic_draw_probability():
     def roshambo_draw_probability(rating_groups):
         return 3. / (3 ** len(rating_groups))
     dynamic_env = TrueSkill(draw_probability=roshambo_draw_probability)
