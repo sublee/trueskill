@@ -8,6 +8,7 @@ Under development.
 - Supports dynamic draw probability. To use this feature, set
   ``draw_probability`` option to a function which returns a ``float`` by the
   given ``rating_groups`` argument.
+- Adds :meth:`TrueSkill.expect`.
 
 Version 0.3.1
 -------------

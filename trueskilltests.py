@@ -393,12 +393,25 @@ def test_partial_play_with_weights_dict():
         rate([t1, t2], weights=[[1], [0.5, 1]])
 
 
+# functions
+
+
 @various_backends
 def test_exposure():
     env = TrueSkill()
     assert env.expose(env.create_rating()) == 0
     env = TrueSkill(1000, 200)
     assert env.expose(env.create_rating()) == 0
+
+
+@various_backends
+def test_expectation():
+    env = TrueSkill()
+    assert almost(env.expect(env.create_rating(), env.create_rating())) == 0.5
+    assert almost(env.expect(
+        env.create_rating(), env.create_rating(env.mu - env.beta))) == 0.8
+    assert almost(env.expect(
+        env.create_rating(), env.create_rating(env.mu + env.beta))) == 0.2
 
 
 # mathematics

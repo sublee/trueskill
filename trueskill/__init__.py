@@ -153,6 +153,20 @@ class TrueSkill(object):
         else:
             self.cdf, self.pdf, self.ppf = choose_backend(backend)
 
+    def create_rating(self, mu=None, sigma=None):
+        """Initializes new :class:`Rating` object, but it fixes default mu and
+        sigma to the environment's.
+
+        >>> env = TrueSkill(mu=0, sigma=1)
+        >>> env.Rating()
+        trueskill.Rating(mu=0.000, sigma=1.000)
+        """
+        if mu is None:
+            mu = self.mu
+        if sigma is None:
+            sigma = self.sigma
+        return Rating(mu, sigma)
+
     def v_win(self, diff, draw_margin):
         """The non-draw version of "V" function. "V" calculates a variation of
         a mean.
@@ -193,20 +207,6 @@ class TrueSkill(object):
     def calc_draw_margin(self, draw_probability, size):
         """Calculates a draw-margin."""
         return calc_draw_margin(draw_probability, size, self.beta, self.ppf)
-
-    def create_rating(self, mu=None, sigma=None):
-        """Initializes new :class:`Rating` object, but it fixes default mu and
-        sigma to the environment's.
-
-        >>> env = TrueSkill(mu=0, sigma=1)
-        >>> env.Rating()
-        trueskill.Rating(mu=0.000, sigma=1.000)
-        """
-        if mu is None:
-            mu = self.mu
-        if sigma is None:
-            sigma = self.sigma
-        return Rating(mu, sigma)
 
     def validate_rating_groups(self, rating_groups):
         """Validates a ``rating_groups`` argument. It should contain more than
@@ -550,6 +550,23 @@ class TrueSkill(object):
         k = self.mu / self.sigma
         return rating.mu - k * rating.sigma
 
+    def expect(self, rating1, rating2):
+        """Calculates rating1's chance of winning.
+
+        >>> r1 = env.create_rating()
+        >>> r2 = env.create_rating(env.mu - env.beta)
+        >>> r3 = env.create_rating(env.mu - 2 * env.beta)
+        >>> print '{:.2%}'.format(env.expect(r1, r2))
+        80.00%
+        >>> print '{:.2%}'.format(env.expect(r1, r3))
+        94.12%
+
+        .. versionadded:: 0.4
+        """
+        exp = (rating1.mu - rating2.mu) / self.beta
+        n = 4. ** exp
+        return n / (n + 1)
+
     def make_as_global(self):
         """Registers the environment as the global environment.
 
@@ -627,6 +644,15 @@ def expose(rating):
     .. versionadded:: 0.4
     """
     return global_env().expose(rating)
+
+
+def expect(rating1, rating2):
+    """A proxy function for :meth:`TrueSkill.expect` of the global TrueSkill
+    environment.
+
+    .. versionadded:: 0.4
+    """
+    return global_env().expect(rating1, rating2)
 
 
 def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,

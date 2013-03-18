@@ -227,34 +227,27 @@ TrueSkill objects
              rate_1vs1,
              quality_1vs1,
              expose,
+             expect,
              make_as_global,
 
 Proxy functions of the global environment
 -----------------------------------------
 
 .. autofunction:: setup
-
 .. autofunction:: rate
-
 .. autofunction:: quality
-
 .. autofunction:: rate_1vs1
-
 .. autofunction:: quality_1vs1
-
 .. autofunction:: expose
+.. autofunction:: expect
 
 Default values
 --------------
 
 .. autodata:: MU
-
 .. autodata:: SIGMA
-
 .. autodata:: BETA
-
 .. autodata:: TAU
-
 .. autodata:: DRAW_PROBABILITY
 
 Mathematical statistics backends
@@ -263,7 +256,6 @@ Mathematical statistics backends
 .. module:: trueskill.backends
 
 .. autofunction:: trueskill.backends.choose_backend
-
 .. autofunction:: trueskill.backends.available_backends
 
 Changelog
