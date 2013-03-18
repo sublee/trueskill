@@ -475,15 +475,15 @@ class TrueSkill(object):
         length = len(flatten_ratings)
         # a vector of all of the skill means
         mean_matrix = Matrix([[r.mu] for r in flatten_ratings])
-        # a matrix whose diagonal values are the variances (sigma^2) of each
+        # a matrix whose diagonal values are the variances (sigma ** 2) of each
         # of the players.
-        def variance_matrix(width, height):
-            for x, variance in enumerate(r.sigma ** 2
-                                         for r in flatten_ratings):
+        def variance_matrix(height, width):
+            variances = (r.sigma ** 2 for r in flatten_ratings)
+            for x, variance in enumerate(variances):
                 yield (x, x), variance
         variance_matrix = Matrix(variance_matrix, length, length)
         # the player-team assignment and comparison matrix
-        def rotated_a_matrix(set_width, set_height):
+        def rotated_a_matrix(set_height, set_width):
             t = 0
             for r, (cur, next) in enumerate(izip(rating_groups[:-1],
                                                  rating_groups[1:])):
@@ -493,8 +493,8 @@ class TrueSkill(object):
                 x += 1
                 for x in xrange(x, x + len(next)):
                     yield (r, x), -flatten_weights[x]
-            set_width(x + 1)
             set_height(r + 1)
+            set_width(x + 1)
         rotated_a_matrix = Matrix(rotated_a_matrix)
         a_matrix = rotated_a_matrix.transpose()
         # match quality further derivation

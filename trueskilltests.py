@@ -401,6 +401,87 @@ def test_exposure():
     assert env.expose(env.create_rating()) == 0
 
 
+# mathematics
+
+
+def test_valid_gaussian():
+    from trueskill.mathematics import Gaussian
+    with raises(TypeError):  # sigma argument is needed
+        Gaussian(0)
+    with raises(ValueError):  # sigma**2 should be greater than 0
+        Gaussian(0, 0)
+
+
+def test_valid_matrix():
+    from trueskill.mathematics import Matrix
+    with raises(TypeError):  # src must be a list or dict or callable
+        Matrix(None)
+    with raises(ValueError):  # src must be a rectangular array of numbers
+        Matrix([])
+    with raises(ValueError):  # src must be a rectangular array of numbers
+        Matrix([[1, 2, 3], [4, 5]])
+    with raises(TypeError):
+        # A callable src must return an interable which generates a tuple
+        # containing coordinate and value
+        Matrix(lambda: None)
+
+
+def test_matrix_from_dict():
+    from trueskill.mathematics import Matrix
+    mat = Matrix({(0, 0): 1, (4, 9): 1})
+    assert mat.height == 5
+    assert mat.width == 10
+    assert mat[0][0] == 1
+    assert mat[0][1] == 0
+    assert mat[4][9] == 1
+    assert mat[4][8] == 0
+
+
+def test_matrix_from_item_generator():
+    from trueskill.mathematics import Matrix
+    def gen_matrix(height, width):
+        yield (0, 0), 1
+        yield (height - 1, width - 1), 1
+    mat = Matrix(gen_matrix, 5, 10)
+    assert mat.height == 5
+    assert mat.width == 10
+    assert mat[0][0] == 1
+    assert mat[0][1] == 0
+    assert mat[4][9] == 1
+    assert mat[4][8] == 0
+    with raises(TypeError):
+        # A callable src must call set_height and set_width if the size is
+        # non-deterministic
+        Matrix(gen_matrix)
+    def gen_and_set_size_matrix(set_height, set_width):
+        set_height(5)
+        set_width(10)
+        return [((0, 0), 1), ((4, 9), 1)]
+    mat = Matrix(gen_and_set_size_matrix)
+    assert mat.height == 5
+    assert mat.width == 10
+    assert mat[0][0] == 1
+    assert mat[0][1] == 0
+    assert mat[4][9] == 1
+    assert mat[4][8] == 0
+
+
+def test_matrix_operations():
+    from trueskill.mathematics import Matrix
+    assert Matrix([[1, 2], [3, 4]]).inverse() == \
+           Matrix([[-2.0, 1.0], [1.5, -0.5]])
+    assert Matrix([[1, 2], [3, 4]]).determinant() == -2
+    assert Matrix([[1, 2], [3, 4]]).adjugate() == Matrix([[4, -2], [-3, 1]])
+    with raises(ValueError):  # Bad size
+        assert Matrix([[1, 2], [3, 4]]) * Matrix([[5, 6]])
+    assert Matrix([[1, 2], [3, 4]]) * Matrix([[5, 6, 7], [8, 9, 10]]) == \
+           Matrix([[21, 24, 27], [47, 54, 61]])
+    with raises(ValueError):  # Must be same size
+        Matrix([[1, 2], [3, 4]]) + Matrix([[5, 6, 7], [8, 9, 10]])
+    assert Matrix([[1, 2], [3, 4]]) + Matrix([[5, 6], [7, 8]]) == \
+           Matrix([[6, 8], [10, 12]])
+
+
 # reported bugs
 
 

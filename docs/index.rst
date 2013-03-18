@@ -59,7 +59,24 @@ player may have 80% of chance to beat the other player. The default value of
 \\(\\beta\\) is \\(\\frac{ 25 }{ 6 }\\).
 
 Ratings will approach real skills through few times of the TrueSkill's Bayesian
-inference algorithm.
+inference algorithm. How many matches TrueSkill needs to estimate real skills?
+It depends on the game rule. See the below table. The table was made by
+`Microsoft Research`_:
+
+==============  =======
+Rule            Matches
+==============  =======
+16P Deathmatch  3
+8P Deathmatch   3
+4P Deathmatch   5
+2P Deathmatch   12
+2:2:2:2         10
+4:4:4:4         20
+4:4             46
+8:8             91
+==============  =======
+
+.. _Microsoft Research: http://research.microsoft.com/en-us/projects/trueskill/
 
 1:1 competition game
 --------------------
@@ -188,6 +205,12 @@ Or with a dictionary:
     # set a weight of 2nd player in 1st team to 0.5, otherwise leave as 1
     rate([(r1, r2), (r3, r4)], weights={(0, 1): 0.5})
     quality([(r1, r2), (r3, r4)], weights={(0, 1): 0.5})
+
+Rock-paper-scissors example
+---------------------------
+
+Rock-paper-scissors (aka. Roshambo) is a most famous and classic game in the
+whole world.
 
 API
 ~~~
