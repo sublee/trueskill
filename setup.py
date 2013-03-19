@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 TrueSkill
 ~~~~~~~~~
@@ -19,18 +20,18 @@ players.
 Links
 `````
 
-* `GitHub repository <http://github.com/sublee/trueskill/>`_
-* `development version
+- `GitHub repository <http://github.com/sublee/trueskill/>`_
+- `development version
   <http://github.com/sublee/trueskill/zipball/master#egg=trueskill-dev>`_
 
 See Also
 ````````
 
-* `TrueSkill(TM) Ranking System by Microsoft
+- `TrueSkill(TM) Ranking System by Microsoft
   <http://research.microsoft.com/en-us/projects/trueskill/>`_
-* `"Computing Your Skill" by Jeff Moser <http://bit.ly/moserware-trueskill>`_
-* `"The Math Behind TrueSkill" by Jeff Moser <http://bit.ly/trueskill-math>`_
-* `TrueSkill Calcurator by Microsoft
+- `"Computing Your Skill" by Jeff Moser <http://bit.ly/moserware-trueskill>`_
+- `"The Math Behind TrueSkill" by Jeff Moser <http://bit.ly/trueskill-math>`_
+- `TrueSkill Calcurator by Microsoft
   <http://atom.research.microsoft.com/trueskill/rankcalculator.aspx>`_
 
 """

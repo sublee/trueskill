@@ -27,6 +27,11 @@ inf = float('inf')
 class Gaussian(object):
     """A model for the normal distribution."""
 
+    #: Precision, the inverse of the variance.
+    pi = 0
+    #: Precision adjusted mean, the precision multiplied by the mean.
+    tau = 0
+
     def __init__(self, mu=None, sigma=None, pi=0, tau=0):
         if mu is not None:
             if sigma is None:
@@ -40,12 +45,12 @@ class Gaussian(object):
 
     @property
     def mu(self):
-        """A mean"""
+        """A property which returns the mean."""
         return self.pi and self.tau / self.pi
 
     @property
     def sigma(self):
-        """A square root of a variance"""
+        """A property which returns the the square root of the variance."""
         return math.sqrt(1 / self.pi) if self.pi else inf
 
     def __mul__(self, other):

@@ -20,23 +20,23 @@ from .mathematics import Gaussian, Matrix
 
 __version__ = '0.4'
 __all__ = ['TrueSkill', 'Rating', 'rate', 'quality', 'rate_1vs1',
-           'quality_1vs1', 'expose', 'setup', 'global_env',
+           'quality_1vs1', 'expose', 'expect', 'setup', 'global_env',
            'MU', 'SIGMA', 'BETA', 'TAU', 'DRAW_PROBABILITY',
            # deprecated functions
            'transform_ratings', 'match_quality']
 
 
-#: Default initial mean of ratings
+#: Default initial mean of ratings.
 MU = 25.
-#: Default initial standard deviation of ratings
+#: Default initial standard deviation of ratings.
 SIGMA = MU / 3
-#: Default guarantee about an 80% chance of winning
+#: Default guarantee about an 80% chance of winning.
 BETA = SIGMA / 2
-#: Default dynamic factor
+#: Default dynamic factor.
 TAU = SIGMA / 100
-#: Default draw probability of the game
+#: Default draw probability of the game.
 DRAW_PROBABILITY = .10
-#: A basis to check reliability of the result
+#: A basis to check reliability of the result.
 DELTA = 0.0001
 
 

@@ -40,8 +40,8 @@ Or check out developement version:
 Learning
 ~~~~~~~~
 
-Rating, a model for player's skill
-----------------------------------
+Rating, a model for skill
+-------------------------
 
 In TrueSkill, rating is a Gaussian distribution which starts from
 \\(\\mathcal{ N }( 25, \\frac{ 25 }{ 3 } )\\). \\(\\mu\\) is an average skill
@@ -206,8 +206,8 @@ Or with a dictionary:
     rate([(r1, r2), (r3, r4)], weights={(0, 1): 0.5})
     quality([(r1, r2), (r3, r4)], weights={(0, 1): 0.5})
 
-Rock-paper-scissors example
----------------------------
+Dynamic draw probability
+------------------------
 
 Rock-paper-scissors (aka. Roshambo) is a most famous and classic game in the
 whole world.
@@ -219,6 +219,8 @@ TrueSkill objects
 -----------------
 
 .. autoclass:: Rating
+   :members: mu,
+             sigma,
 
 .. autoclass:: TrueSkill
    :members: create_rating,
