@@ -208,10 +208,11 @@ If some player wasn't present for the entire duration of the game, use the
 concept of "partial play" by ``weights`` parameter. The above situation can be
 described by the following weights:
 
-- 1P on team A -- 1 (Full time)
-- 2P on team A -- 0.5 (30/60 minutes)
-- 3P on team B -- 1
-- 4P on team B -- 1
+.. hlist::
+   - 1P on team A -- 1 (Full time)
+   - 2P on team A -- 0.5 (30/60 minutes)
+   - 3P on team B -- 1
+   - 4P on team B -- 1
 
 As a code with a 2-dimensional list:
 
@@ -282,7 +283,7 @@ Changelog
 
 .. include:: ../changelog.rst
 
-Further Reading
+Further reading
 ~~~~~~~~~~~~~~~
 
 If you want to more details of the TrueSkill algorithm, see also:

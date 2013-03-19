@@ -64,11 +64,11 @@ Version 0.1.4
 Released on Oct 5th 2012.
 
 Fixes :exc:`ZeroDivisionError` issue. For more detail, see `issue#3`_. Thanks
-to `@youknowone`_ and `@konikos`_.
+to `Yunwon Jeong`_ and `Nikos Kokolakis`_.
 
 .. _issue#3: https://github.com/sublee/trueskill/issues/3
-.. _@youknowone: https://github.com/youknowone
-.. _@konikos: https://github.com/konikos
+.. _Yunwon Jeong: https://github.com/youknowone
+.. _Nikos Kokolakis: https://github.com/konikos
 
 Version 0.1.3
 -------------
@@ -76,13 +76,6 @@ Version 0.1.3
 Released on Mar 10th 2012.
 
 Improves the match quality performance.
-
-Version 0.1.2
--------------
-
-Released on Jan 22nd 2012.
-
-Just more detailed docstrings. 
 
 Version 0.1.1
 -------------
