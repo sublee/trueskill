@@ -248,7 +248,6 @@ TrueSkill objects
              expose,
              expect,
              make_as_global,
-             transform_ratings,
 
 Proxy functions of the global environment
 -----------------------------------------
