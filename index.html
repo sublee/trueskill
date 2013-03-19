@@ -48,7 +48,7 @@
             
   <div class="section" id="trueskill">
 <h1>TrueSkill<a class="headerlink" href="#trueskill" title="Permalink to this headline">¶</a></h1>
-<p>a rating system for video games</p>
+<p>the video game rating system</p>
 <div class="section" id="what-s-trueskill">
 <h2>What&#8217;s TrueSkill?<a class="headerlink" href="#what-s-trueskill" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="http://research.microsoft.com/en-us/projects/trueskill">TrueSkill</a> is a rating system among game players. It has been used on <a class="reference external" href="http://www.xbox.com/live">Xbox
@@ -217,7 +217,7 @@ whole world.</p>
 <p>The draw probability of this game with 2 players is 33.3%; with 3 players,
 11.1%; with 4 players, 3.7%. It depends on the number of players. The fomular
 is \(3^{ 1 - n }\), where \(n\) is the number of players.</p>
-<p>So we need dynamic draw probability to guess ratings exactly. If you set
+<p>So we need dynamic draw probability to estimate ratings exactly. If you set
 <tt class="docutils literal"><span class="pre">draw_probability</span></tt> as a function which returns a <tt class="docutils literal"><span class="pre">float</span></tt> by the given
 rating groups argument:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">roshambo_draw_probability</span><span class="p">(</span><span class="n">rating_groups</span><span class="p">):</span>

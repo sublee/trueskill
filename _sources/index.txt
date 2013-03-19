@@ -1,7 +1,7 @@
 TrueSkill
 =========
 
-a rating system for video games
+the video game rating system
 
 .. currentmodule:: trueskill
 
@@ -187,7 +187,7 @@ The draw probability of this game with 2 players is 33.3%; with 3 players,
 11.1%; with 4 players, 3.7%. It depends on the number of players. The fomular
 is \\(3^{ 1 - n }\\), where \\(n\\) is the number of players.
 
-So we need dynamic draw probability to guess ratings exactly. If you set
+So we need dynamic draw probability to estimate ratings exactly. If you set
 ``draw_probability`` as a function which returns a ``float`` by the given
 rating groups argument:
 
