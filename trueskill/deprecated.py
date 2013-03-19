@@ -47,7 +47,7 @@ def ensure_backward_compatibility(TrueSkill, Rating):
 def TrueSkill_Rating(self, mu=None, sigma=None):
     """Deprecated. Used to create a :class:`Rating` object.
 
-    .. versionchanged:: 0.2
+    .. deprecated:: 0.2
        This method is deprecated with 0.2. Override :meth:`create_rating`
        instead.
     """
@@ -61,7 +61,7 @@ def TrueSkill_transform_ratings(self, rating_groups, ranks=None,
                                 min_delta=DELTA):
     """Deprecated. Used to rate the given ratings.
 
-    .. versionchanged:: 0.2
+    .. deprecated:: 0.2
        This method is deprecated with 0.2. Override :meth:`rate` instead.
     """
     from warnings import warn
@@ -75,7 +75,7 @@ def TrueSkill_transform_ratings(self, rating_groups, ranks=None,
 def TrueSkill_match_quality(self, rating_groups):
     """Deprecated. Used to calculate a match quality.
 
-    .. versionchanged:: 0.2
+    .. deprecated:: 0.2
        This method is deprecated with 0.2. Override :meth:`quality`
        instead.
     """
@@ -91,7 +91,7 @@ def TrueSkill_match_quality(self, rating_groups):
 def Rating_exposure(self):
     """Deprecated. Used to get a value that will go up on the whole.
 
-    .. versionchanged:: 0.4
+    .. deprecated:: 0.4
        This method is deprecated with 0.4. Use :meth:`TrueSkill.expose`
        instead.
     """

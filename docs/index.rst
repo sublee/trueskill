@@ -174,6 +174,29 @@ start with ``r`` are :class:`Rating` objects:
 - N:M unbalanced match -- ``[(r1,), (r2, r3, r4)]``
 - Deathmatch -- ``[(r1,), (r2,), (r3,), (r4,)]``
 
+Dynamic draw probability
+------------------------
+
+Rock-paper-scissors (aka. Roshambo) is a most famous free-for-all game in the
+whole world.
+
+.. image:: roshambo.gif
+   :align: center
+
+The draw probability of this game with 2 players is 33.3%; with 3 players,
+11.1%; with 4 players, 3.7%. It depends on the number of players. The fomular
+is \\(3^{ 1 - n }\\), where \\(n\\) is the number of players.
+
+So we need dynamic draw probability to guess ratings exactly. If you set
+``draw_probability`` as a function which returns a ``float`` by the given
+rating groups argument:
+
+::
+
+    def roshambo_draw_probability(rating_groups):
+        return 3 ** (1 - len(rating_groups))
+    roshambo = TrueSkill(draw_probability=roshambo_draw_probability)
+
 Partial play
 ------------
 
@@ -206,12 +229,6 @@ Or with a dictionary:
     rate([(r1, r2), (r3, r4)], weights={(0, 1): 0.5})
     quality([(r1, r2), (r3, r4)], weights={(0, 1): 0.5})
 
-Dynamic draw probability
-------------------------
-
-Rock-paper-scissors (aka. Roshambo) is a most famous and classic game in the
-whole world.
-
 API
 ~~~
 
@@ -231,6 +248,7 @@ TrueSkill objects
              expose,
              expect,
              make_as_global,
+             transform_ratings,
 
 Proxy functions of the global environment
 -----------------------------------------
