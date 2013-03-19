@@ -40,8 +40,8 @@ Or check out developement version:
 Learning
 ~~~~~~~~
 
-Rating, a model for player's skill
-----------------------------------
+Rating, a model for skill
+-------------------------
 
 In TrueSkill, rating is a Gaussian distribution which starts from
 \\(\\mathcal{ N }( 25, \\frac{ 25 }{ 3 } )\\). \\(\\mu\\) is an average skill
@@ -59,7 +59,24 @@ player may have 80% of chance to beat the other player. The default value of
 \\(\\beta\\) is \\(\\frac{ 25 }{ 6 }\\).
 
 Ratings will approach real skills through few times of the TrueSkill's Bayesian
-inference algorithm.
+inference algorithm. How many matches TrueSkill needs to estimate real skills?
+It depends on the game rule. See the below table. The table was made by
+`Microsoft Research`_:
+
+==============  =======
+Rule            Matches
+==============  =======
+16P Deathmatch  3
+8P Deathmatch   3
+4P Deathmatch   5
+2P Deathmatch   12
+2:2:2:2         10
+4:4:4:4         20
+4:4             46
+8:8             91
+==============  =======
+
+.. _Microsoft Research: http://research.microsoft.com/en-us/projects/trueskill/
 
 1:1 competition game
 --------------------
@@ -157,6 +174,29 @@ start with ``r`` are :class:`Rating` objects:
 - N:M unbalanced match -- ``[(r1,), (r2, r3, r4)]``
 - Deathmatch -- ``[(r1,), (r2,), (r3,), (r4,)]``
 
+Dynamic draw probability
+------------------------
+
+Rock-paper-scissors (aka. Roshambo) is a most famous free-for-all game in the
+whole world.
+
+.. image:: roshambo.gif
+   :align: center
+
+The draw probability of this game with 2 players is 33.3%; with 3 players,
+11.1%; with 4 players, 3.7%. It depends on the number of players. The fomular
+is \\(3^{ 1 - n }\\), where \\(n\\) is the number of players.
+
+So we need dynamic draw probability to guess ratings exactly. If you set
+``draw_probability`` as a function which returns a ``float`` by the given
+rating groups argument:
+
+::
+
+    def roshambo_draw_probability(rating_groups):
+        return 3 ** (1 - len(rating_groups))
+    roshambo = TrueSkill(draw_probability=roshambo_draw_probability)
+
 Partial play
 ------------
 
@@ -168,10 +208,11 @@ If some player wasn't present for the entire duration of the game, use the
 concept of "partial play" by ``weights`` parameter. The above situation can be
 described by the following weights:
 
-- 1P on team A -- 1 (Full time)
-- 2P on team A -- 0.5 (30/60 minutes)
-- 3P on team B -- 1
-- 4P on team B -- 1
+.. hlist::
+   - 1P on team A -- 1 (Full time)
+   - 2P on team A -- 0.5 (30/60 minutes)
+   - 3P on team B -- 1
+   - 4P on team B -- 1
 
 As a code with a 2-dimensional list:
 
@@ -196,6 +237,8 @@ TrueSkill objects
 -----------------
 
 .. autoclass:: Rating
+   :members: mu,
+             sigma,
 
 .. autoclass:: TrueSkill
    :members: create_rating,
@@ -204,34 +247,27 @@ TrueSkill objects
              rate_1vs1,
              quality_1vs1,
              expose,
+             expect,
              make_as_global,
 
 Proxy functions of the global environment
 -----------------------------------------
 
 .. autofunction:: setup
-
 .. autofunction:: rate
-
 .. autofunction:: quality
-
 .. autofunction:: rate_1vs1
-
 .. autofunction:: quality_1vs1
-
 .. autofunction:: expose
+.. autofunction:: expect
 
 Default values
 --------------
 
 .. autodata:: MU
-
 .. autodata:: SIGMA
-
 .. autodata:: BETA
-
 .. autodata:: TAU
-
 .. autodata:: DRAW_PROBABILITY
 
 Mathematical statistics backends
@@ -240,7 +276,6 @@ Mathematical statistics backends
 .. module:: trueskill.backends
 
 .. autofunction:: trueskill.backends.choose_backend
-
 .. autofunction:: trueskill.backends.available_backends
 
 Changelog
@@ -248,7 +283,7 @@ Changelog
 
 .. include:: ../changelog.rst
 
-Further Reading
+Further reading
 ~~~~~~~~~~~~~~~
 
 If you want to more details of the TrueSkill algorithm, see also:

@@ -73,8 +73,8 @@ install it in your system, use <strong class="command">easy_install</strong>:</p
 </div>
 <div class="section" id="learning">
 <h2>Learning<a class="headerlink" href="#learning" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="rating-a-model-for-player-s-skill">
-<h3>Rating, a model for player&#8217;s skill<a class="headerlink" href="#rating-a-model-for-player-s-skill" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="rating-a-model-for-skill">
+<h3>Rating, a model for skill<a class="headerlink" href="#rating-a-model-for-skill" title="Permalink to this headline">¶</a></h3>
 <p>In TrueSkill, rating is a Gaussian distribution which starts from
 \(\mathcal{ N }( 25, \frac{ 25 }{ 3 } )\). \(\mu\) is an average skill
 of player, and \(\sigma\) is a confidence of the guessed rating. A real
@@ -88,7 +88,46 @@ skill of player is between \(\mu \pm 2\sigma\) with 95% confidence.</p>
 player may have 80% of chance to beat the other player. The default value of
 \(\beta\) is \(\frac{ 25 }{ 6 }\).</p>
 <p>Ratings will approach real skills through few times of the TrueSkill&#8217;s Bayesian
-inference algorithm.</p>
+inference algorithm. How many matches TrueSkill needs to estimate real skills?
+It depends on the game rule. See the below table. The table was made by
+<a class="reference external" href="http://research.microsoft.com/en-us/projects/trueskill/">Microsoft Research</a>:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="67%" />
+<col width="33%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Rule</th>
+<th class="head">Matches</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>16P Deathmatch</td>
+<td>3</td>
+</tr>
+<tr class="row-odd"><td>8P Deathmatch</td>
+<td>3</td>
+</tr>
+<tr class="row-even"><td>4P Deathmatch</td>
+<td>5</td>
+</tr>
+<tr class="row-odd"><td>2P Deathmatch</td>
+<td>12</td>
+</tr>
+<tr class="row-even"><td>2:2:2:2</td>
+<td>10</td>
+</tr>
+<tr class="row-odd"><td>4:4:4:4</td>
+<td>20</td>
+</tr>
+<tr class="row-even"><td>4:4</td>
+<td>46</td>
+</tr>
+<tr class="row-odd"><td>8:8</td>
+<td>91</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="competition-game">
 <h3>1:1 competition game<a class="headerlink" href="#competition-game" title="Permalink to this headline">¶</a></h3>
@@ -170,6 +209,23 @@ start with <tt class="docutils literal"><span class="pre">r</span></tt> are <a c
 <li>Deathmatch &#8211; <tt class="docutils literal"><span class="pre">[(r1,),</span> <span class="pre">(r2,),</span> <span class="pre">(r3,),</span> <span class="pre">(r4,)]</span></tt></li>
 </ul>
 </div>
+<div class="section" id="dynamic-draw-probability">
+<h3>Dynamic draw probability<a class="headerlink" href="#dynamic-draw-probability" title="Permalink to this headline">¶</a></h3>
+<p>Rock-paper-scissors (aka. Roshambo) is a most famous free-for-all game in the
+whole world.</p>
+<img alt="_images/roshambo.gif" class="align-center" src="_images/roshambo.gif" />
+<p>The draw probability of this game with 2 players is 33.3%; with 3 players,
+11.1%; with 4 players, 3.7%. It depends on the number of players. The fomular
+is \(3^{ 1 - n }\), where \(n\) is the number of players.</p>
+<p>So we need dynamic draw probability to guess ratings exactly. If you set
+<tt class="docutils literal"><span class="pre">draw_probability</span></tt> as a function which returns a <tt class="docutils literal"><span class="pre">float</span></tt> by the given
+rating groups argument:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">roshambo_draw_probability</span><span class="p">(</span><span class="n">rating_groups</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">3</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">rating_groups</span><span class="p">))</span>
+<span class="n">roshambo</span> <span class="o">=</span> <span class="n">TrueSkill</span><span class="p">(</span><span class="n">draw_probability</span><span class="o">=</span><span class="n">roshambo_draw_probability</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="partial-play">
 <h3>Partial play<a class="headerlink" href="#partial-play" title="Permalink to this headline">¶</a></h3>
 <p>Let&#8217;s assume that there are 2 teams which each has 2 players. The game was for
@@ -178,12 +234,15 @@ later.</p>
 <p>If some player wasn&#8217;t present for the entire duration of the game, use the
 concept of &#8220;partial play&#8221; by <tt class="docutils literal"><span class="pre">weights</span></tt> parameter. The above situation can be
 described by the following weights:</p>
-<ul class="simple">
+<table class="hlist"><tr><td><ul class="simple">
 <li>1P on team A &#8211; 1 (Full time)</li>
 <li>2P on team A &#8211; 0.5 (30/60 minutes)</li>
+</ul>
+</td><td><ul class="simple">
 <li>3P on team B &#8211; 1</li>
 <li>4P on team B &#8211; 1</li>
 </ul>
+</td></tr></table>
 <p>As a code with a 2-dimensional list:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># set each weights to 1, 0.5, 1, 1</span>
 <span class="n">rate</span><span class="p">([(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">),</span> <span class="p">(</span><span class="n">r3</span><span class="p">,</span> <span class="n">r4</span><span class="p">)],</span> <span class="n">weights</span><span class="o">=</span><span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
@@ -221,6 +280,18 @@ settings. If you don&#8217;t want to use the global, use
 </tr>
 </tbody>
 </table>
+<dl class="attribute">
+<dt id="trueskill.Rating.mu">
+<tt class="descname">mu</tt><a class="headerlink" href="#trueskill.Rating.mu" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property which returns the mean.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="trueskill.Rating.sigma">
+<tt class="descname">sigma</tt><a class="headerlink" href="#trueskill.Rating.sigma" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property which returns the the square root of the variance.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -418,6 +489,23 @@ Use this as a sort key in a leaderboard:</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="trueskill.TrueSkill.expect">
+<tt class="descname">expect</tt><big>(</big><em>rating1</em>, <em>rating2</em><big>)</big><a class="headerlink" href="#trueskill.TrueSkill.expect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates rating1&#8217;s chance of winning.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">r1</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">create_rating</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r2</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">create_rating</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">mu</span> <span class="o">-</span> <span class="n">env</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r3</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">create_rating</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">mu</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">env</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;{:.2%}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">expect</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">))</span>
+<span class="go">80.00%</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;{:.2%}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">expect</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r3</span><span class="p">))</span>
+<span class="go">94.12%</span>
+</pre></div>
+</div>
+<p class="versionadded">
+<span class="versionmodified">New in version 0.4.</span></p>
+</dd></dl>
+
+<dl class="method">
 <dt id="trueskill.TrueSkill.make_as_global">
 <tt class="descname">make_as_global</tt><big>(</big><big>)</big><a class="headerlink" href="#trueskill.TrueSkill.make_as_global" title="Permalink to this definition">¶</a></dt>
 <dd><p>Registers the environment as the global environment.</p>
@@ -497,37 +585,46 @@ environment.</p>
 <span class="versionmodified">New in version 0.4.</span></p>
 </dd></dl>
 
+<dl class="function">
+<dt id="trueskill.expect">
+<tt class="descclassname">trueskill.</tt><tt class="descname">expect</tt><big>(</big><em>rating1</em>, <em>rating2</em><big>)</big><a class="headerlink" href="#trueskill.expect" title="Permalink to this definition">¶</a></dt>
+<dd><p>A proxy function for <a class="reference internal" href="#trueskill.TrueSkill.expect" title="trueskill.TrueSkill.expect"><tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.expect()</span></tt></a> of the global TrueSkill
+environment.</p>
+<p class="versionadded">
+<span class="versionmodified">New in version 0.4.</span></p>
+</dd></dl>
+
 </div>
 <div class="section" id="default-values">
 <h3>Default values<a class="headerlink" href="#default-values" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
 <dt id="trueskill.MU">
 <tt class="descclassname">trueskill.</tt><tt class="descname">MU</tt><em class="property"> = 25.0</em><a class="headerlink" href="#trueskill.MU" title="Permalink to this definition">¶</a></dt>
-<dd><p>Default initial mean of ratings</p>
+<dd><p>Default initial mean of ratings.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="trueskill.SIGMA">
 <tt class="descclassname">trueskill.</tt><tt class="descname">SIGMA</tt><em class="property"> = 8.333333333333334</em><a class="headerlink" href="#trueskill.SIGMA" title="Permalink to this definition">¶</a></dt>
-<dd><p>Default initial standard deviation of ratings</p>
+<dd><p>Default initial standard deviation of ratings.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="trueskill.BETA">
 <tt class="descclassname">trueskill.</tt><tt class="descname">BETA</tt><em class="property"> = 4.166666666666667</em><a class="headerlink" href="#trueskill.BETA" title="Permalink to this definition">¶</a></dt>
-<dd><p>Default guarantee about an 80% chance of winning</p>
+<dd><p>Default guarantee about an 80% chance of winning.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="trueskill.TAU">
 <tt class="descclassname">trueskill.</tt><tt class="descname">TAU</tt><em class="property"> = 0.08333333333333334</em><a class="headerlink" href="#trueskill.TAU" title="Permalink to this definition">¶</a></dt>
-<dd><p>Default dynamic factor</p>
+<dd><p>Default dynamic factor.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="trueskill.DRAW_PROBABILITY">
 <tt class="descclassname">trueskill.</tt><tt class="descname">DRAW_PROBABILITY</tt><em class="property"> = 0.1</em><a class="headerlink" href="#trueskill.DRAW_PROBABILITY" title="Permalink to this definition">¶</a></dt>
-<dd><p>Default draw probability of the game</p>
+<dd><p>Default draw probability of the game.</p>
 </dd></dl>
 
 </div>
@@ -574,6 +671,7 @@ TrueSkill settings have to adjust a fomula to calculate an exposure.</li>
 <li>Supports dynamic draw probability. To use this feature, set
 <tt class="docutils literal"><span class="pre">draw_probability</span></tt> option to a function which returns a <tt class="docutils literal"><span class="pre">float</span></tt> by the
 given <tt class="docutils literal"><span class="pre">rating_groups</span></tt> argument.</li>
+<li>Adds <tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.expect()</span></tt>.</li>
 </ul>
 </div>
 <div class="section" id="version-0-3-1">
@@ -616,17 +714,12 @@ player&#8217;s rating simply.</li>
 <h3>Version 0.1.4<a class="headerlink" href="#version-0-1-4" title="Permalink to this headline">¶</a></h3>
 <p>Released on Oct 5th 2012.</p>
 <p>Fixes <tt class="xref py py-exc docutils literal"><span class="pre">ZeroDivisionError</span></tt> issue. For more detail, see <a class="reference external" href="https://github.com/sublee/trueskill/issues/3">issue#3</a>. Thanks
-to <a class="reference external" href="https://github.com/youknowone">&#64;youknowone</a> and <a class="reference external" href="https://github.com/konikos">&#64;konikos</a>.</p>
+to <a class="reference external" href="https://github.com/youknowone">Yunwon Jeong</a> and <a class="reference external" href="https://github.com/konikos">Nikos Kokolakis</a>.</p>
 </div>
 <div class="section" id="version-0-1-3">
 <h3>Version 0.1.3<a class="headerlink" href="#version-0-1-3" title="Permalink to this headline">¶</a></h3>
 <p>Released on Mar 10th 2012.</p>
 <p>Improves the match quality performance.</p>
-</div>
-<div class="section" id="version-0-1-2">
-<h3>Version 0.1.2<a class="headerlink" href="#version-0-1-2" title="Permalink to this headline">¶</a></h3>
-<p>Released on Jan 22nd 2012.</p>
-<p>Just more detailed docstrings.</p>
 </div>
 <div class="section" id="version-0-1-1">
 <h3>Version 0.1.1<a class="headerlink" href="#version-0-1-1" title="Permalink to this headline">¶</a></h3>
@@ -639,7 +732,7 @@ to <a class="reference external" href="https://github.com/youknowone">&#64;youkn
 </div>
 </div>
 <div class="section" id="further-reading">
-<h2>Further Reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h2>
+<h2>Further reading<a class="headerlink" href="#further-reading" title="Permalink to this headline">¶</a></h2>
 <p>If you want to more details of the TrueSkill algorithm, see also:</p>
 <ul class="simple">
 <li><a class="reference external" href="http://research.microsoft.com/en-us/projects/trueskill">TrueSkill™ Ranking System</a>

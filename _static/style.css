@@ -112,6 +112,11 @@ ul, ol {
   margin: 20px 0 20px 40px;
 }
 
+.hlist ul {
+  margin: 0;
+  margin-left: 40px;
+}
+
 a:link, a:visited {
   text-decoration: none;
 }
@@ -181,7 +186,7 @@ tt.descname {
 }
 
 table.docutils {
-  margin: 0 auto 20px;
+  margin: 0 0 20px;
   font-size: 16px;
 }
 table.docutils th {
@@ -222,6 +227,37 @@ table.field-list .field-body {
 table.field-list .field-body p {
   margin: 0;
   font-size: 16px;
+}
+
+.versionmodified {
+  margin-right: 0.25em;
+  font-size: 14px;
+  opacity: 0.5;
+}
+
+div.admonition {
+  padding: 0 10px;
+  margin: 0 -10px 10px;
+  border: 1px solid #c65;
+}
+
+div.admonition p {
+  margin: 10px 0 !important;
+  font-size: 14px !important;
+}
+
+div.admonition p.admonition-title {
+  margin: 5px 0 !important;
+  color: #c65;
+  font-size: 10px !important;
+}
+
+div.admonition.warning {
+  background: #c65;
+}
+
+div.admonition.warning p {
+  color: #f7eed7;
 }
 
 #MathJax_Message {
