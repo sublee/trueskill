@@ -20,8 +20,8 @@ from .mathematics import Gaussian, Matrix
 
 __version__ = '0.4'
 __all__ = ['TrueSkill', 'Rating', 'rate', 'quality', 'rate_1vs1',
-           'quality_1vs1', 'expose', 'expect', 'setup', 'global_env',
-           'MU', 'SIGMA', 'BETA', 'TAU', 'DRAW_PROBABILITY',
+           'quality_1vs1', 'expose', 'setup', 'global_env', 'MU', 'SIGMA',
+           'BETA', 'TAU', 'DRAW_PROBABILITY',
            # deprecated functions
            'transform_ratings', 'match_quality']
 
@@ -550,23 +550,6 @@ class TrueSkill(object):
         k = self.mu / self.sigma
         return rating.mu - k * rating.sigma
 
-    def expect(self, rating1, rating2):
-        """Calculates rating1's chance of winning.
-
-        >>> r1 = env.create_rating()
-        >>> r2 = env.create_rating(env.mu - env.beta)
-        >>> r3 = env.create_rating(env.mu - 2 * env.beta)
-        >>> print '{:.2%}'.format(env.expect(r1, r2))
-        80.00%
-        >>> print '{:.2%}'.format(env.expect(r1, r3))
-        94.12%
-
-        .. versionadded:: 0.4
-        """
-        exp = (rating1.mu - rating2.mu) / self.beta
-        n = 4. ** exp
-        return n / (n + 1)
-
     def make_as_global(self):
         """Registers the environment as the global environment.
 
@@ -646,18 +629,8 @@ def expose(rating):
     return global_env().expose(rating)
 
 
-def expect(rating1, rating2):
-    """A proxy function for :meth:`TrueSkill.expect` of the global TrueSkill
-    environment.
-
-    .. versionadded:: 0.4
-    """
-    return global_env().expect(rating1, rating2)
-
-
 def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
-          draw_probability=DRAW_PROBABILITY, backend=None,
-          env=None):
+          draw_probability=DRAW_PROBABILITY, backend=None, env=None):
     """Setups the global TrueSkill environment.
 
     >>> Rating()

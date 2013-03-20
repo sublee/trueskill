@@ -363,10 +363,6 @@ def test_upset():
 def test_partial_play():
     t1, t2 = (Rating(),), (Rating(), Rating())
     # each results from C# Skills:
-    # [(33.6926, 7.3184), (16.3974, 7.3184), (16.3074, 7.3184)]
-    # [(33.8624, 7.3139), (16.1376, 7.3139), (16.1376, 7.3139)]
-    # [(29.3965, 7.1714), (24.9996, 8.3337), (20.6035, 7.1714)]
-    # [(32.3703, 7.0589), (21.3149, 8.0340), (17.6297, 7.0589)]
     assert rate([t1, t2], weights=[(1,), (1, 1)]) == rate([t1, t2])
     assert _rate([t1, t2], weights=[(1,), (1, 1)]) == \
         [(33.730, 7.317), (16.270, 7.317), (16.270, 7.317)]
@@ -393,6 +389,27 @@ def test_partial_play_with_weights_dict():
         rate([t1, t2], weights=[[1], [0.5, 1]])
 
 
+@various_backends
+def test_microsoft_research_example():
+    # http://research.microsoft.com/en-us/projects/trueskill/details.aspx
+    alice, bob, chris, darren, eve, fabien, george, hillary = \
+        Rating(), Rating(), Rating(), Rating(), \
+        Rating(), Rating(), Rating(), Rating()
+    _rated = rate([{'alice': alice}, {'bob': bob}, {'chris': chris},
+                   {'darren': darren}, {'eve': eve}, {'fabien': fabien},
+                   {'george': george}, {'hillary': hillary}])
+    rated = {}
+    list(map(rated.update, _rated))
+    assert almost(rated['alice']) == (36.771, 5.749)
+    assert almost(rated['bob']) == (32.242, 5.133)
+    assert almost(rated['chris']) == (29.074, 4.943)
+    assert almost(rated['darren']) == (26.322, 4.874)
+    assert almost(rated['eve']) == (23.678, 4.874)
+    assert almost(rated['fabien']) == (20.926, 4.943)
+    assert almost(rated['george']) == (17.758, 5.133)
+    assert almost(rated['hillary']) == (13.229, 5.749)
+
+
 # functions
 
 
@@ -402,16 +419,6 @@ def test_exposure():
     assert env.expose(env.create_rating()) == 0
     env = TrueSkill(1000, 200)
     assert env.expose(env.create_rating()) == 0
-
-
-@various_backends
-def test_expectation():
-    env = TrueSkill()
-    assert almost(env.expect(env.create_rating(), env.create_rating())) == 0.5
-    assert almost(env.expect(
-        env.create_rating(), env.create_rating(env.mu - env.beta))) == 0.8
-    assert almost(env.expect(
-        env.create_rating(), env.create_rating(env.mu + env.beta))) == 0.2
 
 
 # mathematics
