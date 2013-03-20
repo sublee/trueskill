@@ -256,6 +256,34 @@ described by the following weights:</p>
 </pre></div>
 </div>
 </div>
+<div class="section" id="backends">
+<h3>Backends<a class="headerlink" href="#backends" title="Permalink to this headline">¶</a></h3>
+<p>The TrueSkill algorithm uses \(\Phi\), <a class="reference external" href="http://en.wikipedia.org/wiki/Cumulative_distribution_function">the cumulative distribution
+function</a>; \(\phi\), <a class="reference external" href="http://en.wikipedia.org/wiki/Probability_density_function">the probability density function</a>; and
+\(\Phi^{-1}\), the inverse function of the cumulative distribution function.
+But standard mathematics library doesn&#8217;t provide the functions. Therefore this
+module implements them.</p>
+<p>Meanwhile, there are third-party libraries which implement the functions. You
+may want to use another implementation because that&#8217;s more expert. Then set
+<tt class="docutils literal"><span class="pre">backend</span></tt> option of <a class="reference internal" href="#trueskill.TrueSkill" title="trueskill.TrueSkill"><tt class="xref py py-class docutils literal"><span class="pre">TrueSkill</span></tt></a> to the backend you chose:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">setup</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">8.333</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s">&#39;mpmath&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here&#8217;s the list of the backends supported:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">None</span></tt> &#8211; internal implementation</li>
+<li><a class="reference external" href="https://code.google.com/p/mpmath">mpmath</a></li>
+<li><a class="reference external" href="http://www.scipy.org/">scipy</a></li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When winners have too lower rating than losers, <a class="reference internal" href="#trueskill.TrueSkill.rate" title="trueskill.TrueSkill.rate"><tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.rate()</span></tt></a> will
+raise <tt class="xref py py-exc docutils literal"><span class="pre">FloatingPointError</span></tt>. In this case, you need higher
+floating-point precision. The mpmath library offers flexible floating-point
+precision. You can solve the problem with mpmath as a backend and higher
+precision setting.</p>
+</div>
+</div>
 </div>
 <div class="section" id="api">
 <h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
@@ -489,23 +517,6 @@ Use this as a sort key in a leaderboard:</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="trueskill.TrueSkill.expect">
-<tt class="descname">expect</tt><big>(</big><em>rating1</em>, <em>rating2</em><big>)</big><a class="headerlink" href="#trueskill.TrueSkill.expect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates rating1&#8217;s chance of winning.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">r1</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">create_rating</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r2</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">create_rating</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">mu</span> <span class="o">-</span> <span class="n">env</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r3</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">create_rating</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">mu</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">env</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;{:.2%}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">expect</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">))</span>
-<span class="go">80.00%</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;{:.2%}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">expect</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r3</span><span class="p">))</span>
-<span class="go">94.12%</span>
-</pre></div>
-</div>
-<p class="versionadded">
-<span class="versionmodified">New in version 0.4.</span></p>
-</dd></dl>
-
-<dl class="method">
 <dt id="trueskill.TrueSkill.make_as_global">
 <tt class="descname">make_as_global</tt><big>(</big><big>)</big><a class="headerlink" href="#trueskill.TrueSkill.make_as_global" title="Permalink to this definition">¶</a></dt>
 <dd><p>Registers the environment as the global environment.</p>
@@ -585,15 +596,6 @@ environment.</p>
 <span class="versionmodified">New in version 0.4.</span></p>
 </dd></dl>
 
-<dl class="function">
-<dt id="trueskill.expect">
-<tt class="descclassname">trueskill.</tt><tt class="descname">expect</tt><big>(</big><em>rating1</em>, <em>rating2</em><big>)</big><a class="headerlink" href="#trueskill.expect" title="Permalink to this definition">¶</a></dt>
-<dd><p>A proxy function for <a class="reference internal" href="#trueskill.TrueSkill.expect" title="trueskill.TrueSkill.expect"><tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.expect()</span></tt></a> of the global TrueSkill
-environment.</p>
-<p class="versionadded">
-<span class="versionmodified">New in version 0.4.</span></p>
-</dd></dl>
-
 </div>
 <div class="section" id="default-values">
 <h3>Default values<a class="headerlink" href="#default-values" title="Permalink to this headline">¶</a></h3>
@@ -668,10 +670,7 @@ this function:</p>
 <ul class="simple">
 <li>Replaces <tt class="xref py py-meth docutils literal"><span class="pre">Rating.exposure()</span></tt> with <tt class="xref py py-meth docutils literal"><span class="pre">TrueSkiil.expose()</span></tt>. Because the
 TrueSkill settings have to adjust a fomula to calculate an exposure.</li>
-<li>Supports dynamic draw probability. To use this feature, set
-<tt class="docutils literal"><span class="pre">draw_probability</span></tt> option to a function which returns a <tt class="docutils literal"><span class="pre">float</span></tt> by the
-given <tt class="docutils literal"><span class="pre">rating_groups</span></tt> argument.</li>
-<li>Adds <tt class="xref py py-meth docutils literal"><span class="pre">TrueSkill.expect()</span></tt>.</li>
+<li>Supports dynamic draw probability.</li>
 </ul>
 </div>
 <div class="section" id="version-0-3-1">

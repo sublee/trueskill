@@ -230,6 +230,44 @@ Or with a dictionary:
     rate([(r1, r2), (r3, r4)], weights={(0, 1): 0.5})
     quality([(r1, r2), (r3, r4)], weights={(0, 1): 0.5})
 
+Backends
+--------
+
+The TrueSkill algorithm uses \\(\\Phi\\), `the cumulative distribution
+function`_; \\(\\phi\\), `the probability density function`_; and
+\\(\\Phi^{-1}\\), the inverse function of the cumulative distribution function.
+But standard mathematics library doesn't provide the functions. Therefore this
+module implements them.
+
+Meanwhile, there are third-party libraries which implement the functions. You
+may want to use another implementation because that's more expert. Then set
+``backend`` option of :class:`TrueSkill` to the backend you chose:
+
+::
+
+    setup(mu=50, sigma=8.333, backend='mpmath')
+
+Here's the list of the backends supported:
+
+- ``None`` -- internal implementation
+- mpmath_
+- scipy_
+
+.. note::
+
+   When winners have too lower rating than losers, :meth:`TrueSkill.rate` will
+   raise :exc:`FloatingPointError`. In this case, you need higher
+   floating-point precision. The mpmath library offers flexible floating-point
+   precision. You can solve the problem with mpmath as a backend and higher
+   precision setting.
+
+.. _the cumulative distribution function:
+   http://en.wikipedia.org/wiki/Cumulative_distribution_function
+.. _the probability density function:
+   http://en.wikipedia.org/wiki/Probability_density_function
+.. _mpmath: https://code.google.com/p/mpmath
+.. _scipy: http://www.scipy.org/
+
 API
 ~~~
 
@@ -247,7 +285,6 @@ TrueSkill objects
              rate_1vs1,
              quality_1vs1,
              expose,
-             expect,
              make_as_global,
 
 Proxy functions of the global environment
@@ -259,7 +296,6 @@ Proxy functions of the global environment
 .. autofunction:: rate_1vs1
 .. autofunction:: quality_1vs1
 .. autofunction:: expose
-.. autofunction:: expect
 
 Default values
 --------------
