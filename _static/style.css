@@ -256,7 +256,7 @@ div.admonition.warning {
   background: #c65;
 }
 
-div.admonition.warning p {
+div.admonition.warning *, div.admonition.warning p {
   color: #f7eed7;
 }
 

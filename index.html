@@ -262,18 +262,21 @@ described by the following weights:</p>
 function</a>; \(\phi\), <a class="reference external" href="http://en.wikipedia.org/wiki/Probability_density_function">the probability density function</a>; and
 \(\Phi^{-1}\), the inverse function of the cumulative distribution function.
 But standard mathematics library doesn&#8217;t provide the functions. Therefore this
-module implements them.</p>
+package implements them.</p>
 <p>Meanwhile, there are third-party libraries which implement the functions. You
 may want to use another implementation because that&#8217;s more expert. Then set
 <tt class="docutils literal"><span class="pre">backend</span></tt> option of <a class="reference internal" href="#trueskill.TrueSkill" title="trueskill.TrueSkill"><tt class="xref py py-class docutils literal"><span class="pre">TrueSkill</span></tt></a> to the backend you chose:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">setup</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">8.333</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s">&#39;mpmath&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">TrueSkill</span><span class="p">()</span><span class="o">.</span><span class="n">cdf</span>  <span class="c"># internal implementation</span>
+<span class="go">&lt;function cdf at 0x...&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">TrueSkill</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s">&#39;mpmath&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">cdf</span>  <span class="c"># mpmath.ncdf</span>
+<span class="go">&lt;bound method MPContext.f_wrapped of &lt;mpmath.ctx_mp.MPContext object at 0x...&gt;&gt;</span>
 </pre></div>
 </div>
-<p>Here&#8217;s the list of the backends supported:</p>
+<p>Here&#8217;s the list of the available backends:</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">None</span></tt> &#8211; internal implementation</li>
-<li><a class="reference external" href="https://code.google.com/p/mpmath">mpmath</a></li>
-<li><a class="reference external" href="http://www.scipy.org/">scipy</a></li>
+<li><tt class="docutils literal"><span class="pre">None</span></tt> &#8211; the internal implementation. (Default)</li>
+<li>&#8220;mpmath&#8221; &#8211; requires the <a class="reference external" href="https://code.google.com/p/mpmath">mpmath</a> libarary.</li>
+<li>&#8220;scipy&#8221; &#8211; requires the <a class="reference external" href="http://www.scipy.org/">scipy</a> library.</li>
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -353,7 +356,8 @@ the given rating groups argument. If it is a
 Otherwise, the draw probability will be decided
 dynamically per each match.</li>
 <li><strong>backend</strong> &#8211; the name of a backend which implements cdf, pdf, ppf. See
-<a class="reference internal" href="#module-trueskill.backends" title="trueskill.backends"><tt class="xref py py-mod docutils literal"><span class="pre">trueskill.backends</span></tt></a> for more details.</li>
+<a class="reference internal" href="#module-trueskill.backends" title="trueskill.backends"><tt class="xref py py-mod docutils literal"><span class="pre">trueskill.backends</span></tt></a> for more details. Defaults to
+<tt class="docutils literal"><span class="pre">None</span></tt>.</li>
 </ul>
 </td>
 </tr>
@@ -650,7 +654,7 @@ environment.</p>
 <dt id="trueskill.backends.available_backends">
 <tt class="descclassname">trueskill.backends.</tt><tt class="descname">available_backends</tt><big>(</big><big>)</big><a class="headerlink" href="#trueskill.backends.available_backends" title="Permalink to this definition">¶</a></dt>
 <dd><p>Detects list of available backends. All of defined backends are <tt class="docutils literal"><span class="pre">None</span></tt>
-&#8211; internal implementation, <a class="reference external" href="https://code.google.com/p/mpmath">mpmath</a>, <a class="reference external" href="http://www.scipy.org/">scipy</a>.</p>
+&#8211; internal implementation, &#8220;mpmath&#8221;, &#8220;scipy&#8221;.</p>
 <p>You can check if the backend is available in the current environment with
 this function:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="s">&#39;mpmath&#39;</span> <span class="ow">in</span> <span class="n">available_backends</span><span class="p">():</span>
