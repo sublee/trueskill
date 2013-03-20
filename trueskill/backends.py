@@ -114,8 +114,8 @@ def available_backends():
             # mpmath can be used in the current environment
             setup(backend='mpmath')
 
-    .. _scipy: http://www.scipy.org/
     .. _mpmath: https://code.google.com/p/mpmath
+    .. _scipy: http://www.scipy.org/
     """
     backends = [None]
     for backend in ['mpmath', 'scipy']:
