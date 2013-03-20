@@ -237,21 +237,22 @@ The TrueSkill algorithm uses \\(\\Phi\\), `the cumulative distribution
 function`_; \\(\\phi\\), `the probability density function`_; and
 \\(\\Phi^{-1}\\), the inverse function of the cumulative distribution function.
 But standard mathematics library doesn't provide the functions. Therefore this
-module implements them.
+package implements them.
 
 Meanwhile, there are third-party libraries which implement the functions. You
 may want to use another implementation because that's more expert. Then set
 ``backend`` option of :class:`TrueSkill` to the backend you chose:
 
-::
+>>> TrueSkill().cdf  # internal implementation
+<function cdf at 0x...>
+>>> TrueSkill(backend='mpmath').cdf  # mpmath.ncdf
+<bound method MPContext.f_wrapped of <mpmath.ctx_mp.MPContext object at 0x...>>
 
-    setup(mu=50, sigma=8.333, backend='mpmath')
+Here's the list of the available backends:
 
-Here's the list of the backends supported:
-
-- ``None`` -- internal implementation
-- mpmath_
-- scipy_
+- ``None`` -- the internal implementation. (Default)
+- "mpmath" -- requires the mpmath_ libarary.
+- "scipy" -- requires the scipy_ library.
 
 .. note::
 

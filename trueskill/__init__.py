@@ -137,7 +137,8 @@ class TrueSkill(object):
                              Otherwise, the draw probability will be decided
                              dynamically per each match.
     :param backend: the name of a backend which implements cdf, pdf, ppf. See
-                    :mod:`trueskill.backends` for more details.
+                    :mod:`trueskill.backends` for more details. Defaults to
+                    ``None``.
     """
 
     def __init__(self, mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,

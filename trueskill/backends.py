@@ -105,7 +105,7 @@ def choose_backend(backend):
 
 def available_backends():
     """Detects list of available backends. All of defined backends are ``None``
-    -- internal implementation, mpmath_, scipy_.
+    -- internal implementation, "mpmath", "scipy".
 
     You can check if the backend is available in the current environment with
     this function::
@@ -113,9 +113,6 @@ def available_backends():
         if 'mpmath' in available_backends():
             # mpmath can be used in the current environment
             setup(backend='mpmath')
-
-    .. _mpmath: https://code.google.com/p/mpmath
-    .. _scipy: http://www.scipy.org/
     """
     backends = [None]
     for backend in ['mpmath', 'scipy']:
