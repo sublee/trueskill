@@ -18,6 +18,14 @@ or deathmatch.
 
 This project is a Python package which implements the TrueSkill rating system.
 
+::
+
+    from trueskill import Rating, rate_1vs1
+    # assign Alice and Bob's ratings
+    alice, bob = Rating(mu=25, sigma=8.333), Rating(mu=30, sigma=8.333)
+    # update the ratings after the match
+    alice, bob = rate_1vs1(alice, bob)
+
 .. _TrueSkill: http://research.microsoft.com/en-us/projects/trueskill
 .. _Xbox Live: http://www.xbox.com/live
 
