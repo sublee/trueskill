@@ -130,6 +130,10 @@ a:hover {
   text-decoration: underline;
 }
 
+img {
+  clear: both;
+}
+
 tt, .highlight pre, .pre {
   font-family: 'Ubuntu Mono', monospace;
 }
