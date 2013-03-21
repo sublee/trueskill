@@ -115,28 +115,16 @@ def test_invalid_rating_groups():
         env.validate_rating_groups([(Rating(),), {0: Rating()}])
 
 
-def test_dynamic_draw_probability():
-    def roshambo_draw_probability(rating_groups):
-        return 3. / (3 ** len(rating_groups))
-    dynamic_env = TrueSkill(draw_probability=roshambo_draw_probability)
-    fixed_2_env = TrueSkill(draw_probability=1 / 3.)
-    fixed_3_env = TrueSkill(draw_probability=1 / 9.)
-    assert dynamic_env.rate([(Rating(),), (Rating(),)]) == \
-           fixed_2_env.rate([(Rating(),), (Rating(),)])
-    assert dynamic_env.rate([(Rating(),), (Rating(),), (Rating(),)]) == \
-           fixed_3_env.rate([(Rating(),), (Rating(),), (Rating(),)])
-    assert dynamic_env.rate([(Rating(),), (Rating(),), (Rating(),)]) != \
-           fixed_2_env.rate([(Rating(),), (Rating(),), (Rating(),)])
-
-
 def test_deprecated_methods():
     env = TrueSkill()
     r1, r2, r3 = Rating(), Rating(), Rating()
     deprecated_call(transform_ratings, [(r1,), (r2,), (r3,)])
     deprecated_call(match_quality, [(r1,), (r2,), (r3,)])
+    deprecated_call(env.Rating)
     deprecated_call(env.transform_ratings, [(r1,), (r2,), (r3,)])
     deprecated_call(env.match_quality, [(r1,), (r2,), (r3,)])
-    deprecated_call(env.Rating)
+    deprecated_call(env.rate_1vs1, r1, r2)
+    deprecated_call(env.quality_1vs1, r1, r2)
     deprecated_call(lambda: Rating().exposure)
 
 
@@ -408,6 +396,30 @@ def test_microsoft_research_example():
     assert almost(rated['fabien']) == (20.926, 4.943)
     assert almost(rated['george']) == (17.758, 5.133)
     assert almost(rated['hillary']) == (13.229, 5.749)
+
+
+@various_backends
+def test_dynamic_draw_probability():
+    env = TrueSkill(draw_probability=dynamic_draw_probability)
+    _rate_1vs1 = almost.wrap(env.rate_1vs1)
+    assert _rate_1vs1(Rating(100), Rating(10)) == \
+        [(100.000, 8.334), (10.000, 8.334)]
+    assert _rate_1vs1(Rating(10), Rating(100)) == \
+        [(46.742, 6.496), (63.258, 6.496)]
+    assert _rate_1vs1(Rating(10), Rating(30)) == \
+        [(20.298, 6.766), (19.702, 6.766)]
+    assert _rate_1vs1(Rating(20), Rating(20)) == \
+        [(24.205, 7.195), (15.795, 7.195)]
+    assert _rate_1vs1(Rating(20), Rating(200)) == \
+        [(92.383, 6.466), (127.617, 6.466)]
+    assert _rate_1vs1(Rating(100), Rating(10), drawn=True) == \
+        [(63.999, 6.455), (46.001, 6.455)]
+    assert _rate_1vs1(Rating(20), Rating(20), drawn=True) == \
+        [(20.000, 9.588), (20.000, 9.588)]
+    assert _rate_1vs1(Rating(10), Rating(10), drawn=True) == \
+        [(10.000, 9.588), (10.000, 9.588)]
+    assert _rate_1vs1(Rating(10, 1), Rating(10), drawn=True) == \
+        [(10.000, 1.010), (10.000, 11.462)]
 
 
 # functions
