@@ -127,6 +127,8 @@ class Rating(Gaussian):
     def __init__(self, mu=None, sigma=None):
         if isinstance(mu, tuple):
             mu, sigma = mu
+        elif isinstance(mu, Gaussian):
+            mu, sigma = mu.mu, mu.sigma
         if mu is None:
             mu = global_env().mu
         if sigma is None:
@@ -353,16 +355,18 @@ class TrueSkill(object):
                                 teamperf_vars[team:team + 2], [+1, -1])
         def build_trunc_layer():
             for x, teamdiff_var in enumerate(teamdiff_vars):
+                size = sum(map(len, rating_groups[x:x + 2]))
                 if callable(self.draw_probability):
                     # dynamic draw probability
                     teamperf1, teamperf2 = teamperf_vars[x:x + 2]
-                    args = (teamperf2, teamperf2, self)
-                    draw_probability = self.draw_probability(*args)
+                    def draw_margin():
+                        args = (Rating(teamperf1), Rating(teamperf2), self)
+                        drpr = self.draw_probability(*args)
+                        return calc_draw_margin(drpr, size, self)
                 else:
                     # static draw probability
-                    draw_probability = self.draw_probability
-                size = sum(map(len, rating_groups[x:x + 2]))
-                draw_margin = calc_draw_margin(draw_probability, size, self)
+                    drpr = self.draw_probability
+                    draw_margin = calc_draw_margin(drpr, size, self)
                 if ranks[x] == ranks[x + 1]:  # is a tie?
                     v_func, w_func = self.v_draw, self.w_draw
                 else:

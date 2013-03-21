@@ -188,7 +188,11 @@ class TruncateFactor(Factor):
         msg = self.var[self]
         div = val / msg
         sqrt_pi = math.sqrt(div.pi)
-        args = (div.tau / sqrt_pi, self.draw_margin * sqrt_pi)
+        if callable(self.draw_margin):
+            draw_margin = self.draw_margin()
+        else:
+            draw_margin = self.draw_margin
+        args = (div.tau / sqrt_pi, draw_margin * sqrt_pi)
         v = self.v_func(*args)
         w = self.w_func(*args)
         denom = (1. - w)
