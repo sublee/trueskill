@@ -3,7 +3,7 @@
     trueskill
     ~~~~~~~~~
 
-    The TrueSkill rating system.
+    The video game rating system.
 
     :copyright: (c) 2012-2013 by Heungsub Lee
     :license: BSD, see LICENSE for more details.
@@ -19,18 +19,26 @@ from .mathematics import Gaussian, Matrix
 
 
 __version__ = '0.4'
-__all__ = ['TrueSkill', 'Rating', 'rate', 'quality', 'rate_1vs1',
-           'quality_1vs1', 'expose', 'setup', 'global_env', 'MU', 'SIGMA',
-           'BETA', 'TAU', 'DRAW_PROBABILITY',
-           # deprecated functions
-           'transform_ratings', 'match_quality']
+__all__ = [
+    # TrueSkill objects
+    'TrueSkill', 'Rating',
+    # functions for the global environment
+    'rate', 'quality', 'rate_1vs1', 'quality_1vs1', 'expose', 'setup',
+    'global_env',
+    # default values
+    'MU', 'SIGMA', 'BETA', 'TAU', 'DRAW_PROBABILITY',
+    # draw probability helpers
+    'calc_draw_probability', 'calc_draw_margin', 'dynamic_draw_probability',
+    # deprecated features
+    'transform_ratings', 'match_quality',
+]
 
 
 #: Default initial mean of ratings.
 MU = 25.
 #: Default initial standard deviation of ratings.
 SIGMA = MU / 3
-#: Default guarantee about an 80% chance of winning.
+#: Default distance that guarantees about 75.6% chance of winning.
 BETA = SIGMA / 2
 #: Default dynamic factor.
 TAU = SIGMA / 100
@@ -40,18 +48,52 @@ DRAW_PROBABILITY = .10
 DELTA = 0.0001
 
 
-def calc_draw_probability(draw_margin, size, beta, cdf=None):
-    """Calculates a draw-probability from the given ``draw_margin``."""
-    if cdf is None:
-        cdf = global_env().cdf
-    return 2 * cdf(draw_margin / (math.sqrt(size) * beta)) - 1
+def calc_draw_probability(draw_margin, size, env=None):
+    """Calculates a draw-probability from the given ``draw_margin``.
+
+    :param draw_margin: the draw-margin.
+    :param size: the number of players in two comparing teams.
+    :param env: the :class:`TrueSkill` object. Defaults to the global
+                environment.
+    """
+    if env is None:
+        env = global_env()
+    return 2 * env.cdf(draw_margin / (math.sqrt(size) * env.beta)) - 1
 
 
-def calc_draw_margin(draw_probability, size, beta, ppf=None):
-    """Calculates a draw-margin from the given ``draw_probability``."""
-    if ppf is None:
-        ppf = global_env().ppf
-    return ppf((draw_probability + 1) / 2.) * math.sqrt(size) * beta
+def calc_draw_margin(draw_probability, size, env=None):
+    """Calculates a draw-margin from the given ``draw_probability``.
+
+    :param draw_probability: the draw-probability.
+    :param size: the number of players in two comparing teams.
+    :param env: the :class:`TrueSkill` object. Defaults to the global
+                environment.
+    """
+    if env is None:
+        env = global_env()
+    return env.ppf((draw_probability + 1) / 2.) * math.sqrt(size) * env.beta
+
+
+def dynamic_draw_probability(rating1, rating2, env=None):
+    """The draw probability calculator which has been used on Xbox LIVE.
+
+    Set ``draw_probability`` option to this for using it::
+
+        TrueSkill(draw_probability=dynamic_draw_probability)
+
+    :param rating1: the performance of the left team.
+    :param rating2: the performance of the right team.
+    :param env: the :class:`TrueSkill` object. Defaults to the global
+                environment.
+
+    .. versionadded:: 0.4
+    """
+    if env is None:
+        env = global_env()
+    _2beta2 = 2 * env.beta ** 2
+    denom = _2beta2 + rating1.sigma ** 2 + rating2.sigma ** 2
+    delta = rating1.mu - rating2.mu
+    return math.sqrt(_2beta2 / denom) * math.exp(-delta ** 2 / (2 * denom))
 
 
 def _team_sizes(rating_groups):
@@ -74,9 +116,9 @@ def _floating_point_error(env):
 class Rating(Gaussian):
     """Represents a player's skill as Gaussian distrubution.
 
-    The default mu and sigma value follows the global TrueSkill environment's
-    settings. If you don't want to use the global, use
-    :meth:`TrueSkill.create_rating` to create the rating object.
+    The default mu and sigma value follows the global environment's settings.
+    If you don't want to use the global, use :meth:`TrueSkill.create_rating` to
+    create the rating object.
 
     :param mu: the mean.
     :param sigma: the standard deviation.
@@ -119,20 +161,22 @@ class TrueSkill(object):
 
         env = TrueSkill(draw_probability=0.60)
 
-    For more details of the constants, see `The Math Behind TrueSkill`_.
+    For more details of the constants, see `The Math Behind TrueSkill`_ by
+    Jeff Moser.
 
     .. _The Math Behind TrueSkill:: http://bit.ly/trueskill-math
 
     :param mu: the initial mean of ratings.
     :param sigma: the initial standard deviation of ratings. The recommended
                   value is a third of ``mu``.
-    :param beta: the distance which guarantees about an 80% chance of winning.
+    :param beta: the distance which guarantees about 75.6% chance of winning.
                  The recommended value is a half of ``sigma``.
     :param tau: the dynamic factor which restrains a fixation of rating. The
-                recommended value is ``sigma / 100``.
-    :param draw_probability: the draw probability of the game. It can be a
-                             ``float`` or function which returns a ``float`` by
-                             the given rating groups argument. If it is a
+                recommended value is ``sigma`` per cent.
+    :param draw_probability: the draw probability between two teams. It can be
+                             a ``float`` or function which returns a ``float``
+                             by the given two rating (team performance)
+                             arguments and the beta value. If it is a
                              ``float``, the game has fixed draw probability.
                              Otherwise, the draw probability will be decided
                              dynamically per each match.
@@ -204,10 +248,6 @@ class TrueSkill(object):
             raise _floating_point_error(self)
         v = self.v_draw(abs_diff, draw_margin)
         return (v ** 2) + (a * self.pdf(a) - b * self.pdf(b)) / denom
-
-    def calc_draw_margin(self, draw_probability, size):
-        """Calculates a draw-margin."""
-        return calc_draw_margin(draw_probability, size, self.beta, self.ppf)
 
     def validate_rating_groups(self, rating_groups):
         """Validates a ``rating_groups`` argument. It should contain more than
@@ -312,13 +352,17 @@ class TrueSkill(object):
                 yield SumFactor(teamdiff_var,
                                 teamperf_vars[team:team + 2], [+1, -1])
         def build_trunc_layer():
-            if callable(self.draw_probability):
-                draw_probability = self.draw_probability(rating_groups)
-            else:
-                draw_probability = self.draw_probability
             for x, teamdiff_var in enumerate(teamdiff_vars):
-                size = sum(len(group) for group in rating_groups[x:x + 2])
-                draw_margin = self.calc_draw_margin(draw_probability, size)
+                if callable(self.draw_probability):
+                    # dynamic draw probability
+                    teamperf1, teamperf2 = teamperf_vars[x:x + 2]
+                    args = (teamperf2, teamperf2, self)
+                    draw_probability = self.draw_probability(*args)
+                else:
+                    # static draw probability
+                    draw_probability = self.draw_probability
+                size = sum(map(len, rating_groups[x:x + 2]))
+                draw_margin = calc_draw_margin(draw_probability, size, self)
                 if ranks[x] == ranks[x + 1]:  # is a tie?
                     v_func, w_func = self.v_draw, self.w_draw
                 else:
@@ -458,7 +502,7 @@ class TrueSkill(object):
         is the draw probability in the association::
 
             env = TrueSkill()
-            if env.quality([team1, team2, team3]) > 0.8:
+            if env.quality([team1, team2, team3]) > 0.80:
                 print 'It may be a good match.'
             else:
                 print 'Is not there another match?'
@@ -509,40 +553,9 @@ class TrueSkill(object):
         s_arg = _ata.determinant() / middle.determinant()
         return math.exp(e_arg) * math.sqrt(s_arg)
 
-    def rate_1vs1(self, rating1, rating2, drawn=False, min_delta=DELTA):
-        """A shortcut to rate just 2 players in a deathmatch::
-
-            new_rating1, new_rating2 = env.rate_1vs1(rating1, rating2)
-
-        :param rating1: the winner's rating if they didn't draw.
-        :param rating2: the loser's rating if they didn't draw.
-        :param drawn: if the players drew, set this to ``True``. Defaults to
-                      ``False``.
-        :param min_delta: will be passed to :meth:`rate`.
-        :returns: a tuple containing recalculated 2 ratings.
-
-        .. versionadded:: 0.2
-        """
-        ranks = [0, 0 if drawn else 1]
-        teams = self.rate([(rating1,), (rating2,)], ranks, min_delta=min_delta)
-        return teams[0][0], teams[1][0]
-
-    def quality_1vs1(self, rating1, rating2):
-        """A shortcut to calculate the match quality between just 2 players in
-        a deathmatch::
-
-            if env.quality_1vs1(rating1, rating2) > 0.8:
-                print 'They look have similar skills.'
-            else:
-                print 'This match may be unfair!'
-
-        .. versionadded:: 0.2
-        """
-        return self.quality([(rating1,), (rating2,)])
-
     def expose(self, rating):
-        """Returns the value of the rating that will go up from 0 on the whole.
-        Use this as a sort key in a leaderboard::
+        """Returns the value of the rating exposure. It starts from 0 and
+        converges to the mean. Use this as a sort key in a leaderboard::
 
             leaderboard = sorted(ratings, key=env.expose, reverse=True)
 
@@ -562,7 +575,7 @@ class TrueSkill(object):
         >>> Rating()
         trueskill.Rating(mu=50.000, sigma=8.333)
 
-        But if you need just one environment, use :func:`setup` instead.
+        But if you need just one environment, :func:`setup` is better to use.
         """
         return setup(env=self)
 
@@ -585,54 +598,68 @@ class TrueSkill(object):
                 'draw_probability=%s%s)' % args)
 
 
-def rate(rating_groups, ranks=None, weights=None, min_delta=DELTA):
-    """A proxy function for :meth:`TrueSkill.rate` of the global TrueSkill
-    environment.
+def rate_1vs1(rating1, rating2, drawn=False, min_delta=DELTA, env=None):
+    """A shortcut to rate just 2 players in a head-to-head match::
+
+        alice, bob = Rating(25), Rating(30)
+        alice, bob = rate_1vs1(alice, bob)
+        alice, bob = rate_1vs1(alice, bob, drawn=True)
+
+    :param rating1: the winner's rating if they didn't draw.
+    :param rating2: the loser's rating if they didn't draw.
+    :param drawn: if the players drew, set this to ``True``. Defaults to
+                  ``False``.
+    :param min_delta: will be passed to :meth:`rate`.
+    :param env: the :class:`TrueSkill` object. Defaults to the global
+                environment.
+    :returns: a tuple containing recalculated 2 ratings.
 
     .. versionadded:: 0.2
     """
-    return global_env().rate(rating_groups, ranks, weights, min_delta)
+    if env is None:
+        env = global_env()
+    ranks = [0, 0 if drawn else 1]
+    teams = env.rate([(rating1,), (rating2,)], ranks, min_delta=min_delta)
+    return teams[0][0], teams[1][0]
 
 
-def quality(rating_groups, weights=None):
-    """A proxy function for :meth:`TrueSkill.quality` of the global TrueSkill
-    environment.
+def quality_1vs1(rating1, rating2, env=None):
+    """A shortcut to calculate the match quality between just 2 players in
+    a head-to-head match::
 
-    .. versionadded:: 0.2
-    """
-    return global_env().quality(rating_groups, weights)
+        if quality_1vs1(alice, bob) > 0.80:
+            print 'They look have similar skills.'
+        else:
+            print 'This match may be unfair!'
 
-
-def rate_1vs1(rating1, rating2, drawn=False, min_delta=DELTA):
-    """A proxy function for :meth:`TrueSkill.rate_1vs1` of the global TrueSkill
-    environment.
-
-    .. versionadded:: 0.2
-    """
-    return global_env().rate_1vs1(rating1, rating2, drawn, min_delta)
-
-
-def quality_1vs1(rating1, rating2):
-    """A proxy function for :meth:`TrueSkill.quality_1vs1` of the global
-    TrueSkill environment.
+    :param rating1: the rating.
+    :param rating2: the another rating.
+    :param env: the :class:`TrueSkill` object. Defaults to the global
+                environment.
 
     .. versionadded:: 0.2
     """
-    return global_env().quality_1vs1(rating1, rating2)
+    if env is None:
+        env = global_env()
+    return env.quality([(rating1,), (rating2,)])
 
 
-def expose(rating):
-    """A proxy function for :meth:`TrueSkill.expose` of the global TrueSkill
-    environment.
-
-    .. versionadded:: 0.4
-    """
-    return global_env().expose(rating)
+def global_env():
+    """Gets the :class:`TrueSkill` object which is the global environment."""
+    try:
+        global_env.__trueskill__
+    except AttributeError:
+        # setup the default environment
+        setup()
+    return global_env.__trueskill__
 
 
 def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
           draw_probability=DRAW_PROBABILITY, backend=None, env=None):
-    """Setups the global TrueSkill environment.
+    """Setups the global environment.
+
+    :param env: the specific :class:`TrueSkill` object to be the global
+                environment. It is optional.
 
     >>> Rating()
     trueskill.Rating(mu=25.000, sigma=8.333)
@@ -647,14 +674,29 @@ def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
     return env
 
 
-def global_env():
-    """Gets the global TrueSkill environment."""
-    try:
-        global_env.__trueskill__
-    except AttributeError:
-        # setup the default environment
-        setup()
-    return global_env.__trueskill__
+def rate(rating_groups, ranks=None, weights=None, min_delta=DELTA):
+    """A proxy function for :meth:`TrueSkill.rate` of the global environment.
+
+    .. versionadded:: 0.2
+    """
+    return global_env().rate(rating_groups, ranks, weights, min_delta)
+
+
+def quality(rating_groups, weights=None):
+    """A proxy function for :meth:`TrueSkill.quality` of the global
+    environment.
+
+    .. versionadded:: 0.2
+    """
+    return global_env().quality(rating_groups, weights)
+
+
+def expose(rating):
+    """A proxy function for :meth:`TrueSkill.expose` of the global environment.
+
+    .. versionadded:: 0.4
+    """
+    return global_env().expose(rating)
 
 
 # append deprecated methods into :class:`TrueSkill` and :class:`Rating`

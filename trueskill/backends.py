@@ -85,6 +85,8 @@ def choose_backend(backend):
     >>> cdf, pdf, ppf = choose_backend('mpmath')
     >>> cdf(-10)
     mpf('7.6198530241605255e-24')
+
+    .. versionadded:: 0.3
     """
     if backend is None:  # fallback
         return cdf, pdf, ppf
@@ -113,6 +115,8 @@ def available_backends():
         if 'mpmath' in available_backends():
             # mpmath can be used in the current environment
             setup(backend='mpmath')
+
+    .. versionadded:: 0.3
     """
     backends = [None]
     for backend in ['mpmath', 'scipy']:

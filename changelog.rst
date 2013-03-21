@@ -3,9 +3,11 @@ Version 0.4
 
 Under development.
 
+- Supports dynamic draw probability.
 - Replaces :meth:`Rating.exposure` with :meth:`TrueSkiil.expose`. Because the
   TrueSkill settings have to adjust a fomula to calculate an exposure.
-- Supports dynamic draw probability.
+- Deprecates head-to-head shortcut methods in :class:`TrueSkill`. The top-level
+  shortcut functions are still alive.
 
 Version 0.3.1
 -------------

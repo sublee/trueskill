@@ -10,7 +10,7 @@
 """
 from __future__ import absolute_import
 
-from . import Rating, expose, global_env, DELTA
+from . import Rating, expose, global_env, rate_1vs1, quality_1vs1, DELTA
 
 
 __all__ = ['transform_ratings', 'match_quality',
@@ -41,6 +41,8 @@ def ensure_backward_compatibility(TrueSkill, Rating):
     addattr(TrueSkill, 'Rating', TrueSkill_Rating)
     addattr(TrueSkill, 'transform_ratings', TrueSkill_transform_ratings)
     addattr(TrueSkill, 'match_quality', TrueSkill_match_quality)
+    addattr(TrueSkill, 'rate_1vs1', TrueSkill_rate_1vs1)
+    addattr(TrueSkill, 'quality_1vs1', TrueSkill_quality_1vs1)
     addattr(Rating, 'exposure', Rating_exposure)
 
 
@@ -48,8 +50,7 @@ def TrueSkill_Rating(self, mu=None, sigma=None):
     """Deprecated. Used to create a :class:`Rating` object.
 
     .. deprecated:: 0.2
-       This method is deprecated with 0.2. Override :meth:`create_rating`
-       instead.
+       Override :meth:`create_rating` instead.
     """
     from warnings import warn
     warn('TrueSkill.Rating is now called TrueSkill.create_rating',
@@ -62,7 +63,7 @@ def TrueSkill_transform_ratings(self, rating_groups, ranks=None,
     """Deprecated. Used to rate the given ratings.
 
     .. deprecated:: 0.2
-       This method is deprecated with 0.2. Override :meth:`rate` instead.
+       Override :meth:`rate` instead.
     """
     from warnings import warn
     warn('TrueSkill.transform_ratings is now called TrueSkill.rate',
@@ -76,8 +77,7 @@ def TrueSkill_match_quality(self, rating_groups):
     """Deprecated. Used to calculate a match quality.
 
     .. deprecated:: 0.2
-       This method is deprecated with 0.2. Override :meth:`quality`
-       instead.
+       Override :meth:`quality` instead.
     """
     from warnings import warn
     warn('TrueSkill.match_quality is now called TrueSkill.quality',
@@ -87,13 +87,34 @@ def TrueSkill_match_quality(self, rating_groups):
     return self.quality(rating_groups)
 
 
+def TrueSkill_rate_1vs1(self, rating1, rating2, drawn=False, min_delta=DELTA):
+    """Deprecated. Used to rate just a head-to-haed match.
+
+    .. deprecated:: 0.4
+       Use :func:`rate_1vs1` instead.
+    """
+    from warnings import warn
+    warn('Use rate_1vs1, a normal function instead', DeprecationWarning)
+    return rate_1vs1(rating1, rating2, drawn, min_delta, self)
+
+
+def TrueSkill_quality_1vs1(self, rating1, rating2):
+    """Deprecated. Used to calculate a match quality for a head-to-haed match.
+
+    .. deprecated:: 0.4
+       Use :func:`quality_1vs1` instead.
+    """
+    from warnings import warn
+    warn('Use quality_1vs1, a normal function instead', DeprecationWarning)
+    return quality_1vs1(rating1, rating2, self)
+
+
 @property
 def Rating_exposure(self):
     """Deprecated. Used to get a value that will go up on the whole.
 
     .. deprecated:: 0.4
-       This method is deprecated with 0.4. Use :meth:`TrueSkill.expose`
-       instead.
+       Use :meth:`TrueSkill.expose` instead.
     """
     from warnings import warn
     warn('Use TrueSkill.expose instead', DeprecationWarning)
