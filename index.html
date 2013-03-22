@@ -60,8 +60,8 @@ rule including N:N team game or free-for-all.</p>
 system:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">trueskill</span> <span class="kn">import</span> <span class="n">Rating</span><span class="p">,</span> <span class="n">quality_1vs1</span><span class="p">,</span> <span class="n">rate_1vs1</span>
 <span class="n">alice</span><span class="p">,</span> <span class="n">bob</span> <span class="o">=</span> <span class="n">Rating</span><span class="p">(</span><span class="mi">25</span><span class="p">),</span> <span class="n">Rating</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>  <span class="c"># assign Alice and Bob&#39;s ratings</span>
-<span class="k">if</span> <span class="n">quality_1vs1</span><span class="p">(</span><span class="n">alice</span><span class="p">,</span> <span class="n">bob</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.80</span><span class="p">:</span>
-    <span class="n">warn</span><span class="p">(</span><span class="s">&#39;This match does not seem to be good&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">quality_1vs1</span><span class="p">(</span><span class="n">alice</span><span class="p">,</span> <span class="n">bob</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.50</span><span class="p">:</span>
+    <span class="n">warn</span><span class="p">(</span><span class="s">&#39;This match seems to be not so good&#39;</span><span class="p">)</span>
 <span class="n">alice</span><span class="p">,</span> <span class="n">bob</span> <span class="o">=</span> <span class="n">rate_1vs1</span><span class="p">(</span><span class="n">alice</span><span class="p">,</span> <span class="n">bob</span><span class="p">)</span>  <span class="c"># update the ratings after the match</span>
 </pre></div>
 </div>
@@ -432,10 +432,8 @@ solve this error. set the backend to &#8220;mpmath&#8221;.</p>
 <dd><p>Calculates the match quality of the given rating groups. A result
 is the draw probability in the association:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">env</span> <span class="o">=</span> <span class="n">TrueSkill</span><span class="p">()</span>
-<span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">quality</span><span class="p">([</span><span class="n">team1</span><span class="p">,</span> <span class="n">team2</span><span class="p">,</span> <span class="n">team3</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mf">0.80</span><span class="p">:</span>
-    <span class="k">print</span> <span class="s">&#39;It may be a good match.&#39;</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="k">print</span> <span class="s">&#39;Is not there another match?&#39;</span>
+<span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">quality</span><span class="p">([</span><span class="n">team1</span><span class="p">,</span> <span class="n">team2</span><span class="p">,</span> <span class="n">team3</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mf">0.50</span><span class="p">:</span>
+    <span class="n">warn</span><span class="p">(</span><span class="s">&#39;This match seems to be not so good&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
@@ -559,10 +557,8 @@ environment.</li>
 <tt class="descclassname">trueskill.</tt><tt class="descname">quality_1vs1</tt><big>(</big><em>rating1</em>, <em>rating2</em>, <em>env=None</em><big>)</big><a class="headerlink" href="#trueskill.quality_1vs1" title="Permalink to this definition">¶</a></dt>
 <dd><p>A shortcut to calculate the match quality between just 2 players in
 a head-to-head match:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">quality_1vs1</span><span class="p">(</span><span class="n">alice</span><span class="p">,</span> <span class="n">bob</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.80</span><span class="p">:</span>
-    <span class="k">print</span> <span class="s">&#39;They look have similar skills.&#39;</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="k">print</span> <span class="s">&#39;This match may be unfair!&#39;</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">quality_1vs1</span><span class="p">(</span><span class="n">alice</span><span class="p">,</span> <span class="n">bob</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.50</span><span class="p">:</span>
+    <span class="n">warn</span><span class="p">(</span><span class="s">&#39;This match seems to be not so good&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
