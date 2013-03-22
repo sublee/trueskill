@@ -251,7 +251,7 @@ div.admonition p {
 }
 
 div.admonition p.admonition-title {
-  margin: 5px 0 !important;
+  margin: 5px 0 -5px !important;
   color: #c65;
   font-size: 10px !important;
 }
