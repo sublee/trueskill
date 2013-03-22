@@ -7,15 +7,23 @@ import logging
 
 import trueskill
 from trueskill.backends import available_backends
-from trueskill.factorgraph import Factor, Variable
+from trueskill.factorgraph import (Variable, Factor, PriorFactor,
+                                   LikelihoodFactor, SumFactor)
 from trueskill.mathematics import Gaussian
 
 
-__all__ = ['substituted_trueskill', 'factor_graph_logging']
+__all__ = ['substituted_trueskill', 'calc_dynamic_draw_probability',
+           'factor_graph_logging']
 
 
 @contextmanager
 def substituted_trueskill(*args, **kwargs):
+    """Setup the global environment only within the context::
+
+       assert Rating().mu == 25
+       with substituted_trueskill(mu=0):
+           assert Rating().mu == 0
+    """
     env = trueskill.global_env()
     params = [['mu', env.mu], ['sigma', env.sigma], ['beta', env.beta],
               ['tau', env.tau], ['draw_probability', env.draw_probability],
@@ -34,25 +42,34 @@ def substituted_trueskill(*args, **kwargs):
         trueskill.setup(env=env)
 
 
-def win_probability(rating1, rating2, env=None):
+def calc_dynamic_draw_probability(rating_group1, rating_group2, env=None):
+    from trueskill.factorgraph import (Variable, )
     if env is None:
-        env = trueskill.global_env()
-    exp = (rating1.mu - rating2.mu) / env.beta
-    n = 4. ** exp
-    return n / (n + 1)
+        env = global_env()
+    team_perf_vars = []
+    for rating_group in [rating_group1, rating_group2]:
+        team_perf_var = Variable()
+        team_perf_vars.append(team_perf_var)
+        perf_vars = []
+        for rating in rating_group:
+            rating_var, perf_var = Variable(), Variable()
+            perf_vars.append(perf_var)
+            PriorFactor(rating_var, rating, env.tau).down()
+            LikelihoodFactor(rating_var, perf_var, env.beta ** 2).down()
+        SumFactor(team_perf_var, perf_vars, [1] * len(perf_vars)).down()
+    return env.draw_probability(trueskill.Rating(team_perf_vars[0]),
+                                trueskill.Rating(team_perf_vars[1]), env)
 
 
 @contextmanager
 def factor_graph_logging(color=False):
     """In the context, a factor graph prints logs as DEBUG level. It will help
-    to follow factor graph running schedule.
+    to follow factor graph running schedule::
 
-    ::
-
-        with factor_graph_logging() as logger:
-            logger.setLevel(DEBUG)
-            logger.addHandler(StreamHandler(sys.stderr))
-            rate_1vs1(Rating(), Rating())
+       with factor_graph_logging() as logger:
+           logger.setLevel(DEBUG)
+           logger.addHandler(StreamHandler(sys.stderr))
+           rate_1vs1(Rating(), Rating())
     """
     import inspect
     # color mode uses the termcolor module

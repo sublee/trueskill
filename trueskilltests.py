@@ -398,30 +398,22 @@ def test_microsoft_research_example():
     assert almost(rated['hillary']) == (13.229, 5.749)
 
 
-'''
 @various_backends
 def test_dynamic_draw_probability():
-    env = TrueSkill(draw_probability=dynamic_draw_probability)
-    _rate_1vs1 = almost.wrap(env.rate_1vs1)
-    assert _rate_1vs1(Rating(100), Rating(10)) == \
-        [(100.000, 8.334), (10.000, 8.334)]
-    assert _rate_1vs1(Rating(10), Rating(100)) == \
-        [(46.742, 6.496), (63.258, 6.496)]
-    assert _rate_1vs1(Rating(10), Rating(30)) == \
-        [(20.298, 6.766), (19.702, 6.766)]
-    assert _rate_1vs1(Rating(20), Rating(20)) == \
-        [(24.205, 7.195), (15.795, 7.195)]
-    assert _rate_1vs1(Rating(20), Rating(200)) == \
-        [(92.383, 6.466), (127.617, 6.466)]
-    assert _rate_1vs1(Rating(100), Rating(10), drawn=True) == \
-        [(63.999, 6.455), (46.001, 6.455)]
-    assert _rate_1vs1(Rating(20), Rating(20), drawn=True) == \
-        [(20.000, 9.588), (20.000, 9.588)]
-    assert _rate_1vs1(Rating(10), Rating(10), drawn=True) == \
-        [(10.000, 9.588), (10.000, 9.588)]
-    assert _rate_1vs1(Rating(10, 1), Rating(10), drawn=True) == \
-        [(10.000, 1.010), (10.000, 11.462)]
-'''
+    from trueskillhelpers import calc_dynamic_draw_probability as calc
+    def assert_predictable_draw_probability(r1, r2, drawn=False):
+        dyn = TrueSkill(draw_probability=dynamic_draw_probability)
+        sta = TrueSkill(draw_probability=calc((r1,), (r2,), dyn))
+        assert dyn.rate_1vs1(r1, r2, drawn)== sta.rate_1vs1(r1, r2, drawn)
+    assert_predictable_draw_probability(Rating(100), Rating(10))
+    assert_predictable_draw_probability(Rating(10), Rating(100))
+    assert_predictable_draw_probability(Rating(10), Rating(100), drawn=True)
+    assert_predictable_draw_probability(Rating(25), Rating(25))
+    assert_predictable_draw_probability(Rating(25), Rating(25), drawn=True)
+    assert_predictable_draw_probability(Rating(-25), Rating(125))
+    assert_predictable_draw_probability(Rating(125), Rating(-25))
+    assert_predictable_draw_probability(Rating(-25), Rating(125), drawn=True)
+    assert_predictable_draw_probability(Rating(25, 10), Rating(25, 0.1))
 
 
 # functions

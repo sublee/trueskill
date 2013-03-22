@@ -17,8 +17,10 @@ rule including N:N team game or free-for-all.
 This project is a Python package which implements the TrueSkill rating
 system::
 
-   from trueskill import Rating, rate_1vs1
+   from trueskill import Rating, quality_1vs1, rate_1vs1
    alice, bob = Rating(25), Rating(30)  # assign Alice and Bob's ratings
+   if quality_1vs1(alice, bob) < 0.80:
+       warn('This match does not seem to be good')
    alice, bob = rate_1vs1(alice, bob)  # update the ratings after the match
 
 .. _TrueSkill: http://research.microsoft.com/en-us/projects/trueskill

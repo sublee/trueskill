@@ -112,9 +112,9 @@ def available_backends():
     You can check if the backend is available in the current environment with
     this function::
 
-        if 'mpmath' in available_backends():
-            # mpmath can be used in the current environment
-            setup(backend='mpmath')
+       if 'mpmath' in available_backends():
+           # mpmath can be used in the current environment
+           setup(backend='mpmath')
 
     .. versionadded:: 0.3
     """

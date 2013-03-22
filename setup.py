@@ -7,15 +7,13 @@ An implementation of the TrueSkill algorithm for Python. TrueSkill is a rating
 system among game players and it is used on Xbox Live to rank and match
 players.
 
-.. sourcecode:: pycon
+.. sourcecode:: python
 
-   >>> from trueskill import Rating, rate_1vs1, quality_1vs1
-   >>> r1, r2 = Rating(mu=25, sigma=8.333), Rating(mu=30, sigma=8.333)
-   >>> 'Match quality = {:.1%}'.format(quality_1vs1(r1, r2))
-   'Match quality = 41.6%'
-   >>> rate_1vs1(r1, r2)
-   (trueskill.Rating(mu=30.768, sigma=7.030),
-    trueskill.Rating(mu=24.232, sigma=7.030))
+   from trueskill import Rating, quality_1vs1, rate_1vs1
+   alice, bob = Rating(25), Rating(30)  # assign Alice and Bob's ratings
+   if quality_1vs1(alice, bob) < 0.80:
+       warn('This match does not seem to be good')
+   alice, bob = rate_1vs1(alice, bob)  # update the ratings after the match
 
 Links
 `````
