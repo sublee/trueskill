@@ -514,10 +514,8 @@ class TrueSkill(object):
         is the draw probability in the association::
 
           env = TrueSkill()
-          if env.quality([team1, team2, team3]) > 0.80:
-              print 'It may be a good match.'
-          else:
-              print 'Is not there another match?'
+          if env.quality([team1, team2, team3]) < 0.50:
+              warn('This match seems to be not so good')
 
         :param rating_groups: a list of tuples or dictionaries containing
                               :class:`Rating` objects.
@@ -639,10 +637,8 @@ def quality_1vs1(rating1, rating2, env=None):
     """A shortcut to calculate the match quality between just 2 players in
     a head-to-head match::
 
-       if quality_1vs1(alice, bob) > 0.80:
-           print 'They look have similar skills.'
-       else:
-           print 'This match may be unfair!'
+       if quality_1vs1(alice, bob) < 0.50:
+           warn('This match seems to be not so good')
 
     :param rating1: the rating.
     :param rating2: the another rating.
