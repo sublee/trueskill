@@ -61,7 +61,7 @@ system:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">trueskill</span> <span class="kn">import</span> <span class="n">Rating</span><span class="p">,</span> <span class="n">quality_1vs1</span><span class="p">,</span> <span class="n">rate_1vs1</span>
 <span class="n">alice</span><span class="p">,</span> <span class="n">bob</span> <span class="o">=</span> <span class="n">Rating</span><span class="p">(</span><span class="mi">25</span><span class="p">),</span> <span class="n">Rating</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>  <span class="c"># assign Alice and Bob&#39;s ratings</span>
 <span class="k">if</span> <span class="n">quality_1vs1</span><span class="p">(</span><span class="n">alice</span><span class="p">,</span> <span class="n">bob</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.50</span><span class="p">:</span>
-    <span class="n">warn</span><span class="p">(</span><span class="s">&#39;This match seems to be not so good&#39;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;This match seems to be not so fair&#39;</span><span class="p">)</span>
 <span class="n">alice</span><span class="p">,</span> <span class="n">bob</span> <span class="o">=</span> <span class="n">rate_1vs1</span><span class="p">(</span><span class="n">alice</span><span class="p">,</span> <span class="n">bob</span><span class="p">)</span>  <span class="c"># update the ratings after the match</span>
 </pre></div>
 </div>
@@ -147,16 +147,16 @@ These are very easy to use.</p>
 </div>
 <p>Then we can guess match quality which is equivalent with draw probability of
 this match using <a class="reference internal" href="#trueskill.quality_1vs1" title="trueskill.quality_1vs1"><tt class="xref py py-func docutils literal"><span class="pre">quality_1vs1()</span></tt></a>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;{:.1%} chance to draw&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">quality_1vs1</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="s">&#39;{:.1%} chance to draw&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">quality_1vs1</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">)))</span>
 <span class="go">44.7% chance to draw</span>
 </pre></div>
 </div>
 <p>After the game, TrueSkill recalculates their ratings by the game result. For
 example, if 1P beat 2P:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">new_r1</span><span class="p">,</span> <span class="n">new_r2</span> <span class="o">=</span> <span class="n">rate_1vs1</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">new_r1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">new_r1</span><span class="p">)</span>
 <span class="go">trueskill.Rating(mu=29.396, sigma=7.171)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">new_e2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">new_r2</span><span class="p">)</span>
 <span class="go">trueskill.Rating(mu=20.604, sigma=7.171)</span>
 </pre></div>
 </div>
@@ -167,9 +167,9 @@ plays and higher rating confidence.</p>
 to 20.604. And both sigma values became narrow about same magnitude.</p>
 <p>Of course, you can also handle a tie game with <tt class="docutils literal"><span class="pre">drawn=True</span></tt>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">new_r1</span><span class="p">,</span> <span class="n">new_r2</span> <span class="o">=</span> <span class="n">rate_1vs1</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">drawn</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">new_r1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">new_r1</span><span class="p">)</span>
 <span class="go">trueskill.Rating(mu=25.000, sigma=6.458)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">new_e2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">new_r2</span><span class="p">)</span>
 <span class="go">trueskill.Rating(mu=25.000, sigma=6.458)</span>
 </pre></div>
 </div>
@@ -189,14 +189,14 @@ accepts any types of matches.</p>
 </pre></div>
 </div>
 <p>Then we can calculate the match quality and rate them:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&#39;{:.1%} chance to draw&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">quality</span><span class="p">([</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">]))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="s">&#39;{:.1%} chance to draw&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">quality</span><span class="p">([</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">])))</span>
 <span class="go">13.5% chance to draw</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">new_r1</span><span class="p">,),</span> <span class="p">(</span><span class="n">new_r2</span><span class="p">,</span> <span class="n">new_r3</span><span class="p">)</span> <span class="o">=</span> <span class="n">rate</span><span class="p">([</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">],</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">new_r1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">new_r1</span><span class="p">)</span>
 <span class="go">trueskill.Rating(mu=33.731, sigma=7.317)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">new_r2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">new_r2</span><span class="p">)</span>
 <span class="go">trueskill.Rating(mu=16.269, sigma=7.317)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">new_r3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">new_r3</span><span class="p">)</span>
 <span class="go">trueskill.Rating(mu=16.269, sigma=7.317)</span>
 </pre></div>
 </div>
@@ -433,7 +433,7 @@ solve this error. set the backend to &#8220;mpmath&#8221;.</p>
 is the draw probability in the association:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">env</span> <span class="o">=</span> <span class="n">TrueSkill</span><span class="p">()</span>
 <span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">quality</span><span class="p">([</span><span class="n">team1</span><span class="p">,</span> <span class="n">team2</span><span class="p">,</span> <span class="n">team3</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mf">0.50</span><span class="p">:</span>
-    <span class="n">warn</span><span class="p">(</span><span class="s">&#39;This match seems to be not so good&#39;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;This match seems to be not so fair&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
@@ -558,7 +558,7 @@ environment.</li>
 <dd><p>A shortcut to calculate the match quality between just 2 players in
 a head-to-head match:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">quality_1vs1</span><span class="p">(</span><span class="n">alice</span><span class="p">,</span> <span class="n">bob</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.50</span><span class="p">:</span>
-    <span class="n">warn</span><span class="p">(</span><span class="s">&#39;This match seems to be not so good&#39;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&#39;This match seems to be not so fair&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
