@@ -515,7 +515,7 @@ class TrueSkill(object):
 
           env = TrueSkill()
           if env.quality([team1, team2, team3]) < 0.50:
-              warn('This match seems to be not so good')
+              print('This match seems to be not so fair')
 
         :param rating_groups: a list of tuples or dictionaries containing
                               :class:`Rating` objects.
@@ -638,7 +638,7 @@ def quality_1vs1(rating1, rating2, env=None):
     a head-to-head match::
 
        if quality_1vs1(alice, bob) < 0.50:
-           warn('This match seems to be not so good')
+           print('This match seems to be not so fair')
 
     :param rating1: the rating.
     :param rating2: the another rating.

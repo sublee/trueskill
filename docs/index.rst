@@ -20,7 +20,7 @@ system::
    from trueskill import Rating, quality_1vs1, rate_1vs1
    alice, bob = Rating(25), Rating(30)  # assign Alice and Bob's ratings
    if quality_1vs1(alice, bob) < 0.50:
-       warn('This match seems to be not so good')
+       print('This match seems to be not so fair')
    alice, bob = rate_1vs1(alice, bob)  # update the ratings after the match
 
 .. _TrueSkill: http://research.microsoft.com/en-us/projects/trueskill
@@ -95,16 +95,16 @@ First of all, we need 2 :class:`Rating` objects::
 Then we can guess match quality which is equivalent with draw probability of
 this match using :func:`quality_1vs1`::
 
-   >>> print '{:.1%} chance to draw'.format(quality_1vs1(r1, r2))
+   >>> print('{:.1%} chance to draw'.format(quality_1vs1(r1, r2)))
    44.7% chance to draw
 
 After the game, TrueSkill recalculates their ratings by the game result. For
 example, if 1P beat 2P::
 
    >>> new_r1, new_r2 = rate_1vs1(r1, r2)
-   >>> print new_r1
+   >>> print(new_r1)
    trueskill.Rating(mu=29.396, sigma=7.171)
-   >>> print new_e2
+   >>> print(new_r2)
    trueskill.Rating(mu=20.604, sigma=7.171)
 
 Mu value follows player's win/draw/lose records. Higher value means higher game
@@ -117,9 +117,9 @@ to 20.604. And both sigma values became narrow about same magnitude.
 Of course, you can also handle a tie game with ``drawn=True``::
 
    >>> new_r1, new_r2 = rate_1vs1(r1, r2, drawn=True)
-   >>> print new_r1
+   >>> print(new_r1)
    trueskill.Rating(mu=25.000, sigma=6.458)
-   >>> print new_e2
+   >>> print(new_r2)
    trueskill.Rating(mu=25.000, sigma=6.458)
 
 Other match rules
@@ -140,14 +140,14 @@ We should arrange ratings into a group by their team::
 
 Then we can calculate the match quality and rate them::
 
-   >>> print '{:.1%} chance to draw'.format(quality([t1, t2]))
+   >>> print('{:.1%} chance to draw'.format(quality([t1, t2])))
    13.5% chance to draw
    >>> (new_r1,), (new_r2, new_r3) = rate([t1, t2], ranks=[0, 1])
-   >>> print new_r1
+   >>> print(new_r1)
    trueskill.Rating(mu=33.731, sigma=7.317)
-   >>> print new_r2
+   >>> print(new_r2)
    trueskill.Rating(mu=16.269, sigma=7.317)
-   >>> print new_r3
+   >>> print(new_r3)
    trueskill.Rating(mu=16.269, sigma=7.317)
 
 If you want to describe other game results, set the ``ranks`` argument like the
