@@ -58,8 +58,10 @@ the Bayesian inference algorithm. It also works well with any type of match
 rule including N:N team game or free-for-all.</p>
 <p>This project is a Python package which implements the TrueSkill rating
 system:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">trueskill</span> <span class="kn">import</span> <span class="n">Rating</span><span class="p">,</span> <span class="n">rate_1vs1</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">trueskill</span> <span class="kn">import</span> <span class="n">Rating</span><span class="p">,</span> <span class="n">quality_1vs1</span><span class="p">,</span> <span class="n">rate_1vs1</span>
 <span class="n">alice</span><span class="p">,</span> <span class="n">bob</span> <span class="o">=</span> <span class="n">Rating</span><span class="p">(</span><span class="mi">25</span><span class="p">),</span> <span class="n">Rating</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>  <span class="c"># assign Alice and Bob&#39;s ratings</span>
+<span class="k">if</span> <span class="n">quality_1vs1</span><span class="p">(</span><span class="n">alice</span><span class="p">,</span> <span class="n">bob</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.80</span><span class="p">:</span>
+    <span class="n">warn</span><span class="p">(</span><span class="s">&#39;This match does not seem to be good&#39;</span><span class="p">)</span>
 <span class="n">alice</span><span class="p">,</span> <span class="n">bob</span> <span class="o">=</span> <span class="n">rate_1vs1</span><span class="p">(</span><span class="n">alice</span><span class="p">,</span> <span class="n">bob</span><span class="p">)</span>  <span class="c"># update the ratings after the match</span>
 </pre></div>
 </div>
