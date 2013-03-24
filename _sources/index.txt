@@ -10,7 +10,7 @@ What's TrueSkill?
 
 TrueSkill_ is a rating system among game players. It was developed by
 `Microsoft Research`_ and has been used on `Xbox LIVE`_ for ranking and
-matchmaking service. This system quantizes players' **TRUE** skill points by
+matchmaking service. This system quantifies players' **TRUE** skill points by
 the Bayesian inference algorithm. It also works well with any type of match
 rule including N:N team game or free-for-all.
 
