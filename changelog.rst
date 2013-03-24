@@ -1,7 +1,7 @@
 Version 0.4
 -----------
 
-Under development.
+Released on Mar 25th 2013.
 
 - Supports dynamic draw probability.
 - Replaces :meth:`Rating.exposure` with :meth:`TrueSkiil.expose`. Because the
