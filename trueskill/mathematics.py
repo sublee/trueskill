@@ -81,6 +81,10 @@ class Gaussian(object):
     def __repr__(self):
         return 'N(mu=%.3f, sigma=%.3f)' % (self.mu, self.sigma)
 
+    def _repr_latex_(self):
+        latex = r'\mathcal{ N }( %.3f, %.3f^2 )' % (self.mu, self.sigma)
+        return '$%s$' % latex
+
 
 class Matrix(list):
     """A model for matrix."""
@@ -245,3 +249,8 @@ class Matrix(list):
 
     def __repr__(self):
         return '%s(%s)' % (type(self).__name__, super(Matrix, self).__repr__())
+
+    def _repr_latex_(self):
+        rows = [' && '.join(['%.3f' % cell for cell in row]) for row in self]
+        latex = r'\begin{matrix} %s \end{matrix}' % r'\\'.join(rows)
+        return '$%s$' % latex

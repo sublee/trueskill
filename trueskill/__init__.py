@@ -18,7 +18,7 @@ from .factorgraph import (Variable, PriorFactor, LikelihoodFactor, SumFactor,
 from .mathematics import Gaussian, Matrix
 
 
-__version__ = '0.4'
+__version__ = '0.4.1.dev'
 __all__ = [
     # TrueSkill objects
     'TrueSkill', 'Rating',
