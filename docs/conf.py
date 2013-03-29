@@ -180,7 +180,7 @@ htmlhelp_basename = 'trueskilldoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'trueskill.tex', u'trueskill Documentation',
+  ('index', 'trueskill.tex', u'TrueSkill Documentation',
    u'Heungsub Lee', 'manual'),
 ]
 
@@ -213,6 +213,6 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'trueskill', u'trueskill Documentation',
+    ('index', 'trueskill', u'TrueSkill Documentation',
      [u'Heungsub Lee'], 1)
 ]
