@@ -1,0 +1,18 @@
+{% extends "subpixel/layout.html" %}
+
+{% block extrahead %}
+  {{ super() }}
+  <script>
+    var d = new Date();
+    // april fools' day
+    if (d.getMonth() + 1 == 4 && d.getDate() == 1) {
+      $(function() {
+        var $elems = $('body, title');
+        $elems.each(function() {
+          $this = $(this);
+          $this.html($this.html().replace(/TrueSkill/g, 'FalseSkill'));
+        });
+      });
+    }
+  </script>
+{% endblock %}
