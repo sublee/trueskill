@@ -27,12 +27,24 @@
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="top" title="trueskill 0.4 documentation" href="#" />
+  
   <meta name="viewport" content="width=750px" />
   
   
     <link rel="image_src" href="_static/image.png" />
   
 
+
+  <script>
+    var d = new Date();
+    // april fools' day
+    if (d.getMonth() + 1 == 4 && d.getDate() == 1) {
+      $(function() {
+        var $body = $(document.body);
+        $body.html($body.html().replace(/TrueSkill/g, 'FalseSkill'));
+      });
+    }
+  </script>
 
   </head>
   <body>
@@ -83,9 +95,9 @@ install it in your system, use <strong class="command">easy_install</strong>:</p
 <div class="section" id="rating-the-model-for-skill">
 <h3>Rating, the model for skill<a class="headerlink" href="#rating-the-model-for-skill" title="Permalink to this headline">¶</a></h3>
 <p>In TrueSkill, rating is a Gaussian distribution which starts from
-<span class="math">\(\mathcal{ N }( 25, \frac{ 25 }{ 3 } )\)</span>. <span class="math">\(\mu\)</span> is an average skill
-of player, and <span class="math">\(\sigma\)</span> is a confidence of the guessed rating. A real
-skill of player is between <span class="math">\(\mu \pm 2\sigma\)</span> with 95% confidence.</p>
+<span class="math">\(\mathcal{ N }( 25, \frac{ 25 }{ 3 }^2 )\)</span>. <span class="math">\(\mu\)</span> is an average
+skill of player, and <span class="math">\(\sigma\)</span> is a confidence of the guessed rating. A
+real skill of player is between <span class="math">\(\mu \pm 2\sigma\)</span> with 95% confidence.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">trueskill</span> <span class="kn">import</span> <span class="n">Rating</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Rating</span><span class="p">()</span>  <span class="c"># use the default mu and sigma</span>
 <span class="go">trueskill.Rating(mu=25.000, sigma=8.333)</span>

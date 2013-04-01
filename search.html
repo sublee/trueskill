@@ -32,12 +32,24 @@
     jQuery(function() { Search.loadIndex("searchindex.js"); });
   </script>
   
+  
   <meta name="viewport" content="width=750px" />
   
   
     <link rel="image_src" href="_static/image.png" />
   
 
+
+  <script>
+    var d = new Date();
+    // april fools' day
+    if (d.getMonth() + 1 == 4 && d.getDate() == 1) {
+      $(function() {
+        var $body = $(document.body);
+        $body.html($body.html().replace(/TrueSkill/g, 'FalseSkill'));
+      });
+    }
+  </script>
 
 
   </head>

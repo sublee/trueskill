@@ -51,9 +51,9 @@ Rating, the model for skill
 ---------------------------
 
 In TrueSkill, rating is a Gaussian distribution which starts from
-:math:`\mathcal{ N }( 25, \frac{ 25 }{ 3 } )`. :math:`\mu` is an average skill
-of player, and :math:`\sigma` is a confidence of the guessed rating. A real
-skill of player is between :math:`\mu \pm 2\sigma` with 95% confidence. ::
+:math:`\mathcal{ N }( 25, \frac{ 25 }{ 3 }^2 )`. :math:`\mu` is an average
+skill of player, and :math:`\sigma` is a confidence of the guessed rating. A
+real skill of player is between :math:`\mu \pm 2\sigma` with 95% confidence. ::
 
    >>> from trueskill import Rating
    >>> Rating()  # use the default mu and sigma
