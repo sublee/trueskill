@@ -42,8 +42,11 @@
     // april fools' day
     if (d.getMonth() + 1 == 4 && d.getDate() == 1) {
       $(function() {
-        var $body = $(document.body);
-        $body.html($body.html().replace(/TrueSkill/g, 'FalseSkill'));
+        var $elems = $('body, title');
+        $elems.each(function() {
+          $this = $(this);
+          $this.html($this.html().replace(/TrueSkill/g, 'FalseSkill'));
+        });
       });
     }
   </script>
