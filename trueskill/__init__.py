@@ -369,7 +369,8 @@ class TrueSkill(object):
                     v_func, w_func = self.v_draw, self.w_draw
                 else:
                     v_func, w_func = self.v_win, self.w_win
-                yield TruncateFactor(team_diff_var, v_func, w_func, draw_margin)
+                yield TruncateFactor(team_diff_var,
+                                     v_func, w_func, draw_margin)
         # build layers
         return (build_rating_layer, build_perf_layer, build_team_perf_layer,
                 build_team_diff_layer, build_trunc_layer)
