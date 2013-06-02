@@ -81,6 +81,11 @@ def dynamic_draw_probability(rating1, rating2, env=None):
 
        TrueSkill(draw_probability=dynamic_draw_probability)
 
+    .. seealso::
+
+       Page 8 of `MSR-TR-2006-80 <http://research.microsoft.com/apps/pubs/
+       default.aspx?id=74419>`_.
+
     :param rating1: the performance of the left team.
     :param rating2: the performance of the right team.
     :param env: the :class:`TrueSkill` object. Defaults to the global
