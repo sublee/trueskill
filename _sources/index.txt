@@ -278,7 +278,6 @@ Draw probability helpers
 
 .. autofunction:: calc_draw_probability
 .. autofunction:: calc_draw_margin
-.. autofunction:: dynamic_draw_probability
 
 Mathematical statistics backends
 --------------------------------
