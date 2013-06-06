@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>TrueSkill &mdash; trueskill 0.4.1.dev documentation</title>
+    <title>TrueSkill &mdash; trueskill 0.4.1 documentation</title>
     
     <link rel="stylesheet" href="_static/style.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.4.1.dev',
+        VERSION:     '0.4.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="trueskill 0.4.1.dev documentation" href="#" />
+    <link rel="top" title="trueskill 0.4.1 documentation" href="#" />
   
   <meta name="viewport" content="width=750px" />
   
@@ -697,27 +697,9 @@ environment.</li>
 <dl class="function">
 <dt id="trueskill.dynamic_draw_probability">
 <tt class="descclassname">trueskill.</tt><tt class="descname">dynamic_draw_probability</tt><big>(</big><em>rating1</em>, <em>rating2</em>, <em>env=None</em><big>)</big><a class="headerlink" href="#trueskill.dynamic_draw_probability" title="Permalink to this definition">¶</a></dt>
-<dd><p>The draw probability calculator which has been used on Xbox LIVE.</p>
-<p>Set <tt class="docutils literal"><span class="pre">draw_probability</span></tt> option to this for using it:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">TrueSkill</span><span class="p">(</span><span class="n">draw_probability</span><span class="o">=</span><span class="n">dynamic_draw_probability</span><span class="p">)</span>
-</pre></div>
-</div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>rating1</strong> &#8211; the performance of the left team.</li>
-<li><strong>rating2</strong> &#8211; the performance of the right team.</li>
-<li><strong>env</strong> &#8211; the <a class="reference internal" href="#trueskill.TrueSkill" title="trueskill.TrueSkill"><tt class="xref py py-class docutils literal"><span class="pre">TrueSkill</span></tt></a> object. Defaults to the global
-environment.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="versionadded">
-<span class="versionmodified">New in version 0.4.</span></p>
+<dd><p>Deprecated. It was an approximation for <a class="reference internal" href="#trueskill.quality_1vs1" title="trueskill.quality_1vs1"><tt class="xref py py-func docutils literal"><span class="pre">quality_1vs1()</span></tt></a>.</p>
+<p class="deprecated">
+<span class="versionmodified">Deprecated since version 0.4.1: </span>Use <a class="reference internal" href="#trueskill.quality_1vs1" title="trueskill.quality_1vs1"><tt class="xref py py-func docutils literal"><span class="pre">quality_1vs1()</span></tt></a> instead.</p>
 </dd></dl>
 
 </div>
@@ -759,6 +741,13 @@ this function:</p>
 </div>
 <div class="section" id="changelog">
 <h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="version-0-4-1">
+<h3>Version 0.4.1<a class="headerlink" href="#version-0-4-1" title="Permalink to this headline">¶</a></h3>
+<p>Released on Jun 6th 2013.</p>
+<ul class="simple">
+<li>Deprecates <tt class="xref py py-func docutils literal"><span class="pre">dynamic_draw_probability()</span></tt>.</li>
+</ul>
+</div>
 <div class="section" id="version-0-4">
 <h3>Version 0.4<a class="headerlink" href="#version-0-4" title="Permalink to this headline">¶</a></h3>
 <p>Released on Mar 25th 2013.</p>
