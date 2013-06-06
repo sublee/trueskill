@@ -126,6 +126,8 @@ def test_deprecated_methods():
     deprecated_call(env.rate_1vs1, r1, r2)
     deprecated_call(env.quality_1vs1, r1, r2)
     deprecated_call(lambda: Rating().exposure)
+    dyn = TrueSkill(draw_probability=dynamic_draw_probability)
+    deprecated_call(dyn.rate, [(r1,), (r2,)])
 
 
 def test_deprecated_individual_rating_groups():
@@ -213,7 +215,7 @@ def generate_teams(sizes, env=None):
 
 
 def generate_individual(size, env=None):
-    return generate_teams([1] * size, env)
+    return generate_teams([1] * size, env=env)
 
 
 @various_backends

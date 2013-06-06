@@ -1,3 +1,10 @@
+Version 0.4.1
+-------------
+
+Released on Jun 6th 2013.
+
+- Deprecates :func:`dynamic_draw_probability`.
+
 Version 0.4
 -----------
 

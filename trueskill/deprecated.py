@@ -13,7 +13,7 @@ from __future__ import absolute_import
 from . import Rating, expose, global_env, rate_1vs1, quality_1vs1, DELTA
 
 
-__all__ = ['transform_ratings', 'match_quality',
+__all__ = ['transform_ratings', 'match_quality', 'dynamic_draw_probability',
            'ensure_backward_compatibility']
 
 
@@ -26,6 +26,17 @@ def transform_ratings(rating_groups, ranks=None, min_delta=DELTA):
 
 def match_quality(rating_groups):
     return global_env().match_quality(rating_groups)
+
+
+def dynamic_draw_probability(rating1, rating2, env=None):
+    """Deprecated. It was an approximation for :func:`quality_1vs1`.
+
+    .. deprecated:: 0.4.1
+       Use :func:`quality_1vs1` instead.
+    """
+    from warnings import warn
+    warn('Use quality_1vs1 instead', DeprecationWarning)
+    return quality_1vs1(rating1, rating2, env=env)
 
 
 # deprecated methods

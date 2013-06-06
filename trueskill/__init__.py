@@ -18,7 +18,7 @@ from .factorgraph import (Variable, PriorFactor, LikelihoodFactor, SumFactor,
 from .mathematics import Gaussian, Matrix
 
 
-__version__ = '0.4.1.dev'
+__version__ = '0.4.1'
 __all__ = [
     # TrueSkill objects
     'TrueSkill', 'Rating',
@@ -28,9 +28,9 @@ __all__ = [
     # default values
     'MU', 'SIGMA', 'BETA', 'TAU', 'DRAW_PROBABILITY',
     # draw probability helpers
-    'calc_draw_probability', 'calc_draw_margin', 'dynamic_draw_probability',
+    'calc_draw_probability', 'calc_draw_margin',
     # deprecated features
-    'transform_ratings', 'match_quality',
+    'transform_ratings', 'match_quality', 'dynamic_draw_probability',
 ]
 
 
@@ -72,33 +72,6 @@ def calc_draw_margin(draw_probability, size, env=None):
     if env is None:
         env = global_env()
     return env.ppf((draw_probability + 1) / 2.) * math.sqrt(size) * env.beta
-
-
-def dynamic_draw_probability(rating1, rating2, env=None):
-    """The draw probability calculator which has been used on Xbox LIVE.
-
-    Set ``draw_probability`` option to this for using it::
-
-       TrueSkill(draw_probability=dynamic_draw_probability)
-
-    .. seealso::
-
-       Page 8 of `MSR-TR-2006-80 <http://research.microsoft.com/apps/pubs/
-       default.aspx?id=74419>`_.
-
-    :param rating1: the performance of the left team.
-    :param rating2: the performance of the right team.
-    :param env: the :class:`TrueSkill` object. Defaults to the global
-                environment.
-
-    .. versionadded:: 0.4
-    """
-    if env is None:
-        env = global_env()
-    _2beta2 = 2 * env.beta ** 2
-    denom = _2beta2 + rating1.sigma ** 2 + rating2.sigma ** 2
-    delta = rating1.mu - rating2.mu
-    return math.sqrt(_2beta2 / denom) * math.exp(-delta ** 2 / (2 * denom))
 
 
 def _team_sizes(rating_groups):
@@ -715,5 +688,6 @@ def expose(rating):
 
 # append deprecated methods into :class:`TrueSkill` and :class:`Rating`
 from . import deprecated
-from .deprecated import transform_ratings, match_quality
+from .deprecated import (transform_ratings, match_quality,
+                         dynamic_draw_probability)
 deprecated.ensure_backward_compatibility(TrueSkill, Rating)
