@@ -72,8 +72,8 @@ setup(
     author='Heungsub Lee',
     author_email=re.sub('((sub).)(.*)', r'\2@\1.\3', 'sublee'),
     url='http://trueskill.org/',
-    download_url='http://github.com/sublee/{0}/zipball/'
-                 'master#egg={0}-dev'.format('trueskill'),
+    download_url='trueskill'.join([
+        'http://github.com/sublee/', '/zipball/master#egg=', '-dev']),
     description='The video game rating system',
     long_description=__doc__,
     platforms='any',
