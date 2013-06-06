@@ -18,9 +18,18 @@ players.
 Links
 `````
 
-- `GitHub repository <http://github.com/sublee/trueskill/>`_
-- `development version
-  <http://github.com/sublee/trueskill/zipball/master#egg=trueskill-dev>`_
+Documentation
+   http://trueskill.org/
+GitHub:
+   http://github.com/sublee/trueskill
+Mailing list:
+   trueskill@librelist.com
+List archive:
+   http://librelist.com/browser/trueskill
+Continuous integration (Travis CI)
+   https://travis-ci.org/sublee/trueskill
+
+   .. image:: https://api.travis-ci.org/sublee/trueskill.png
 
 See Also
 ````````
@@ -63,6 +72,8 @@ setup(
     author='Heungsub Lee',
     author_email=re.sub('((sub).)(.*)', r'\2@\1.\3', 'sublee'),
     url='http://trueskill.org/',
+    download_url='http://github.com/sublee/{0}/zipball/'
+                 'master#egg={0}-dev'.format('trueskill'),
     description='The video game rating system',
     long_description=__doc__,
     platforms='any',
