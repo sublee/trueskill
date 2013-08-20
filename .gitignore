@@ -33,6 +33,6 @@ pip-log.txt
 .cache
 *$py.class
 
-# Shinx
+# Sphinx
 docs/Makefile
 docs/_build
