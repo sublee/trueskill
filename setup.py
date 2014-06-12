@@ -59,9 +59,7 @@ assert version
 
 # use pytest instead
 def run_tests(self):
-    pyc = re.compile(r'\.pyc|\$py\.class')
-    test_file = pyc.sub('.py', __import__(self.test_suite).__file__)
-    raise SystemExit(__import__('pytest').main([test_file]))
+    raise SystemExit(__import__('pytest').main(['-xv']))
 test.run_tests = run_tests
 
 
@@ -97,8 +95,7 @@ setup(
                  'Programming Language :: Python :: Implementation :: PyPy',
                  'Topic :: Games/Entertainment',
                  'Topic :: Scientific/Engineering :: Mathematics'],
-    install_requires=['distribute'],
-    test_suite='trueskilltests',
     tests_require=['pytest', 'almost>=0.1.5', 'mpmath>=0.17'],
+    test_suite='.',
     use_2to3=(sys.version_info[0] >= 3),
 )
