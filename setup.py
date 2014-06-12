@@ -43,8 +43,6 @@ See Also
 
 """
 from __future__ import with_statement
-import distutils
-import os
 import re
 from setuptools import setup
 from setuptools.command.test import test
@@ -59,7 +57,9 @@ assert version
 
 # use pytest instead
 def run_tests(self):
-    raise SystemExit(__import__('pytest').main(['-xv']))
+    pyc = re.compile(r'\.pyc|\$py\.class')
+    test_file = pyc.sub('.py', __import__(self.test_suite).__file__)
+    raise SystemExit(__import__('pytest').main(['-xv', test_file]))
 test.run_tests = run_tests
 
 
@@ -96,6 +96,6 @@ setup(
                  'Topic :: Games/Entertainment',
                  'Topic :: Scientific/Engineering :: Mathematics'],
     tests_require=['pytest', 'almost>=0.1.5', 'mpmath>=0.17'],
-    test_suite='.',
+    test_suite='trueskilltest',
     use_2to3=(sys.version_info[0] >= 3),
 )
