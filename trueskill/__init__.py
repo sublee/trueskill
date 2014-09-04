@@ -268,7 +268,7 @@ class TrueSkill(object):
             keys = []
             for dict_rating_group in dict_rating_groups:
                 rating_group, key_group = [], []
-                for key, rating in dict_rating_group.viewitems():
+                for key, rating in dict_rating_group.iteritems():
                     rating_group.append(rating)
                     key_group.append(key)
                 rating_groups.append(tuple(rating_group))
