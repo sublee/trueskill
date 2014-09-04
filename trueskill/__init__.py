@@ -5,7 +5,7 @@
 
     The video game rating system.
 
-    :copyright: (c) 2012-2013 by Heungsub Lee
+    :copyright: (c) 2012-2014 by Heungsub Lee
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
@@ -18,7 +18,7 @@ from .factorgraph import (Variable, PriorFactor, LikelihoodFactor, SumFactor,
 from .mathematics import Gaussian, Matrix
 
 
-__version__ = '0.4.2'
+__version__ = '0.4.3'
 __all__ = [
     # TrueSkill objects
     'TrueSkill', 'Rating',
@@ -690,6 +690,6 @@ def expose(rating):
 
 # append deprecated methods into :class:`TrueSkill` and :class:`Rating`
 from . import deprecated
-from .deprecated import (transform_ratings, match_quality,
-                         dynamic_draw_probability)
+from .deprecated import (
+    transform_ratings, match_quality, dynamic_draw_probability)
 deprecated.ensure_backward_compatibility(TrueSkill, Rating)

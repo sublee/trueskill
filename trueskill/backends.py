@@ -5,7 +5,7 @@
 
     Provides mathematical statistics backend chooser.
 
-    :copyright: (c) 2012-2013 by Heungsub Lee.
+    :copyright: (c) 2012-2014 by Heungsub Lee.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
@@ -54,10 +54,12 @@ def erfc(x):
     z = abs(x)
     t = 1. / (1. + z / 2.)
     r = t * math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (
-                     0.37409196 + t * (0.09678418 + t * (
-                     -0.18628806 + t * (0.27886807 + t * (
-                     -1.13520398 + t * (1.48851587 + t * (
-                     -0.82215223 + t * 0.17087277)))))))))
+        0.37409196 + t * (0.09678418 + t * (-0.18628806 + t * (
+            0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (
+                -0.82215223 + t * 0.17087277
+            )))
+        )))
+    )))
     return 2. - r if x < 0 else r
 
 
