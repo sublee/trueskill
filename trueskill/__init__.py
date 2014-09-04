@@ -263,11 +263,20 @@ class TrueSkill(object):
             raise TypeError('Rating cannot be a rating group')
         # normalize rating_groups
         if isinstance(rating_groups[0], dict):
-            keys = map(dict.keys, rating_groups)
-            rating_groups = (tuple(g.itervalues()) for g in rating_groups)
+            dict_rating_groups = rating_groups
+            rating_groups = []
+            keys = []
+            for dict_rating_group in dict_rating_groups:
+                rating_group, key_group = [], []
+                for key, rating in dict_rating_group.viewitems():
+                    rating_group.append(rating)
+                    key_group.append(key)
+                rating_groups.append(tuple(rating_group))
+                keys.append(tuple(key_group))
         else:
+            rating_groups = list(rating_groups)
             keys = None
-        return list(rating_groups), keys
+        return rating_groups, keys
 
     def validate_weights(self, weights, rating_groups, keys=None):
         if weights is None:
