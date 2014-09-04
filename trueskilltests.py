@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
-import warnings
 
 from almost import Approximate
 from pytest import deprecated_call, raises
 
 from conftest import various_backends
-from trueskill import *
+import trueskill as t
+from trueskill import (
+    Rating, TrueSkill, quality, quality_1vs1, rate, rate_1vs1, setup)
 
 
 inf = float('inf')
@@ -118,15 +119,15 @@ def test_invalid_rating_groups():
 def test_deprecated_methods():
     env = TrueSkill()
     r1, r2, r3 = Rating(), Rating(), Rating()
-    deprecated_call(transform_ratings, [(r1,), (r2,), (r3,)])
-    deprecated_call(match_quality, [(r1,), (r2,), (r3,)])
+    deprecated_call(t.transform_ratings, [(r1,), (r2,), (r3,)])
+    deprecated_call(t.match_quality, [(r1,), (r2,), (r3,)])
     deprecated_call(env.Rating)
     deprecated_call(env.transform_ratings, [(r1,), (r2,), (r3,)])
     deprecated_call(env.match_quality, [(r1,), (r2,), (r3,)])
     deprecated_call(env.rate_1vs1, r1, r2)
     deprecated_call(env.quality_1vs1, r1, r2)
     deprecated_call(lambda: Rating().exposure)
-    dyn = TrueSkill(draw_probability=dynamic_draw_probability)
+    dyn = TrueSkill(draw_probability=t.dynamic_draw_probability)
     deprecated_call(dyn.rate, [(r1,), (r2,)])
 
 
@@ -136,10 +137,10 @@ def test_deprecated_individual_rating_groups():
         deprecated_call(rate, [r1, r2, r3])
     with raises(TypeError):
         deprecated_call(quality, [r1, r2, r3])
-    assert transform_ratings([r1, r2, r3]) == rate([(r1,), (r2,), (r3,)])
-    assert match_quality([r1, r2, r3]) == quality([(r1,), (r2,), (r3,)])
-    deprecated_call(transform_ratings, [r1, r2, r3])
-    deprecated_call(match_quality, [r1, r2, r3])
+    assert t.transform_ratings([r1, r2, r3]) == rate([(r1,), (r2,), (r3,)])
+    assert t.match_quality([r1, r2, r3]) == quality([(r1,), (r2,), (r3,)])
+    deprecated_call(t.transform_ratings, [r1, r2, r3])
+    deprecated_call(t.match_quality, [r1, r2, r3])
 
 
 def test_rating_tuples():
@@ -404,9 +405,9 @@ def test_microsoft_research_example():
 def test_dynamic_draw_probability():
     from trueskillhelpers import calc_dynamic_draw_probability as calc
     def assert_predictable_draw_probability(r1, r2, drawn=False):
-        dyn = TrueSkill(draw_probability=dynamic_draw_probability)
+        dyn = TrueSkill(draw_probability=t.dynamic_draw_probability)
         sta = TrueSkill(draw_probability=calc((r1,), (r2,), dyn))
-        assert dyn.rate_1vs1(r1, r2, drawn)== sta.rate_1vs1(r1, r2, drawn)
+        assert dyn.rate_1vs1(r1, r2, drawn) == sta.rate_1vs1(r1, r2, drawn)
     assert_predictable_draw_probability(Rating(100), Rating(10))
     assert_predictable_draw_probability(Rating(10), Rating(100))
     assert_predictable_draw_probability(Rating(10), Rating(100), drawn=True)
@@ -616,3 +617,22 @@ def test_issue5_with_more_extreme():
             [(400001600117.693, 6.455), (599998399907.307, 6.455)]
     finally:
         mpmath.mp.dps = dps
+
+
+def test_issue9_weights_dict_with_object_keys():
+    """The `issue #9`_, opened by @.
+
+    .. _issue #9: https://github.com/sublee/trueskill/issues/9
+    """
+    class Player(object):
+        def __init__(self, rating, team):
+            self.rating = rating
+            self.team = team
+    p1 = Player(Rating(), 0)
+    p2 = Player(Rating(), 0)
+    p3 = Player(Rating(), 1)
+    teams = [{p1: p1.rating, p2: p2.rating}, {p3: p3.rating}]
+    rated = rate(teams, weights={(0, p1): 1, (0, p2): 0.5, (1, p3): 1})
+    assert rated[0][p1].mu > rated[0][p2].mu
+    assert rated[0][p1].sigma < rated[0][p2].sigma
+    assert rated[0][p1].sigma == rated[1][p3].sigma

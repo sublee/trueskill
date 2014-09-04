@@ -18,7 +18,7 @@ from .factorgraph import (Variable, PriorFactor, LikelihoodFactor, SumFactor,
 from .mathematics import Gaussian, Matrix
 
 
-__version__ = '0.4.1'
+__version__ = '0.4.2'
 __all__ = [
     # TrueSkill objects
     'TrueSkill', 'Rating',
@@ -269,7 +269,7 @@ class TrueSkill(object):
             keys = None
         return list(rating_groups), keys
 
-    def validate_weights(self, weights, rating_groups):
+    def validate_weights(self, weights, rating_groups, keys=None):
         if weights is None:
             weights = [(1,) * len(g) for g in rating_groups]
         elif isinstance(weights, dict):
@@ -278,6 +278,8 @@ class TrueSkill(object):
                 w = []
                 weights.append(w)
                 for y, rating in enumerate(group):
+                    if keys is not None:
+                        y = keys[x][y]
                     w.append(weights_dict.get((x, y), 1))
         return weights
 
@@ -286,19 +288,19 @@ class TrueSkill(object):
 
         Here's an example of a TrueSkill factor graph when 1 vs 2 vs 1 match::
 
-             rating_layer:  O O O O  (PriorFactor)
-                            | | | |
-                            | | | |
-               perf_layer:  O O O O  (LikelihoodFactor)
-                            | \ / |
-                            |  |  |
+              rating_layer:  O O O O  (PriorFactor)
+                             | | | |
+                             | | | |
+                perf_layer:  O O O O  (LikelihoodFactor)
+                             | \ / |
+                             |  |  |
            team_perf_layer:  O  O  O  (SumFactor)
-                            \ / \ /
-                             |   |
+                             \ / \ /
+                              |   |
            team_diff_layer:   O   O   (SumFactor)
-                             |   |
-                             |   |
-              trunc_layer:   O   O   (TruncateFactor)
+                              |   |
+                              |   |
+               trunc_layer:   O   O   (TruncateFactor)
         """
         flatten_ratings = sum(imap(tuple, rating_groups), ())
         flatten_weights = sum(imap(tuple, weights), ())
@@ -451,7 +453,7 @@ class TrueSkill(object):
         .. versionadded:: 0.2
         """
         rating_groups, keys = self.validate_rating_groups(rating_groups)
-        weights = self.validate_weights(weights, rating_groups)
+        weights = self.validate_weights(weights, rating_groups, keys)
         group_size = len(rating_groups)
         if ranks is None:
             ranks = range(group_size)
@@ -503,7 +505,7 @@ class TrueSkill(object):
         .. versionadded:: 0.2
         """
         rating_groups, keys = self.validate_rating_groups(rating_groups)
-        weights = self.validate_weights(weights, rating_groups)
+        weights = self.validate_weights(weights, rating_groups, keys)
         flatten_ratings = sum(imap(tuple, rating_groups), ())
         flatten_weights = sum(imap(tuple, weights), ())
         length = len(flatten_ratings)
