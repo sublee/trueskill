@@ -183,15 +183,17 @@ described by the following weights:
 
 As a code with a 2-dimensional list::
 
-   # set each weights to 1, 0.5, 1, 1
+   # set each weights to 1, 0.5, 1, 1.
    rate([(r1, r2), (r3, r4)], weights=[(1, 0.5), (1, 1)])
    quality([(r1, r2), (r3, r4)], weights=[(1, 0.5), (1, 1)])
 
-Or with a dictionary::
+Or with a dictionary. Each keys are a tuple of
+``(team_index, index_or_key_of_rating)``::
 
-   # set a weight of 2nd player in 1st team to 0.5, otherwise leave as 1
+   # set a weight of 2nd player in 1st team to 0.5, otherwise leave as 1.
    rate([(r1, r2), (r3, r4)], weights={(0, 1): 0.5})
-   quality([(r1, r2), (r3, r4)], weights={(0, 1): 0.5})
+   # set a weight of Carol in 2nd team to 0.5, otherwise leave as 1.
+   rate([{'alice': r1, 'bob': r2}, {'carol': r3}], weights={(1, 'carol'): 0.5})
 
 Backends
 --------
