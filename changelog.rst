@@ -1,9 +1,26 @@
+Version 0.4.3
+-------------
+
+Released on Sep 4th 2014.
+
+Fixes ordering bug on weights argument as a dict. This was reported at
+`issue #9`_.
+
+.. _issue #9: https://github.com/sublee/trueskill/issues/9
+
+Version 0.4.2
+-------------
+
+Released on Jun 13th 2014.
+
+Updates only meta code such as :file:`setup.py`.
+
 Version 0.4.1
 -------------
 
 Released on Jun 6th 2013.
 
-- Deprecates :func:`dynamic_draw_probability`.
+Deprecates :func:`dynamic_draw_probability`.
 
 Version 0.4
 -----------
