@@ -6,5 +6,11 @@ python:
 - 3.3
 - 3.4
 - pypy
+- pypy3
+install:
+- pip install pytest pytest-cov coveralls
+- pip install -e .
 script:
-- python setup.py test
+- py.test -v --cov=trueskill
+after_success:
+- coveralls
