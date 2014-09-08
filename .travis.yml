@@ -9,8 +9,8 @@ python:
 - pypy3
 install:
 - pip install -e .
-- pip install pytest almost mpmath pytest-cov coveralls
+- pip install coveralls
 script:
-- py.test -v --cov=trueskill
+- coverage run --source=trueskill setup.py test
 after_success:
 - coveralls
