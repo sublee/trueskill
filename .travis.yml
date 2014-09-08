@@ -8,8 +8,8 @@ python:
 - pypy
 - pypy3
 install:
-- pip install pytest pytest-cov coveralls
 - pip install -e .
+- pip install pytest pytest-cov coveralls
 script:
 - py.test -v --cov=trueskill
 after_success:
