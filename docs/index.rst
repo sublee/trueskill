@@ -308,8 +308,9 @@ If you want to more details of the TrueSkill algorithm, see also:
 - `TrueSkill Calcurator
   <http://atom.research.microsoft.com/trueskill/rankcalculator.aspx>`_
   by Microsoft Research
-- `Computing Your Skill <http://bit.ly/moserware-trueskill>`_ by Jeff Moser
-- `The Math Behind TrueSkill <http://bit.ly/trueskill-math>`_ by Jeff Moser
+- `Computing Your Skill <http://bit.ly/computing-your-skill>`_ by Jeff Moser
+- `The Math Behind TrueSkill <http://bit.ly/the-math-behind-trueskill>`_ by
+  Jeff Moser
 
 Licensing and Author
 ~~~~~~~~~~~~~~~~~~~~
