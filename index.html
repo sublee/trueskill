@@ -376,7 +376,7 @@ dynamically per each match.</li>
 <dd><p>Initializes new <a class="reference internal" href="#trueskill.Rating" title="trueskill.Rating"><tt class="xref py py-class docutils literal"><span class="pre">Rating</span></tt></a> object, but it fixes default mu and
 sigma to the environment&#8217;s.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">env</span> <span class="o">=</span> <span class="n">TrueSkill</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">Rating</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">create_rating</span><span class="p">()</span>
 <span class="go">trueskill.Rating(mu=0.000, sigma=1.000)</span>
 </pre></div>
 </div>
