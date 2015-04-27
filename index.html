@@ -106,8 +106,8 @@ real skill of player is between <span class="math">\(\mu \pm 2\sigma\)</span> wi
 </pre></div>
 </div>
 <p>If some player&#8217;s rating is higher <span class="math">\(\beta\)</span> than another player&#8217;s, the
-player may have about 75.6% of chance to beat the other player. The default
-value of <span class="math">\(\beta\)</span> is <span class="math">\(\frac{ 25 }{ 6 }\)</span>.</p>
+player may have about 80% of chance to beat the other player. The default value
+of <span class="math">\(\beta\)</span> is <span class="math">\(\frac{ 25 }{ 6 }\)</span>.</p>
 <p>Ratings will approach real skills through few times of the TrueSkill&#8217;s Bayesian
 inference algorithm. How many matches TrueSkill needs to estimate real skills?
 It depends on the game rule. See the below table:</p>
@@ -341,7 +341,7 @@ should set <tt class="docutils literal"><span class="pre">draw_probability</span
 <div class="highlight-python"><div class="highlight"><pre><span class="n">env</span> <span class="o">=</span> <span class="n">TrueSkill</span><span class="p">(</span><span class="n">draw_probability</span><span class="o">=</span><span class="mf">0.60</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>For more details of the constants, see <a class="reference external" href="http://bit.ly/trueskill-math">The Math Behind TrueSkill</a> by
+<p>For more details of the constants, see <a class="reference external" href="http://bit.ly/the-math-behind-trueskill">The Math Behind TrueSkill</a> by
 Jeff Moser.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -838,8 +838,9 @@ to <a class="reference external" href="https://github.com/youknowone">Yunwon Jeo
 by Herbrich, Ralf and Graepel, Thore</li>
 <li><a class="reference external" href="http://atom.research.microsoft.com/trueskill/rankcalculator.aspx">TrueSkill Calcurator</a>
 by Microsoft Research</li>
-<li><a class="reference external" href="http://bit.ly/moserware-trueskill">Computing Your Skill</a> by Jeff Moser</li>
-<li><a class="reference external" href="http://bit.ly/trueskill-math">The Math Behind TrueSkill</a> by Jeff Moser</li>
+<li><a class="reference external" href="http://bit.ly/computing-your-skill">Computing Your Skill</a> by Jeff Moser</li>
+<li><a class="reference external" href="http://bit.ly/the-math-behind-trueskill">The Math Behind TrueSkill</a> by
+Jeff Moser</li>
 </ul>
 </div>
 <div class="section" id="licensing-and-author">
@@ -869,8 +870,8 @@ welcomed.</p>
 
     
     <div class="footer">
-        &copy; Copyright 2012-2013, Heungsub Lee.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+        &copy; Copyright 2012-2015, Heungsub Lee.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </div>
   
