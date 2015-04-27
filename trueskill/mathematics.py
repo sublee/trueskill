@@ -6,7 +6,7 @@
     This module contains basic mathematics functions and objects for TrueSkill
     algorithm. If you have not scipy, this module provides the fallback.
 
-    :copyright: (c) 2012-2014 by Heungsub Lee.
+    :copyright: (c) 2012-2015 by Heungsub Lee.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
