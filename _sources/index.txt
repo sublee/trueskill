@@ -60,8 +60,8 @@ real skill of player is between :math:`\mu \pm 2\sigma` with 95% confidence. ::
    trueskill.Rating(mu=25.000, sigma=8.333)
 
 If some player's rating is higher :math:`\beta` than another player's, the
-player may have about 75.6% of chance to beat the other player. The default
-value of :math:`\beta` is :math:`\frac{ 25 }{ 6 }`.
+player may have about 80% of chance to beat the other player. The default value
+of :math:`\beta` is :math:`\frac{ 25 }{ 6 }`.
 
 Ratings will approach real skills through few times of the TrueSkill's Bayesian
 inference algorithm. How many matches TrueSkill needs to estimate real skills?
@@ -183,15 +183,17 @@ described by the following weights:
 
 As a code with a 2-dimensional list::
 
-   # set each weights to 1, 0.5, 1, 1
+   # set each weights to 1, 0.5, 1, 1.
    rate([(r1, r2), (r3, r4)], weights=[(1, 0.5), (1, 1)])
    quality([(r1, r2), (r3, r4)], weights=[(1, 0.5), (1, 1)])
 
-Or with a dictionary::
+Or with a dictionary. Each keys are a tuple of
+``(team_index, index_or_key_of_rating)``::
 
-   # set a weight of 2nd player in 1st team to 0.5, otherwise leave as 1
+   # set a weight of 2nd player in 1st team to 0.5, otherwise leave as 1.
    rate([(r1, r2), (r3, r4)], weights={(0, 1): 0.5})
-   quality([(r1, r2), (r3, r4)], weights={(0, 1): 0.5})
+   # set a weight of Carol in 2nd team to 0.5, otherwise leave as 1.
+   rate([{'alice': r1, 'bob': r2}, {'carol': r3}], weights={(1, 'carol'): 0.5})
 
 Backends
 --------
@@ -306,8 +308,9 @@ If you want to more details of the TrueSkill algorithm, see also:
 - `TrueSkill Calcurator
   <http://atom.research.microsoft.com/trueskill/rankcalculator.aspx>`_
   by Microsoft Research
-- `Computing Your Skill <http://bit.ly/moserware-trueskill>`_ by Jeff Moser
-- `The Math Behind TrueSkill <http://bit.ly/trueskill-math>`_ by Jeff Moser
+- `Computing Your Skill <http://bit.ly/computing-your-skill>`_ by Jeff Moser
+- `The Math Behind TrueSkill <http://bit.ly/the-math-behind-trueskill>`_ by
+  Jeff Moser
 
 Licensing and Author
 ~~~~~~~~~~~~~~~~~~~~
