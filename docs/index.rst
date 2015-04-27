@@ -60,8 +60,8 @@ real skill of player is between :math:`\mu \pm 2\sigma` with 95% confidence. ::
    trueskill.Rating(mu=25.000, sigma=8.333)
 
 If some player's rating is higher :math:`\beta` than another player's, the
-player may have about 75.6% of chance to beat the other player. The default
-value of :math:`\beta` is :math:`\frac{ 25 }{ 6 }`.
+player may have about 80% of chance to beat the other player. The default value
+of :math:`\beta` is :math:`\frac{ 25 }{ 6 }`.
 
 Ratings will approach real skills through few times of the TrueSkill's Bayesian
 inference algorithm. How many matches TrueSkill needs to estimate real skills?
