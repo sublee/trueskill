@@ -7,6 +7,7 @@
 
     :copyright: (c) 2012-2015 by Heungsub Lee.
     :license: BSD, see LICENSE for more details.
+
 """
 from __future__ import absolute_import
 import math
@@ -88,6 +89,7 @@ def choose_backend(backend):
     mpf('7.6198530241605255e-24')
 
     .. versionadded:: 0.3
+
     """
     if backend is None:  # fallback
         return cdf, pdf, ppf
@@ -118,6 +120,7 @@ def available_backends():
            setup(backend='mpmath')
 
     .. versionadded:: 0.3
+
     """
     backends = [None]
     for backend in ['mpmath', 'scipy']:

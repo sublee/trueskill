@@ -7,6 +7,7 @@
 
     :copyright: (c) 2012-2015 by Heungsub Lee
     :license: BSD, see LICENSE for more details.
+
 """
 from __future__ import absolute_import
 
@@ -33,6 +34,7 @@ def dynamic_draw_probability(rating1, rating2, env=None):
 
     .. deprecated:: 0.4.1
        Use :func:`quality_1vs1` instead.
+
     """
     from warnings import warn
     warn('Use quality_1vs1 instead', DeprecationWarning)
@@ -62,6 +64,7 @@ def TrueSkill_Rating(self, mu=None, sigma=None):
 
     .. deprecated:: 0.2
        Override :meth:`create_rating` instead.
+
     """
     from warnings import warn
     warn('TrueSkill.Rating is now called TrueSkill.create_rating',
@@ -75,6 +78,7 @@ def TrueSkill_transform_ratings(self, rating_groups, ranks=None,
 
     .. deprecated:: 0.2
        Override :meth:`rate` instead.
+
     """
     from warnings import warn
     warn('TrueSkill.transform_ratings is now called TrueSkill.rate',
@@ -89,6 +93,7 @@ def TrueSkill_match_quality(self, rating_groups):
 
     .. deprecated:: 0.2
        Override :meth:`quality` instead.
+
     """
     from warnings import warn
     warn('TrueSkill.match_quality is now called TrueSkill.quality',
@@ -103,6 +108,7 @@ def TrueSkill_rate_1vs1(self, rating1, rating2, drawn=False, min_delta=DELTA):
 
     .. deprecated:: 0.4
        Use :func:`rate_1vs1` instead.
+
     """
     from warnings import warn
     warn('Use rate_1vs1, a normal function instead', DeprecationWarning)
@@ -114,6 +120,7 @@ def TrueSkill_quality_1vs1(self, rating1, rating2):
 
     .. deprecated:: 0.4
        Use :func:`quality_1vs1` instead.
+
     """
     from warnings import warn
     warn('Use quality_1vs1, a normal function instead', DeprecationWarning)
@@ -126,6 +133,7 @@ def Rating_exposure(self):
 
     .. deprecated:: 0.4
        Use :meth:`TrueSkill.expose` instead.
+
     """
     from warnings import warn
     warn('Use TrueSkill.expose instead', DeprecationWarning)

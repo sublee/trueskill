@@ -7,6 +7,7 @@
 
     :copyright: (c) 2012-2015 by Heungsub Lee
     :license: BSD, see LICENSE for more details.
+
 """
 from __future__ import absolute_import
 from itertools import chain, imap, izip
@@ -55,6 +56,7 @@ def calc_draw_probability(draw_margin, size, env=None):
     :param size: the number of players in two comparing teams.
     :param env: the :class:`TrueSkill` object. Defaults to the global
                 environment.
+
     """
     if env is None:
         env = global_env()
@@ -68,6 +70,7 @@ def calc_draw_margin(draw_probability, size, env=None):
     :param size: the number of players in two comparing teams.
     :param env: the :class:`TrueSkill` object. Defaults to the global
                 environment.
+
     """
     if env is None:
         env = global_env()
@@ -100,6 +103,7 @@ class Rating(Gaussian):
 
     :param mu: the mean.
     :param sigma: the standard deviation.
+
     """
 
     def __init__(self, mu=None, sigma=None):
@@ -163,6 +167,7 @@ class TrueSkill(object):
     :param backend: the name of a backend which implements cdf, pdf, ppf. See
                     :mod:`trueskill.backends` for more details. Defaults to
                     ``None``.
+
     """
 
     def __init__(self, mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
@@ -183,8 +188,9 @@ class TrueSkill(object):
         sigma to the environment's.
 
         >>> env = TrueSkill(mu=0, sigma=1)
-        >>> env.Rating()
+        >>> env.create_rating()
         trueskill.Rating(mu=0.000, sigma=1.000)
+
         """
         if mu is None:
             mu = self.mu
@@ -249,6 +255,7 @@ class TrueSkill(object):
         >>> env.validate_rating_groups([(Rating(),), (Rating(),)])
         ... #doctest: +ELLIPSIS
         [(truekill.Rating(...),), (trueskill.Rating(...),)]
+
         """
         # check group sizes
         if len(rating_groups) < 2:
@@ -310,6 +317,7 @@ class TrueSkill(object):
                               |   |
                               |   |
                trunc_layer:   O   O   (TruncateFactor)
+
         """
         flatten_ratings = sum(imap(tuple, rating_groups), ())
         flatten_weights = sum(imap(tuple, weights), ())
@@ -460,6 +468,7 @@ class TrueSkill(object):
                  solve this error. set the backend to "mpmath".
 
         .. versionadded:: 0.2
+
         """
         rating_groups, keys = self.validate_rating_groups(rating_groups)
         weights = self.validate_weights(weights, rating_groups, keys)
@@ -512,6 +521,7 @@ class TrueSkill(object):
         :param weights: weights of each players for "partial play".
 
         .. versionadded:: 0.2
+
         """
         rating_groups, keys = self.validate_rating_groups(rating_groups)
         weights = self.validate_weights(weights, rating_groups, keys)
@@ -560,6 +570,7 @@ class TrueSkill(object):
            leaderboard = sorted(ratings, key=env.expose, reverse=True)
 
         .. versionadded:: 0.4
+
         """
         k = self.mu / self.sigma
         return rating.mu - k * rating.sigma
@@ -576,6 +587,7 @@ class TrueSkill(object):
         trueskill.Rating(mu=50.000, sigma=8.333)
 
         But if you need just one environment, :func:`setup` is better to use.
+
         """
         return setup(env=self)
 
@@ -615,6 +627,7 @@ def rate_1vs1(rating1, rating2, drawn=False, min_delta=DELTA, env=None):
     :returns: a tuple containing recalculated 2 ratings.
 
     .. versionadded:: 0.2
+
     """
     if env is None:
         env = global_env()
@@ -636,6 +649,7 @@ def quality_1vs1(rating1, rating2, env=None):
                 environment.
 
     .. versionadded:: 0.2
+
     """
     if env is None:
         env = global_env()
@@ -665,6 +679,7 @@ def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
     trueskill.TrueSkill(mu=50.000, ...)
     >>> Rating()
     trueskill.Rating(mu=50.000, sigma=8.333)
+
     """
     if env is None:
         env = TrueSkill(mu, sigma, beta, tau, draw_probability, backend)
@@ -676,6 +691,7 @@ def rate(rating_groups, ranks=None, weights=None, min_delta=DELTA):
     """A proxy function for :meth:`TrueSkill.rate` of the global environment.
 
     .. versionadded:: 0.2
+
     """
     return global_env().rate(rating_groups, ranks, weights, min_delta)
 
@@ -685,6 +701,7 @@ def quality(rating_groups, weights=None):
     environment.
 
     .. versionadded:: 0.2
+
     """
     return global_env().quality(rating_groups, weights)
 
@@ -693,6 +710,7 @@ def expose(rating):
     """A proxy function for :meth:`TrueSkill.expose` of the global environment.
 
     .. versionadded:: 0.4
+
     """
     return global_env().expose(rating)
 
