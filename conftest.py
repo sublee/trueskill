@@ -36,10 +36,10 @@ def various_backends(backends=None):
                 sig = inspect.signature(f)
             except AttributeError:
                 spec = inspect.getargspec(f)
-                backend_required = 'backend' in spec[0]
+                params = spec[0]
             else:
-                backend_required = 'backend' in sig.paramters
-            if backend_required:
+                params = sig.parameters
+            if 'backend' in params:
                 kwargs.setdefault('backend', backend)
             with substituted_trueskill(backend=backend):
                 return f(*args, **kwargs)
