@@ -32,8 +32,15 @@ def various_backends(backends=None):
         return various_backends(True)(backends)
     def decorator(f):
         def wrapped(backend, *args, **kwargs):
-            if 'backend' in inspect.getargspec(f)[0]:
-                kwargs['backend'] = kwargs.get('backend', backend)
+            try:
+                sig = inspect.signature(f)
+            except AttributeError:
+                spec = inspect.getargspec(f)
+                backend_required = 'backend' in spec[0]
+            else:
+                backend_required = 'backend' in sig.paramters
+            if backend_required:
+                kwargs.setdefault('backend', backend)
             with substituted_trueskill(backend=backend):
                 return f(*args, **kwargs)
         wrapped.__name__ = f.__name__
