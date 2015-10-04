@@ -110,19 +110,19 @@ class LikelihoodFactor(Factor):
         self.value = value_var
         self.variance = variance
 
+    def calc_a(self, var):
+        return 1. / (1. + self.variance * var.pi)
+
     def down(self):
-        # update value
-        val = self.mean
-        msg = val / self.mean[self]
-        pi = 1. / self.variance
-        a = pi / (pi + val.pi)
+        # update value.
+        msg = self.mean / self.mean[self]
+        a = self.calc_a(msg)
         return self.value.update_message(self, a * msg.pi, a * msg.tau)
 
     def up(self):
-        # update mean
-        val = self.value
-        msg = val / self.value[self]
-        a = 1. / (1 + self.variance * msg.pi)
+        # update mean.
+        msg = self.value / self.value[self]
+        a = self.calc_a(msg)
         return self.mean.update_message(self, a * msg.pi, a * msg.tau)
 
 
