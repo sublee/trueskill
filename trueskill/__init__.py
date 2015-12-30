@@ -39,7 +39,7 @@ __all__ = [
 MU = 25.
 #: Default initial standard deviation of ratings.
 SIGMA = MU / 3
-#: Default distance that guarantees about 75.6% chance of winning.
+#: Default distance that guarantees about 76% chance of winning.
 BETA = SIGMA / 2
 #: Default dynamic factor.
 TAU = SIGMA / 100
@@ -153,7 +153,7 @@ class TrueSkill(object):
     :param mu: the initial mean of ratings.
     :param sigma: the initial standard deviation of ratings. The recommended
                   value is a third of ``mu``.
-    :param beta: the distance which guarantees about 75.6% chance of winning.
+    :param beta: the distance which guarantees about 76% chance of winning.
                  The recommended value is a half of ``sigma``.
     :param tau: the dynamic factor which restrains a fixation of rating. The
                 recommended value is ``sigma`` per cent.
