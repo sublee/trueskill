@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-    trueskill.backends
-    ~~~~~~~~~~~~~~~~~~
+   trueskill.backends
+   ~~~~~~~~~~~~~~~~~~
 
-    Provides mathematical statistics backend chooser.
+   Provides mathematical statistics backend chooser.
 
-    :copyright: (c) 2012-2015 by Heungsub Lee.
-    :license: BSD, see LICENSE for more details.
+   :copyright: (c) 2012-2015 by Heungsub Lee.
+   :license: BSD, see LICENSE for more details.
 
 """
 from __future__ import absolute_import
+
 import math
 
 
@@ -40,7 +41,7 @@ def _gen_erfcinv(erfc, math=math):
 
 
 def _gen_ppf(erfc, math=math):
-    """ppf is the inverse function of cdf. This function generates cdf by the
+    """ppf is the inverse function of cdf.  This function generates cdf by the
     given erfc and math module.
     """
     erfcinv = _gen_erfcinv(erfc, math)
@@ -109,8 +110,8 @@ def choose_backend(backend):
 
 
 def available_backends():
-    """Detects list of available backends. All of defined backends are ``None``
-    -- internal implementation, "mpmath", "scipy".
+    """Detects list of available backends.  All of defined backends are
+    ``None`` -- internal implementation, "mpmath", "scipy".
 
     You can check if the backend is available in the current environment with
     this function::

@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-    trueskill.factorgraph
-    ~~~~~~~~~~~~~~~~~~~~~
+   trueskill.factorgraph
+   ~~~~~~~~~~~~~~~~~~~~~
 
-    This module contains nodes for the factor graph of TrueSkill algorithm.
+   This module contains nodes for the factor graph of TrueSkill algorithm.
 
-    :copyright: (c) 2012-2015 by Heungsub Lee.
-    :license: BSD, see LICENSE for more details.
+   :copyright: (c) 2012-2015 by Heungsub Lee.
+   :license: BSD, see LICENSE for more details.
 
 """
 from __future__ import absolute_import
+
 import itertools
 import math
 
@@ -166,7 +167,7 @@ class SumFactor(Factor):
             try:
                 # numpy.float64 handles floating-point error by different way.
                 # For example, it can just warn RuntimeWarning on n/0 problem
-                # instead of throwing ZeroDivisionError. So div.pi, the
+                # instead of throwing ZeroDivisionError.  So div.pi, the
                 # denominator has to be a built-in float.
                 pi_inv += coeff ** 2 / float(div.pi)
             except ZeroDivisionError:

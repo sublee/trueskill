@@ -3,7 +3,7 @@
 TrueSkill
 ~~~~~~~~~
 
-An implementation of the TrueSkill algorithm for Python. TrueSkill is a rating
+An implementation of the TrueSkill algorithm for Python.  TrueSkill is a rating
 system among game players and it is used on Xbox Live to rank and match
 players.
 
@@ -43,10 +43,12 @@ See Also
 
 """
 from __future__ import with_statement
+
 import re
+import sys
+
 from setuptools import setup
 from setuptools.command.test import test
-import sys
 
 
 # detect the current version
@@ -93,7 +95,7 @@ setup(
                  'Programming Language :: Python :: Implementation :: PyPy',
                  'Topic :: Games/Entertainment',
                  'Topic :: Scientific/Engineering :: Mathematics'],
-    tests_require=['pytest', 'almost>=0.1.5', 'mpmath>=0.17'],
+    tests_require=['pytest>=2.8.5', 'almost>=0.1.5', 'mpmath>=0.17'],
     test_suite='trueskilltest',
     use_2to3=(sys.version_info[0] >= 3),
 )

@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
 
+import warnings
+
 from almost import Approximate
 from pytest import deprecated_call, raises
 
 from conftest import various_backends
 import trueskill as t
 from trueskill import (
-    Rating, TrueSkill, quality, quality_1vs1, rate, rate_1vs1, setup)
+    quality, quality_1vs1, rate, rate_1vs1, Rating, setup, TrueSkill)
+
+
+warnings.simplefilter('always')
 
 
 inf = float('inf')

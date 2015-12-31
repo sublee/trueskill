@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*-
 """
-    trueskill
-    ~~~~~~~~~
+   trueskill
+   ~~~~~~~~~
 
-    The video game rating system.
+   The video game rating system.
 
-    :copyright: (c) 2012-2015 by Heungsub Lee
-    :license: BSD, see LICENSE for more details.
+   :copyright: (c) 2012-2015 by Heungsub Lee
+   :license: BSD, see LICENSE for more details.
 
 """
 from __future__ import absolute_import
+
 from itertools import chain, imap, izip
 import math
 
 from .backends import choose_backend
-from .factorgraph import (Variable, PriorFactor, LikelihoodFactor, SumFactor,
-                          TruncateFactor)
+from .factorgraph import (LikelihoodFactor, PriorFactor, SumFactor,
+                          TruncateFactor, Variable)
 from .mathematics import Gaussian, Matrix
 
 
-__version__ = '0.4.3'
+__version__ = '0.4.4'
 __all__ = [
     # TrueSkill objects
     'TrueSkill', 'Rating',
@@ -54,7 +55,7 @@ def calc_draw_probability(draw_margin, size, env=None):
 
     :param draw_margin: the draw-margin.
     :param size: the number of players in two comparing teams.
-    :param env: the :class:`TrueSkill` object. Defaults to the global
+    :param env: the :class:`TrueSkill` object.  Defaults to the global
                 environment.
 
     """
@@ -68,7 +69,7 @@ def calc_draw_margin(draw_probability, size, env=None):
 
     :param draw_probability: the draw-probability.
     :param size: the number of players in two comparing teams.
-    :param env: the :class:`TrueSkill` object. Defaults to the global
+    :param env: the :class:`TrueSkill` object.  Defaults to the global
                 environment.
 
     """
@@ -136,9 +137,9 @@ class Rating(Gaussian):
 
 
 class TrueSkill(object):
-    """Implements a TrueSkill environment. An environment could have customized
-    constants. Every games have not same design and may need to customize
-    TrueSkill constants.
+    """Implements a TrueSkill environment.  An environment could have
+    customized constants.  Every games have not same design and may need to
+    customize TrueSkill constants.
 
     For example, 60% of matches in your game have finished as draw then you
     should set ``draw_probability`` to 0.60::
@@ -151,21 +152,21 @@ class TrueSkill(object):
     .. _The Math Behind TrueSkill:: http://bit.ly/trueskill-math
 
     :param mu: the initial mean of ratings.
-    :param sigma: the initial standard deviation of ratings. The recommended
+    :param sigma: the initial standard deviation of ratings.  The recommended
                   value is a third of ``mu``.
     :param beta: the distance which guarantees about 76% chance of winning.
                  The recommended value is a half of ``sigma``.
-    :param tau: the dynamic factor which restrains a fixation of rating. The
+    :param tau: the dynamic factor which restrains a fixation of rating.  The
                 recommended value is ``sigma`` per cent.
-    :param draw_probability: the draw probability between two teams. It can be
+    :param draw_probability: the draw probability between two teams.  It can be
                              a ``float`` or function which returns a ``float``
                              by the given two rating (team performance)
-                             arguments and the beta value. If it is a
+                             arguments and the beta value.  If it is a
                              ``float``, the game has fixed draw probability.
                              Otherwise, the draw probability will be decided
                              dynamically per each match.
-    :param backend: the name of a backend which implements cdf, pdf, ppf. See
-                    :mod:`trueskill.backends` for more details. Defaults to
+    :param backend: the name of a backend which implements cdf, pdf, ppf.  See
+                    :mod:`trueskill.backends` for more details.  Defaults to
                     ``None``.
 
     """
@@ -199,7 +200,7 @@ class TrueSkill(object):
         return Rating(mu, sigma)
 
     def v_win(self, diff, draw_margin):
-        """The non-draw version of "V" function. "V" calculates a variation of
+        """The non-draw version of "V" function.  "V" calculates a variation of
         a mean.
         """
         x = diff - draw_margin
@@ -215,7 +216,7 @@ class TrueSkill(object):
         return ((numer / denom) if denom else a) * (-1 if diff < 0 else +1)
 
     def w_win(self, diff, draw_margin):
-        """The non-draw version of "W" function. "W" calculates a variation of
+        """The non-draw version of "W" function.  "W" calculates a variation of
         a standard deviation.
         """
         x = diff - draw_margin
@@ -236,7 +237,7 @@ class TrueSkill(object):
         return (v ** 2) + (a * self.pdf(a) - b * self.pdf(b)) / denom
 
     def validate_rating_groups(self, rating_groups):
-        """Validates a ``rating_groups`` argument. It should contain more than
+        """Validates a ``rating_groups`` argument.  It should contain more than
         2 groups and all groups must not be empty.
 
         >>> env = TrueSkill()
@@ -440,8 +441,8 @@ class TrueSkill(object):
            (r1,), (r2,) = rated_rating_groups
 
         ``rating_groups`` is a list of rating tuples or dictionaries that
-        represents each team of the match. You will get a result as same
-        structure as this argument. Rating dictionaries for this may be useful
+        represents each team of the match.  You will get a result as same
+        structure as this argument.  Rating dictionaries for this may be useful
         to choose specific player's new rating::
 
            # load players from the database
@@ -457,15 +458,15 @@ class TrueSkill(object):
 
         :param rating_groups: a list of tuples or dictionaries containing
                               :class:`Rating` objects.
-        :param ranks: a ranking table. By default, it is same as the order of
+        :param ranks: a ranking table.  By default, it is same as the order of
                       the ``rating_groups``.
         :param weights: weights of each players for "partial play".
         :param min_delta: each loop checks a delta of changes and the loop
                           will stop if the delta is less then this argument.
         :returns: recalculated ratings same structure as ``rating_groups``.
         :raises: :exc:`FloatingPointError` occurs when winners have too lower
-                 rating than losers. higher floating-point precision couls
-                 solve this error. set the backend to "mpmath".
+                 rating than losers.  higher floating-point precision couls
+                 solve this error.  set the backend to "mpmath".
 
         .. versionadded:: 0.2
 
@@ -509,7 +510,7 @@ class TrueSkill(object):
         return [dict(izip(keys[x], g)) for x, g in unsorting]
 
     def quality(self, rating_groups, weights=None):
-        """Calculates the match quality of the given rating groups. A result
+        """Calculates the match quality of the given rating groups.  A result
         is the draw probability in the association::
 
           env = TrueSkill()
@@ -564,8 +565,8 @@ class TrueSkill(object):
         return math.exp(e_arg) * math.sqrt(s_arg)
 
     def expose(self, rating):
-        """Returns the value of the rating exposure. It starts from 0 and
-        converges to the mean. Use this as a sort key in a leaderboard::
+        """Returns the value of the rating exposure.  It starts from 0 and
+        converges to the mean.  Use this as a sort key in a leaderboard::
 
            leaderboard = sorted(ratings, key=env.expose, reverse=True)
 
@@ -619,10 +620,10 @@ def rate_1vs1(rating1, rating2, drawn=False, min_delta=DELTA, env=None):
 
     :param rating1: the winner's rating if they didn't draw.
     :param rating2: the loser's rating if they didn't draw.
-    :param drawn: if the players drew, set this to ``True``. Defaults to
+    :param drawn: if the players drew, set this to ``True``.  Defaults to
                   ``False``.
     :param min_delta: will be passed to :meth:`rate`.
-    :param env: the :class:`TrueSkill` object. Defaults to the global
+    :param env: the :class:`TrueSkill` object.  Defaults to the global
                 environment.
     :returns: a tuple containing recalculated 2 ratings.
 
@@ -645,7 +646,7 @@ def quality_1vs1(rating1, rating2, env=None):
 
     :param rating1: the rating.
     :param rating2: the another rating.
-    :param env: the :class:`TrueSkill` object. Defaults to the global
+    :param env: the :class:`TrueSkill` object.  Defaults to the global
                 environment.
 
     .. versionadded:: 0.2
@@ -671,7 +672,7 @@ def setup(mu=MU, sigma=SIGMA, beta=BETA, tau=TAU,
     """Setups the global environment.
 
     :param env: the specific :class:`TrueSkill` object to be the global
-                environment. It is optional.
+                environment.  It is optional.
 
     >>> Rating()
     trueskill.Rating(mu=25.000, sigma=8.333)
@@ -715,8 +716,8 @@ def expose(rating):
     return global_env().expose(rating)
 
 
-# append deprecated methods into :class:`TrueSkill` and :class:`Rating`
-from . import deprecated
-from .deprecated import (
-    transform_ratings, match_quality, dynamic_draw_probability)
+# Append deprecated methods into :class:`TrueSkill` and :class:`Rating`
+from . import deprecated  # noqa
+from .deprecated import (  # noqa
+    dynamic_draw_probability, match_quality, transform_ratings)
 deprecated.ensure_backward_compatibility(TrueSkill, Rating)

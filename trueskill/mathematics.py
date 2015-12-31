@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-    trueskill.mathematics
-    ~~~~~~~~~~~~~~~~~~~~~
+   trueskill.mathematics
+   ~~~~~~~~~~~~~~~~~~~~~
 
-    This module contains basic mathematics functions and objects for TrueSkill
-    algorithm. If you have not scipy, this module provides the fallback.
+   This module contains basic mathematics functions and objects for TrueSkill
+   algorithm.  If you have not scipy, this module provides the fallback.
 
-    :copyright: (c) 2012-2015 by Heungsub Lee.
-    :license: BSD, see LICENSE for more details.
+   :copyright: (c) 2012-2015 by Heungsub Lee.
+   :license: BSD, see LICENSE for more details.
 
 """
 from __future__ import absolute_import
+
 import copy
 import math
 try:
