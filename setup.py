@@ -44,35 +44,34 @@ See Also
 """
 from __future__ import with_statement
 
-import re
+import os
 import sys
 
 from setuptools import setup
 from setuptools.command.test import test
 
 
-# detect the current version
-with open('trueskill/__init__.py') as f:
-    version = re.search(r'__version__\s*=\s*\'(.+?)\'', f.read()).group(1)
-assert version
+# include __about__.py.
+__dir__ = os.path.dirname(__file__)
+about = {}
+with open(os.path.join(__dir__, 'trueskill', '__about__.py')) as f:
+    exec(f.read(), about)
 
 
-# use pytest instead
+# use pytest instead.
 def run_tests(self):
-    pyc = re.compile(r'\.pyc|\$py\.class')
-    test_file = pyc.sub('.py', __import__(self.test_suite).__file__)
-    raise SystemExit(__import__('pytest').main(['-xv', test_file]))
+    raise SystemExit(__import__('pytest').main(['-v']))
 test.run_tests = run_tests
 
 
 setup(
     name='trueskill',
-    version=version,
-    license='BSD',
-    author='Heungsub Lee',
-    author_email=re.sub('((sub).)(.*)', r'\2@\1.\3', 'sublee'),
-    url='http://trueskill.org/',
-    description='The video game rating system',
+    version=about['__version__'],
+    license=about['__license__'],
+    author=about['__author__'],
+    author_email=about['__author_email__'],
+    url=about['__url__'],
+    description=about['__description__'],
     long_description=__doc__,
     platforms='any',
     packages=['trueskill'],
@@ -96,6 +95,6 @@ setup(
                  'Topic :: Games/Entertainment',
                  'Topic :: Scientific/Engineering :: Mathematics'],
     tests_require=['pytest>=2.8.5', 'almost>=0.1.5', 'mpmath>=0.17'],
-    test_suite='trueskilltest',
+    test_suite='...',
     use_2to3=(sys.version_info[0] >= 3),
 )

@@ -14,13 +14,13 @@ from __future__ import absolute_import
 from itertools import chain, imap, izip
 import math
 
+from .__about__ import __version__  # noqa
 from .backends import choose_backend
 from .factorgraph import (LikelihoodFactor, PriorFactor, SumFactor,
                           TruncateFactor, Variable)
 from .mathematics import Gaussian, Matrix
 
 
-__version__ = '0.4.4'
 __all__ = [
     # TrueSkill objects
     'TrueSkill', 'Rating',
