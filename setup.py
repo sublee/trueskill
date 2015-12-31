@@ -94,6 +94,7 @@ setup(
                  'Programming Language :: Python :: Implementation :: PyPy',
                  'Topic :: Games/Entertainment',
                  'Topic :: Scientific/Engineering :: Mathematics'],
+    install_requires=['six'],
     tests_require=['pytest>=2.8.5', 'almost>=0.1.5', 'mpmath>=0.17'],
     test_suite='...',
     use_2to3=(sys.version_info[0] >= 3),

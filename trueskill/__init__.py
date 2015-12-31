@@ -11,8 +11,11 @@
 """
 from __future__ import absolute_import
 
-from itertools import chain, imap, izip
+from itertools import chain
 import math
+
+from six import iteritems
+from six.moves import map, range, zip
 
 from .__about__ import __version__  # noqa
 from .backends import choose_backend
@@ -264,7 +267,7 @@ class TrueSkill(object):
         elif not all(rating_groups):
             raise ValueError('Each group must contain multiple ratings')
         # check group types
-        group_types = set(imap(type, rating_groups))
+        group_types = set(map(type, rating_groups))
         if len(group_types) != 1:
             raise TypeError('All groups should be same type')
         elif group_types.pop() is Rating:
@@ -276,7 +279,7 @@ class TrueSkill(object):
             keys = []
             for dict_rating_group in dict_rating_groups:
                 rating_group, key_group = [], []
-                for key, rating in dict_rating_group.iteritems():
+                for key, rating in iteritems(dict_rating_group):
                     rating_group.append(rating)
                     key_group.append(key)
                 rating_groups.append(tuple(rating_group))
@@ -320,22 +323,22 @@ class TrueSkill(object):
                trunc_layer:   O   O   (TruncateFactor)
 
         """
-        flatten_ratings = sum(imap(tuple, rating_groups), ())
-        flatten_weights = sum(imap(tuple, weights), ())
+        flatten_ratings = sum(map(tuple, rating_groups), ())
+        flatten_weights = sum(map(tuple, weights), ())
         size = len(flatten_ratings)
         group_size = len(rating_groups)
         # create variables
-        rating_vars = [Variable() for x in xrange(size)]
-        perf_vars = [Variable() for x in xrange(size)]
-        team_perf_vars = [Variable() for x in xrange(group_size)]
-        team_diff_vars = [Variable() for x in xrange(group_size - 1)]
+        rating_vars = [Variable() for x in range(size)]
+        perf_vars = [Variable() for x in range(size)]
+        team_perf_vars = [Variable() for x in range(group_size)]
+        team_diff_vars = [Variable() for x in range(group_size - 1)]
         team_sizes = _team_sizes(rating_groups)
         # layer builders
         def build_rating_layer():
-            for rating_var, rating in izip(rating_vars, flatten_ratings):
+            for rating_var, rating in zip(rating_vars, flatten_ratings):
                 yield PriorFactor(rating_var, rating, self.tau)
         def build_perf_layer():
-            for rating_var, perf_var in izip(rating_vars, perf_vars):
+            for rating_var, perf_var in zip(rating_vars, perf_vars):
                 yield LikelihoodFactor(rating_var, perf_var, self.beta ** 2)
         def build_team_perf_layer():
             for team, team_perf_var in enumerate(team_perf_vars):
@@ -397,7 +400,7 @@ class TrueSkill(object):
         team_diff_layer, trunc_layer = build([build_team_diff_layer,
                                               build_trunc_layer])
         team_diff_len = len(team_diff_layer)
-        for x in xrange(10):
+        for x in range(10):
             if team_diff_len == 1:
                 # only two teams
                 team_diff_layer[0].down()
@@ -405,11 +408,11 @@ class TrueSkill(object):
             else:
                 # multiple teams
                 delta = 0
-                for x in xrange(team_diff_len - 1):
+                for x in range(team_diff_len - 1):
                     team_diff_layer[x].down()
                     delta = max(delta, trunc_layer[x].up())
                     team_diff_layer[x].up(1)  # up to right variable
-                for x in xrange(team_diff_len - 1, 0, -1):
+                for x in range(team_diff_len - 1, 0, -1):
                     team_diff_layer[x].down()
                     delta = max(delta, trunc_layer[x].up())
                     team_diff_layer[x].up(0)  # up to left variable
@@ -421,7 +424,7 @@ class TrueSkill(object):
         team_diff_layer[team_diff_len - 1].up(1)
         # up the remainder of the black arrows
         for f in team_perf_layer:
-            for x in xrange(len(f.vars) - 1):
+            for x in range(len(f.vars) - 1):
                 f.up(x)
         for f in perf_layer:
             f.up()
@@ -480,7 +483,7 @@ class TrueSkill(object):
             raise ValueError('Wrong ranks')
         # sort rating groups by rank
         by_rank = lambda x: x[1][1]
-        sorting = sorted(enumerate(izip(rating_groups, ranks, weights)),
+        sorting = sorted(enumerate(zip(rating_groups, ranks, weights)),
                          key=by_rank)
         sorted_rating_groups, sorted_ranks, sorted_weights = [], [], []
         for x, (g, r, w) in sorting:
@@ -496,18 +499,18 @@ class TrueSkill(object):
         # make result
         rating_layer, team_sizes = layers[0], _team_sizes(sorted_rating_groups)
         transformed_groups = []
-        for start, end in izip([0] + team_sizes[:-1], team_sizes):
+        for start, end in zip([0] + team_sizes[:-1], team_sizes):
             group = []
             for f in rating_layer[start:end]:
                 group.append(Rating(float(f.var.mu), float(f.var.sigma)))
             transformed_groups.append(tuple(group))
         by_hint = lambda x: x[0]
-        unsorting = sorted(izip((x for x, __ in sorting), transformed_groups),
+        unsorting = sorted(zip((x for x, __ in sorting), transformed_groups),
                            key=by_hint)
         if keys is None:
             return [g for x, g in unsorting]
         # restore the structure with input dictionary keys
-        return [dict(izip(keys[x], g)) for x, g in unsorting]
+        return [dict(zip(keys[x], g)) for x, g in unsorting]
 
     def quality(self, rating_groups, weights=None):
         """Calculates the match quality of the given rating groups.  A result
@@ -526,8 +529,8 @@ class TrueSkill(object):
         """
         rating_groups, keys = self.validate_rating_groups(rating_groups)
         weights = self.validate_weights(weights, rating_groups, keys)
-        flatten_ratings = sum(imap(tuple, rating_groups), ())
-        flatten_weights = sum(imap(tuple, weights), ())
+        flatten_ratings = sum(map(tuple, rating_groups), ())
+        flatten_weights = sum(map(tuple, weights), ())
         length = len(flatten_ratings)
         # a vector of all of the skill means
         mean_matrix = Matrix([[r.mu] for r in flatten_ratings])
@@ -541,13 +544,13 @@ class TrueSkill(object):
         # the player-team assignment and comparison matrix
         def rotated_a_matrix(set_height, set_width):
             t = 0
-            for r, (cur, next) in enumerate(izip(rating_groups[:-1],
-                                                 rating_groups[1:])):
-                for x in xrange(t, t + len(cur)):
+            for r, (cur, next) in enumerate(zip(rating_groups[:-1],
+                                                rating_groups[1:])):
+                for x in range(t, t + len(cur)):
                     yield (r, x), flatten_weights[x]
                     t += 1
                 x += 1
-                for x in xrange(x, x + len(next)):
+                for x in range(x, x + len(next)):
                     yield (r, x), -flatten_weights[x]
             set_height(r + 1)
             set_width(x + 1)

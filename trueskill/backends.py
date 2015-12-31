@@ -13,6 +13,8 @@ from __future__ import absolute_import
 
 import math
 
+from six.moves import range
+
 
 __all__ = ['available_backends', 'choose_backend', 'cdf', 'pdf', 'ppf']
 
@@ -33,7 +35,7 @@ def _gen_erfcinv(erfc, math=math):
         t = math.sqrt(-2 * math.log(y / 2.))
         x = -0.70711 * \
             ((2.30753 + t * 0.27061) / (1. + t * (0.99229 + t * 0.04481)) - t)
-        for i in xrange(2):
+        for i in range(2):
             err = erfc(x) - y
             x += err / (1.12837916709551257 * math.exp(-(x ** 2)) - x * err)
         return x if zero_point else -x
