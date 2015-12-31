@@ -5,7 +5,7 @@ Released on Dec 31 2015.
 
 Fixed documentation error.  See `issue #11`_.  Thanks to `Russel Simmons`_.
 
-.. _issue #11: https://github.com/sublee/trueskill/issues/10
+.. _issue #11: https://github.com/sublee/trueskill/issues/11
 .. _Russel Simmons: https://github.com/rsimmons
 
 Version 0.4.3
