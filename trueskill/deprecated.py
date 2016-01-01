@@ -5,7 +5,7 @@
 
    Deprecated features.
 
-   :copyright: (c) 2012-2015 by Heungsub Lee
+   :copyright: (c) 2012-2016 by Heungsub Lee
    :license: BSD, see LICENSE for more details.
 
 """
