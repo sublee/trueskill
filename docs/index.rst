@@ -301,7 +301,7 @@ If you want to more details of the TrueSkill algorithm, see also:
 - `TrueSkill: A Bayesian Skill Rating System
   <http://research.microsoft.com/apps/pubs/default.aspx?id=67956>`_
   by Herbrich, Ralf and Graepel, Thore
-- `TrueSkill Calcurator
+- `TrueSkill Calculator
   <http://atom.research.microsoft.com/trueskill/rankcalculator.aspx>`_
   by Microsoft Research
 - `Computing Your Skill <http://bit.ly/computing-your-skill>`_ by Jeff Moser
