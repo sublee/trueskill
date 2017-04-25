@@ -614,7 +614,7 @@ class TrueSkill(object):
                 'draw_probability=%s%s)' % args)
 
 
-def rate_1vs1(rating1, rating2, drawn=False, min_delta=DELTA, env=None):
+def rate_1vs1(rating1, rating2, drawn=False, min_delta=DELTA, env=None, reverse=False):
     """A shortcut to rate just 2 players in a head-to-head match::
 
        alice, bob = Rating(25), Rating(30)
@@ -628,6 +628,7 @@ def rate_1vs1(rating1, rating2, drawn=False, min_delta=DELTA, env=None):
     :param min_delta: will be passed to :meth:`rate`.
     :param env: the :class:`TrueSkill` object.  Defaults to the global
                 environment.
+    :param reverse: take rating1 and rating2 by reversed order.
     :returns: a tuple containing recalculated 2 ratings.
 
     .. versionadded:: 0.2
@@ -635,7 +636,10 @@ def rate_1vs1(rating1, rating2, drawn=False, min_delta=DELTA, env=None):
     """
     if env is None:
         env = global_env()
-    ranks = [0, 0 if drawn else 1]
+    if reverse:
+        ranks = [0, 0 if drawn else 1]
+    else:
+        ranks = [0 if drawn else 1, 0]
     teams = env.rate([(rating1,), (rating2,)], ranks, min_delta=min_delta)
     return teams[0][0], teams[1][0]
 
