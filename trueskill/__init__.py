@@ -660,6 +660,40 @@ def quality_1vs1(rating1, rating2, env=None):
     return env.quality([(rating1,), (rating2,)])
 
 
+def probability_NvsM(team1_ratings, team2_ratings, env=None):
+    """Calculates the win probability of the first team over the second team.
+
+    :param team1_ratings: ratings of the first team participants.
+    :param team2_ratings: ratings of another team participants.
+    :param env: the :class:`TrueSkill` object.  Defaults to the global
+                environment.
+    """
+    if env is None:
+        env = global_env()
+
+    team1_mu = sum(r.mu for r in team1_ratings)
+    team1_sigma = sum((env.beta**2 + r.sigma**2) for r in team1_ratings)
+    team2_mu = sum(r.mu for r in team2_ratings)
+    team2_sigma = sum((env.beta**2 + r.sigma**2) for r in team2_ratings)
+
+    x = (team1_mu - team2_mu) / math.sqrt(team1_sigma + team2_sigma)
+    probability_win_team1 = env.cdf(x)
+    return probability_win_team1
+
+
+def probability_1vs1(rating1, rating2, env=None):
+    """A shortcut to calculate the win probability between just 2 players in
+    a head-to-head match
+
+    :param rating1: the rating.
+    :param rating2: the another rating.
+    :param env: the :class:`TrueSkill` object.  Defaults to the global
+                environment.
+    :return: probability the first player wins
+    """
+    return probability_NvsM((rating1,), (rating2,), env=env)
+
+
 def global_env():
     """Gets the :class:`TrueSkill` object which is the global environment."""
     try:
