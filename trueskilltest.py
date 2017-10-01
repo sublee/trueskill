@@ -9,7 +9,7 @@ from pytest import deprecated_call, raises
 from conftest import various_backends
 import trueskill as t
 from trueskill import (
-    quality, quality_1vs1, rate, rate_1vs1, Rating, setup, TrueSkill)
+    quality, quality_1vs1, rate, rate_1vs1, Rating, setup, TrueSkill, probability_NvsM, probability_1vs1)
 
 
 warnings.simplefilter('always')
@@ -204,6 +204,22 @@ def test_backend():
     with raises(ValueError):
         # '__not_defined__' backend is not defined
         TrueSkill(backend='__not_defined__')
+
+
+def test_probability_NvsM():
+    def assert_almost_equal(value, correct):
+        eps = 1e-3
+        assert abs(value - correct) < eps
+
+    r1, r2 = Rating(), Rating()
+    assert_almost_equal(probability_1vs1(r1, r2), 0.5)
+
+    r1, r2 = rate_1vs1(r1, r2)
+    assert_almost_equal(probability_1vs1(r1, r2), 0.773)
+    assert_almost_equal(probability_1vs1(r2, r1) + probability_1vs1(r1, r2), 1.0)
+    assert_almost_equal(probability_NvsM((r1, r1, r1), (r2, r2, r2)), 0.903)
+    assert_almost_equal(probability_NvsM((r1, r1, r1), (r1, r2, r2)), 0.807)
+    assert_almost_equal(probability_NvsM((r2,), (r1, r2)), 0.02)
 
 
 # algorithm
