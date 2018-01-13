@@ -134,7 +134,7 @@ img {
   clear: both;
 }
 
-tt, .highlight pre, .pre {
+tt, code, .highlight pre, .pre {
   font-family: 'Ubuntu Mono', monospace;
 }
 
