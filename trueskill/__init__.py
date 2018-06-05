@@ -99,7 +99,7 @@ def _floating_point_error(env):
 
 
 class Rating(Gaussian):
-    """Represents a player's skill as Gaussian distrubution.
+    """Represents a player's skill as Gaussian distribution.
 
     The default mu and sigma value follows the global environment's settings.
     If you don't want to use the global, use :meth:`TrueSkill.create_rating` to
@@ -124,9 +124,6 @@ class Rating(Gaussian):
     def __int__(self):
         return int(self.mu)
 
-    def __long__(self):
-        return long(self.mu)
-
     def __float__(self):
         return float(self.mu)
 
@@ -141,7 +138,7 @@ class Rating(Gaussian):
 
 class TrueSkill(object):
     """Implements a TrueSkill environment.  An environment could have
-    customized constants.  Every games have not same design and may need to
+    customized constants.  Not all games have the same design and may need to
     customize TrueSkill constants.
 
     For example, 60% of matches in your game have finished as draw then you
@@ -152,7 +149,7 @@ class TrueSkill(object):
     For more details of the constants, see `The Math Behind TrueSkill`_ by
     Jeff Moser.
 
-    .. _The Math Behind TrueSkill:: http://bit.ly/trueskill-math
+    .. _The Math Behind TrueSkill:: https://www.moserware.com/assets/computing-your-skill/The%20Math%20Behind%20TrueSkill.pdf
 
     :param mu: the initial mean of ratings.
     :param sigma: the initial standard deviation of ratings.  The recommended
@@ -379,7 +376,8 @@ class TrueSkill(object):
     def run_schedule(self, build_rating_layer, build_perf_layer,
                      build_team_perf_layer, build_team_diff_layer,
                      build_trunc_layer, min_delta=DELTA):
-        """Sends messages within every nodes of the factor graph until the
+        """
+        Sends messages between every node of the factor graph until the
         result is reliable.
         """
         if min_delta <= 0:
