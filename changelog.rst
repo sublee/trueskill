@@ -1,3 +1,13 @@
+Version 0.4.5
+-------------
+
+Released on Sep 7 2018.
+
+Started to support Python 3.6 and 3.7. But dropped support of Python 2.5, 2.6,
+3.1, 3.2, and 3.3.  Thanks to `Hugo`_.
+
+.. _Hugo: https://github.com/hugovk
+
 Version 0.4.4
 -------------
 
