@@ -84,7 +84,7 @@ def factor_graph_logging(color=False):
     orig_factor_init = Factor.__init__
     orig_variable_set = Variable.set
     def repr_factor(factor):
-        return '{0}@{1}'.format(type(factor).__name__, id(factor))
+        return '{}@{}'.format(type(factor).__name__, id(factor))
     def repr_gauss(gauss):
         return 'N(mu=%.3f, sigma=%.3f, pi=%r, tau=%r)' % \
                (gauss.mu, gauss.sigma, gauss.pi, gauss.tau)
@@ -104,8 +104,8 @@ def factor_graph_logging(color=False):
         return orig_factor_init(self, *args, **kwargs)
     def variable_set(self, val):
         old_value = Gaussian(pi=self.pi, tau=self.tau)
-        old_messages = dict((fac, Gaussian(pi=msg.pi, tau=msg.tau))
-                            for fac, msg in self.messages.items())
+        old_messages = {fac: Gaussian(pi=msg.pi, tau=msg.tau)
+                        for fac, msg in self.messages.items()}
         delta = orig_variable_set(self, val)
         # inspect outer frames
         frames = inspect.getouterframes(inspect.currentframe())
@@ -126,24 +126,24 @@ def factor_graph_logging(color=False):
         # print layer
         if getattr(logger, '_prev_layer_name', None) != factor._layer_name:
             logger._prev_layer_name = factor._layer_name
-            l(colored('[{0}]'.format(factor._layer_name), 'blue'))
+            l(colored('[{}]'.format(factor._layer_name), 'blue'))
         # print factor
-        l(colored('<{0}.{1}>'.format(r(factor), methods[1]), 'cyan'))
+        l(colored('<{}.{}>'.format(r(factor), methods[1]), 'cyan'))
         # print value
         if old_value == self:
-            line = '{0}'.format(r(self))
+            line = '{}'.format(r(self))
         else:
-            line = '{0} -> {1}'.format(r(old_value), r(self))
+            line = '{} -> {}'.format(r(old_value), r(self))
         l(bullet(methods[0] == 'update_value') + line)
         # print messages
-        fmt = '{0}: {1} -> {2}'.format
+        fmt = '{}: {} -> {}'.format
         for fac, msg in self.messages.items():
             old_msg = old_messages[fac]
             changed = fac is factor and methods[0] == 'update_message'
             if old_msg == msg:
-                line = '{0}: {1}'.format(r(fac), r(msg))
+                line = '{}: {}'.format(r(fac), r(msg))
             else:
-                line = '{0}: {1} -> {2}'.format(r(fac), r(old_msg), r(msg))
+                line = '{}: {} -> {}'.format(r(fac), r(old_msg), r(msg))
             l(bullet(changed) + line)
         # print buffered logs
         map(logger.debug, logs)
