@@ -544,13 +544,13 @@ class TrueSkill(object):
         # the player-team assignment and comparison matrix
         def rotated_a_matrix(set_height, set_width):
             t = 0
-            for r, (cur, next) in enumerate(zip(rating_groups[:-1],
+            for r, (cur, _next) in enumerate(zip(rating_groups[:-1],
                                                 rating_groups[1:])):
                 for x in range(t, t + len(cur)):
                     yield (r, x), flatten_weights[x]
                     t += 1
                 x += 1
-                for x in range(x, x + len(next)):
+                for x in range(x, x + len(_next)):
                     yield (r, x), -flatten_weights[x]
             set_height(r + 1)
             set_width(x + 1)
