@@ -69,9 +69,9 @@ class Variable(Node, Gaussian):
 
 class Factor(Node):
 
-    def __init__(self, vars):
-        self.vars = vars
-        for var in vars:
+    def __init__(self, variables):
+        self.vars = variables
+        for var in variables:
             var[self] = Gaussian()
 
     def down(self):
