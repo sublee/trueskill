@@ -124,6 +124,9 @@ class Rating(Gaussian):
     def __int__(self):
         return int(self.mu)
 
+    def __long__(self):
+        return long(self.mu)
+
     def __float__(self):
         return float(self.mu)
 
