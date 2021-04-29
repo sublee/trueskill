@@ -661,13 +661,13 @@ def quality_1vs1(rating1, rating2, env=None):
     return env.quality([(rating1,), (rating2,)])
 
 
-def global_env():
+def global_env(**kwargs):
     """Gets the :class:`TrueSkill` object which is the global environment."""
     try:
         global_env.__trueskill__
     except AttributeError:
         # setup the default environment
-        setup()
+        setup(**kwargs)
     return global_env.__trueskill__
 
 
