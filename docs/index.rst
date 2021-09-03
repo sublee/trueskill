@@ -338,6 +338,9 @@ If you want to more details of the TrueSkill algorithm, see also:
 - `Computing Your Skill <http://bit.ly/computing-your-skill>`_ by Jeff Moser
 - `The Math Behind TrueSkill <http://bit.ly/the-math-behind-trueskill>`_ by
   Jeff Moser
+- `Application and Further Development of TrueSkill™ Ranking in Sports
+  <http://uu.diva-portal.org/smash/get/diva2:1322103/FULLTEXT01.pdf>` (2019)
+  by Ibstedt, Rådahl, Turesson, vande Voorde
 
 Licensing and Author
 ~~~~~~~~~~~~~~~~~~~~
