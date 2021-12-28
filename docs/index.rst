@@ -239,9 +239,10 @@ between arbitrary ratings.  But there's no function for a win probability.
 Anyway, if you need to calculate a win probability between only 2 teams, this
 code snippet will help you::
 
-   import trueskill
    import itertools
    import math
+
+   import trueskill
 
    def win_probability(team1, team2, draw_margin=0, env=None):
        if env is None:
