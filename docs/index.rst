@@ -246,11 +246,11 @@ code snippet will help you::
    def win_probability(team1, team2, draw_margin=0, env=None):
        if env is None:
            env = trueskill.global_env()
-       BETA = env.beta
+       beta = env.beta
        delta_mu = sum(r.mu for r in team1) - sum(r.mu for r in team2)
        sum_sigma = sum(r.sigma ** 2 for r in itertools.chain(team1, team2))
        size = len(team1) + len(team2)
-       denom = math.sqrt(size * (BETA * BETA) + sum_sigma)
+       denom = math.sqrt(size * (beta * beta) + sum_sigma)
        return env.cdf((delta_mu - draw_margin) / denom)
 
 This snippet is written by `Juho Snellman`_ and `@coldfix`_ in `issue #1`_.
