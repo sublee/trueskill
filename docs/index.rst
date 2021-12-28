@@ -242,18 +242,23 @@ code snippet will help you::
    import itertools
    import math
 
-   def win_probability(team1, team2):
+   import trueskill
+
+   def win_probability(team1, team2, draw_margin=0, env=None):
+       if env is None:
+           env = trueskill.global_env()
+       beta = env.beta
        delta_mu = sum(r.mu for r in team1) - sum(r.mu for r in team2)
        sum_sigma = sum(r.sigma ** 2 for r in itertools.chain(team1, team2))
        size = len(team1) + len(team2)
-       denom = math.sqrt(size * (BETA * BETA) + sum_sigma)
-       ts = trueskill.global_env()
-       return ts.cdf(delta_mu / denom)
+       denom = math.sqrt(size * (beta * beta) + sum_sigma)
+       return env.cdf((delta_mu - draw_margin) / denom)
 
-This snippet is written by `Juho Snellman`_ in `issue #1`_.
+This snippet is written by `Juho Snellman`_ and `@coldfix`_ in `issue #1`_.
 
 .. _Juho Snellman:
    https://www.snellman.net/
+.. _@coldfix: https://github.com/coldfix
 .. _issue #1:
    https://github.com/sublee/trueskill/issues/1#issuecomment-149762508
 
@@ -334,6 +339,9 @@ If you want to more details of the TrueSkill algorithm, see also:
 - `Computing Your Skill <http://bit.ly/computing-your-skill>`_ by Jeff Moser
 - `The Math Behind TrueSkill <http://bit.ly/the-math-behind-trueskill>`_ by
   Jeff Moser
+- `Application and Further Development of TrueSkill™ Ranking in Sports
+  <http://uu.diva-portal.org/smash/get/diva2:1322103/FULLTEXT01.pdf>` (2019)
+  by Ibstedt, Rådahl, Turesson, vande Voorde
 
 Licensing and Author
 ~~~~~~~~~~~~~~~~~~~~
