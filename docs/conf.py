@@ -98,7 +98,7 @@ html_theme = 'trueskill'
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {'github_fork': 'sublee/trueskill',
-                      'google_analytics': 'UA-28655602-3'}
+                      'google_analytics': 'G-0WR378530B'}
 
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = ['_themes']
