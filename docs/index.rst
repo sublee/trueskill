@@ -217,7 +217,7 @@ Here's the list of the available backends:
 
 .. note::
 
-   When winners have too lower rating than losers, :meth:`TrueSkill.rate` will
+   When winners have a much lower rating than losers, :meth:`TrueSkill.rate` will
    raise :exc:`FloatingPointError`.  In this case, you need higher
    floating-point precision.  The mpmath library offers flexible floating-point
    precision.  You can solve the problem with mpmath as a backend and higher
