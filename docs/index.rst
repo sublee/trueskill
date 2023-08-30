@@ -1,18 +1,18 @@
 TrueSkill
 =========
 
-the video game rating system
+The video game rating system
 
 .. currentmodule:: trueskill
 
-What's TrueSkill?
+What is TrueSkill?
 ~~~~~~~~~~~~~~~~~
 
-TrueSkill_ is a rating system among game players.  It was developed by
-`Microsoft Research`_ and has been used on `Xbox LIVE`_ for ranking and
-matchmaking service.  This system quantifies players' **TRUE** skill points by
-the Bayesian inference algorithm.  It also works well with any type of match
-rule including N:N team game or free-for-all.
+TrueSkill_ is a skill-based ranking system that can be used across a wide variety
+of games. It was developed by `Microsoft Research`_ and has been used on `Xbox LIVE`_ 
+for ranking and matchmaking services.  This system quantifies players' **TRUE** skill
+level by using the Bayesian inference algorithm.  It also works well with any type of match
+rule including N:N team games or free-for-all.
 
 This project is a Python package which implements the TrueSkill rating
 system::
@@ -43,10 +43,10 @@ Learning
 Rating, the model for skill
 ---------------------------
 
-In TrueSkill, rating is a Gaussian distribution which starts from
-:math:`\mathcal{ N }( 25, \frac{ 25 }{ 3 }^2 )`.  :math:`\mu` is an average
-skill of player, and :math:`\sigma` is a confidence of the guessed rating.  A
-real skill of player is between :math:`\mu \pm 2\sigma` with 95% confidence.
+In TrueSkill, the rating is represented by a Gaussian distribution which starts from
+:math:`\mathcal{ N }( 25, \frac{ 25 }{ 3 }^2 )`.  :math:`\mu` is the average
+skill of a player, and :math:`\sigma` is the confidence of the estimated rating.  The
+actual skill of a player falls within the range :math:`\mu \pm 2\sigma` with 95% confidence.
 
 ::
 
@@ -54,17 +54,17 @@ real skill of player is between :math:`\mu \pm 2\sigma` with 95% confidence.
    >>> Rating()  # use the default mu and sigma
    trueskill.Rating(mu=25.000, sigma=8.333)
 
-If some player's rating is higher :math:`\beta` than another player's, the
-player may have about a 76% (specifically :math:`\Phi(\frac {1}{\sqrt{2}})`)
-chance to beat the other player.  The default value of :math:`\beta` is
+If a player's rating is :math:`\beta` higher than another player's rating, the
+first player would have a 76% (specifically :math:`\Phi(\frac {1}{\sqrt{2}})`)
+chance of beating the second player in a match.  The default value of :math:`\beta` is
 :math:`\frac{ 25 }{ 6 }`.
 
-Ratings will approach real skills through few times of the TrueSkill's Bayesian
-inference algorithm.  How many matches TrueSkill needs to estimate real skills?
-It depends on the game rule.  See the below table:
+Ratings gradually converge towards the actual skill level of a player after a 
+certain number of matches, thanks to TrueSkill's Bayesian inference algorithm.
+How many? It depends on the game mode.  See the table below:
 
 ================  =======
-Rule              Matches
+Game Mode         Matches
 ================  =======
 16P free-for-all  3
 8P free-for-all   3
@@ -76,26 +76,26 @@ Rule              Matches
 8:8               91
 ================  =======
 
-Head-to-head (1 vs. 1) match rule
+Head-to-head (1 vs. 1) game mode
 ---------------------------------
 
-Most competition games follows 1:1 match rule.  If your game does, just use
+Most games follow a 1:1 game mode.  If yours does as well, just use the
 ``_1vs1`` shortcuts containing :func:`rate_1vs1` and :func:`quality_1vs1`.
 These are very easy to use.
 
 First of all, we need 2 :class:`Rating` objects::
 
-   >>> r1 = Rating()  # 1P's skill
-   >>> r2 = Rating()  # 2P's skill
+   >>> r1 = Rating()  # P1's skill
+   >>> r2 = Rating()  # P2's skill
 
-Then we can guess match quality which is equivalent with draw probability of
-this match using :func:`quality_1vs1`::
+Then we can guess the quality of the match, which is also equivalent to the probability of a draw,
+by using :func:`quality_1vs1`::
 
    >>> print('{:.1%} chance to draw'.format(quality_1vs1(r1, r2)))
    44.7% chance to draw
 
-After the game, TrueSkill recalculates their ratings by the game result.  For
-example, if 1P beat 2P::
+After the game, TrueSkill recalculates their ratings according to the result.
+For example, if Player 1 beats Player 2::
 
    >>> new_r1, new_r2 = rate_1vs1(r1, r2)
    >>> print(new_r1)
@@ -103,14 +103,14 @@ example, if 1P beat 2P::
    >>> print(new_r2)
    trueskill.Rating(mu=20.604, sigma=7.171)
 
-Mu value follows player's win/draw/lose records.  Higher value means higher
-game skill.  And sigma value follows the number of games.  Lower value means
-many game plays and higher rating confidence.
+The mu value is related to the player's performance.  A higher value signifies a higher
+skill level.  Meanwhile, the value of sigma is tied to the number of games, and reflects
+the algorithm's confidence in the player's skill assessment.  A lower number indicates more confidence.
 
-So 1P, a winner's skill grew up from 25 to 29.396 but 2P, a loser's skill shrank
-to 20.604.  And both sigma values became narrow about same magnitude.
+So for P1, the skill increased from 25 to 29.396. While for P2, who lost the game, the skill level shrank
+to 20.604.  The sigma value also decreased by the same amount for both players.
 
-Of course, you can also handle a tie game with ``drawn=True``::
+Of course, you can also handle a tie by using ``drawn=True``::
 
    >>> new_r1, new_r2 = rate_1vs1(r1, r2, drawn=True)
    >>> print(new_r1)
@@ -118,21 +118,22 @@ Of course, you can also handle a tie game with ``drawn=True``::
    >>> print(new_r2)
    trueskill.Rating(mu=25.000, sigma=6.458)
 
-Other match rules
+Other game modes
 -----------------
 
-There are many other match rules such as N:N team match, N:N:N multiple team
-match, N:M unbalanced match, free-for-all (Player vs. All), and so on.  Mostly
-other rating systems cannot work with them but TrueSkill does.  TrueSkill
-accepts any types of matches.
+Additional game modes include N:N team matches, N:N:N multiple team matches,
+N:M unbalanced matches, free-for-all (Player vs. All), and various others.
+Most rating systems aren't able to handle these game modes, but TrueSkill can.
+In fact, TrueSkill works with any game mode.
 
-We should arrange ratings into a group by their team::
+To represent team-based game modes, we need to create a list for each team.
+Within these lists, we'll place the rating of each player of the team::
 
-   >>> r1 = Rating()  # 1P's skill
-   >>> r2 = Rating()  # 2P's skill
-   >>> r3 = Rating()  # 3P's skill
-   >>> t1 = [r1]  # Team A contains just 1P
-   >>> t2 = [r2, r3]  # Team B contains 2P and 3P
+   >>> r1 = Rating()  # P1's skill
+   >>> r2 = Rating()  # P2's skill
+   >>> r3 = Rating()  # P3's skill
+   >>> t1 = [r1]  # Team A only has P1
+   >>> t2 = [r2, r3]  # Team B has P2 and P3
 
 Then we can calculate the match quality and rate them::
 
@@ -146,13 +147,12 @@ Then we can calculate the match quality and rate them::
    >>> print(new_r3)
    trueskill.Rating(mu=16.269, sigma=7.317)
 
-If you want to describe other game results, set the ``ranks`` argument like the
-below examples:
+If you want to describe other game results, set the ``ranks`` argument as shown below:
 
 - A drawn game -- ``ranks=[0, 0]``
 - Team B won not team A -- ``ranks=[1, 0]`` (Lower rank is better)
 
-Additionally, here are varied patterns of rating groups.  All variables which
+Here are other examples for different game modes.  All variables which
 start with ``r`` are :class:`Rating` objects:
 
 - N:N team match -- ``[(r1, r2, r3), (r4, r5, r6)]``
@@ -163,27 +163,27 @@ start with ``r`` are :class:`Rating` objects:
 Partial play
 ------------
 
-Let's assume that there are 2 teams which each has 2 players.  The game was for
-a hour but the one of players on the first team entered the game at 30 minutes
-later.
+Let's assume that there are 2 teams, with 2 players each.  The game was 1 hour long,
+but one of the players on the first team entered the game 30 minutes after the
+start of the match.
 
-If some player wasn't present for the entire duration of the game, use the
-concept of "partial play" by ``weights`` parameter.  The above situation can be
-described by the following weights:
+If some player wasn't present for the entire duration of the game, we can use the
+concept of "partial play" by using the ``weights`` parameter.
+This situation can be described by the following weights:
 
 .. hlist::
-   - 1P on team A -- 1.0 = Full time
-   - 2P on team A -- 0.5 = :math:`\frac{ 30 }{ 60 }` minutes
-   - 3P on team B -- 1.0
+   - P1 on team A -- 1.0 = Full time
+   - P2 on team A -- 0.5 = :math:`\frac{ 30 }{ 60 }` minutes
+   - P3 on team B -- 1.0
    - 4P on team B -- 1.0
 
-As a code with a 2-dimensional list::
+In code, using a 2-dimensional list::
 
    # set each weights to 1, 0.5, 1, 1.
    rate([(r1, r2), (r3, r4)], weights=[(1, 0.5), (1, 1)])
    quality([(r1, r2), (r3, r4)], weights=[(1, 0.5), (1, 1)])
 
-Or with a dictionary.  Each keys are a tuple of
+Or with a dictionary.  Each key is a tuple of
 ``(team_index, index_or_key_of_rating)``::
 
    # set a weight of 2nd player in 1st team to 0.5, otherwise leave as 1.
@@ -196,20 +196,20 @@ Backends
 
 The TrueSkill algorithm uses :math:`\Phi`, `the cumulative distribution
 function`_; :math:`\phi`, `the probability density function`_; and
-:math:`\Phi^{-1}`, the inverse cumulative distribution function.  But standard
-mathematics library doesn't provide the functions.  Therefore this package
+:math:`\Phi^{-1}`, the inverse cumulative distribution function.  But the standard
+mathematics library doesn't provide these functions.  Therefore this package
 implements them.
 
-Meanwhile, there are third-party libraries which implement the functions.  You
-may want to use another implementation because that's more expert.  Then set
-``backend`` option of :class:`TrueSkill` to the backend you chose:
+There are also third-party libraries which implement these functions.
+If prefer to use another one, you can set the ``backend`` option of :class:`TrueSkill`
+to the backend of your choice:
 
 >>> TrueSkill().cdf  # internal implementation
 <function cdf at ...>
 >>> TrueSkill(backend='mpmath').cdf  # mpmath.ncdf
 <bound method MPContext.f_wrapped of <mpmath.ctx_mp.MPContext object at ...>>
 
-Here's the list of the available backends:
+Here's the list of available backends:
 
 - ``None`` -- the internal implementation.  (Default)
 - "mpmath" -- requires mpmath_ installed.
@@ -218,7 +218,7 @@ Here's the list of the available backends:
 .. note::
 
    When winners have a much lower rating than losers, :meth:`TrueSkill.rate` will
-   raise :exc:`FloatingPointError`.  In this case, you need higher
+   raise :exc:`FloatingPointError`.  In this case, you will need higher
    floating-point precision.  The mpmath library offers flexible floating-point
    precision.  You can solve the problem with mpmath as a backend and higher
    precision setting.
@@ -233,11 +233,11 @@ Here's the list of the available backends:
 Win probability
 ---------------
 
-TrueSkill provides a function (:func:`quality`) to calculate a draw probability
-between arbitrary ratings.  But there's no function for a win probability.
+TrueSkill provides the (:func:`quality`) function to calculate the probability of a
+draw between arbitrary ratings. Unfortunately, there is no function for win probability. 
 
-Anyway, if you need to calculate a win probability between only 2 teams, this
-code snippet will help you::
+If you need to calculate the win probability between 2 teams, you
+can use this code snippet::
 
    import itertools
    import math
@@ -254,7 +254,7 @@ code snippet will help you::
        denom = math.sqrt(size * (beta * beta) + sum_sigma)
        return env.cdf((delta_mu - draw_margin) / denom)
 
-This snippet is written by `Juho Snellman`_ and `@coldfix`_ in `issue #1`_.
+This snippet was written by `Juho Snellman`_ and `@coldfix`_ in `issue #1`_.
 
 .. _Juho Snellman:
    https://www.snellman.net/
@@ -322,13 +322,13 @@ Changelog
 
 .. include:: ../changelog.rst
 
-Further more
+More about TrueSkill
 ~~~~~~~~~~~~
 
-There's the list for users.  To subscribe the list, just send a mail to
+A mailing list is available for the users of this package.  To subscribe, just send an email to
 trueskill@librelist.com.
 
-If you want to more details of the TrueSkill algorithm, see also:
+If you'd like to delve deeper into how the TrueSkill algorithm works, also see:
 
 - `TrueSkill: A Bayesian Skill Rating System
   <http://research.microsoft.com/apps/pubs/default.aspx?id=67956>`_
