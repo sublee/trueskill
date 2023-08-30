@@ -175,7 +175,7 @@ This situation can be described by the following weights:
    - P1 on team A -- 1.0 = Full time
    - P2 on team A -- 0.5 = :math:`\frac{ 30 }{ 60 }` minutes
    - P3 on team B -- 1.0
-   - 4P on team B -- 1.0
+   - P4 on team B -- 1.0
 
 In code, using a 2-dimensional list::
 
